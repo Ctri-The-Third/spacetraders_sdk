@@ -1,0 +1,16 @@
+[project]
+name = "straders"
+version = "0.8.0" 
+authors = [
+{name="C'tri", email ="pythonpackages@ctri.co.uk"},
+]
+description = "A series of clients for the Space Traders API, facilitates API interaction, Postgres DB interaction."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[build-system]
+requires = ["pytest", "requests", "requests-ratelimiter", "networkx", "psycopg2-binary", "setuptools", "wheel"]
