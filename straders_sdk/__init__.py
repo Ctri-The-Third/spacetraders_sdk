@@ -2,3 +2,4 @@
 
 
 from .client_mediator import SpaceTradersMediatorClient as SpaceTraders
+from . import pg_pieces
