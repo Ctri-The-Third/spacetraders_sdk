@@ -6,7 +6,7 @@ authors = [
 ]
 description = "A series of clients for the Space Traders API, facilitates API interaction, Postgres DB interaction."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
