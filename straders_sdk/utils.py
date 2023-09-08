@@ -111,6 +111,7 @@ def get_and_validate(
         if st_log_client:
             st_log_client.log_429(url, RemoteSpaceTradersRespose(response))
         # logging.warning("Rate limited retrying!")
+        sleep(0.1)
         return get_and_validate(url, params=params, headers=headers, session=session)
 
     if response.status_code >= 500 and response.status_code < 600:
@@ -171,6 +172,7 @@ def post_and_validate(
         logging.debug("Rate limited")
         if st_log_client:
             st_log_client.log_429(url, RemoteSpaceTradersRespose(response))
+        sleep(0.1)
         return post_and_validate(
             url, data=data, json=json, headers=headers, session=session
         )
