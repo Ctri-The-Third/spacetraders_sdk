@@ -759,12 +759,13 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         if not resp:
             if resp.error_code in [4224, 4221, 4220]:
                 self.surveys_remove_one(survey.signature)
-            self.logger.error(
-                "status_code = %s, error_code = %s,  error = %s",
-                resp.status_code,
-                resp.error_code,
-                resp.error,
-            )
+            else:
+                self.logger.error(
+                    "status_code = %s, error_code = %s,  error = %s",
+                    resp.status_code,
+                    resp.error_code,
+                    resp.error,
+                )
         return resp
 
     def ship_refine(self, ship: Ship, trade_symbol: str):
