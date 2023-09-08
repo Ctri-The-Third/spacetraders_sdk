@@ -4,7 +4,7 @@ import urllib.parse
 from dataclasses import dataclass
 from logging import FileHandler, StreamHandler
 from sys import stdout
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 import time
 from .local_response import LocalSpaceTradersRespose
@@ -146,8 +146,7 @@ def post_and_validate(
 ) -> SpaceTradersResponse:
     "wraps the requests.post function to make it easier to use"
 
-    # repeat 5 times with staggered wait
-    # if still 429, skip
+    start = datetime.now()
     resp = False
     try:
         if session:

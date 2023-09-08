@@ -135,10 +135,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             resp = self.db_client.agents_view_one(symbol)
             if resp:
                 return resp
-
+        start = datetime.now()
         resp = self.api_client.agents_view_one(symbol)
         if resp:
-            self.logging_client.agents_view_one(resp)
+            self.logging_client.agents_view_one(
+                resp, (datetime.now() - start).total_seconds()
+            )
             self.update(resp)
         return resp
 
@@ -159,9 +161,10 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 self.current_agent = resp
                 self.current_agent_symbol = resp.symbol
                 return resp
-
+        start = datetime.now()
         resp = self.api_client.view_my_self()
-        self.logging_client.view_my_self(resp)
+
+        self.logging_client.view_my_self(resp, (datetime.now() - start).total_seconds())
         if resp:
             self.current_agent = resp
             self.current_agent_symbol = resp.symbol
@@ -180,9 +183,9 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             if resp:
                 self.ships = self.ships | resp
                 return resp
-
+        start = datetime.now()
         resp = self.api_client.ships_view()
-        self.logging_client.ships_view(resp)
+        self.logging_client.ships_view(resp, (datetime.now() - start).total_seconds())
         if resp:
             new_ships = resp
             self.ships = self.ships | new_ships
@@ -203,9 +206,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 resp: Ship
                 self.ships[symbol] = resp
                 return resp
-
+        start = datetime.now()
         resp = self.api_client.ships_view_one(symbol)
-        self.logging_client.ships_view_one(symbol, resp)
+        self.logging_client.ships_view_one(
+            symbol, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             resp: Ship
             self.ships[symbol] = resp
@@ -223,7 +228,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
             Returns:
                 Either a Ship object or a SpaceTradersResponse object on failure."""
+        start = datetime.now()
         resp = self.api_client.ships_purchase(ship_type, waypoint)
+        self.logging_client.ships_purchase(
+            ship_type, waypoint, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             self.update(resp[0])
             self.update(resp[1])
@@ -246,9 +255,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             if resp:
                 self.contracts = self.contracts | {c.contract: c for c in resp}
                 return resp
-
+        start = datetime.now()
         resp = self.api_client.view_my_contracts()
-        self.logging_client.view_my_contracts(resp)
+        self.logging_client.view_my_contracts(
+            resp, (datetime.now() - start).total_seconds()
+        )
         if resp or len(resp) == 0:
             for c in resp:
                 self.update(c)
@@ -332,8 +343,14 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 self.update(wayp)
                 return wayp
         # check api
+        start = datetime.now()
         wayp = self.api_client.waypoints_view_one(system_symbol, waypoint_symbol)
-        self.logging_client.waypoints_view_one(system_symbol, waypoint_symbol, wayp)
+        self.logging_client.waypoints_view_one(
+            system_symbol,
+            waypoint_symbol,
+            wayp,
+            (datetime.now() - start).total_seconds(),
+        )
         if wayp:
             self.update(wayp)
             self.db_client.update(wayp)
@@ -361,9 +378,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 for new_wayp in new_wayps.values():
                     self.update(new_wayp)
                 return new_wayps
-
+        start = datetime.now()
         new_wayps = self.api_client.waypoints_view(system_symbol)
-        self.logging_client.waypoints_view(system_symbol, new_wayps)
+        self.logging_client.waypoints_view(
+            system_symbol, new_wayps, (datetime.now() - start).total_seconds()
+        )
         if new_wayps:
             for new_wayp in new_wayps.values():
                 self.db_client.update(new_wayp)
@@ -382,23 +401,18 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
         Returns:
             Either a Ship object or a SpaceTradersResponse object on failure."""
-
-        if ship_id in self.ships and not force:
-            return self.ships[ship_id]
-        url = _url(f"my/ships/{ship_id}")
-        resp = get_and_validate(url, headers=self._headers())
-        if not resp:
-            return resp
-        ship = Ship.from_json(resp.data)
-        self.ships[ship_id] = ship
-        return ship
+        self.logger.warning("USing depreciated method `view_my_ships_one`")
+        return self.ships_view_one(ship_id, force)
 
     def systems_view_twenty(
         self, page_number, force=False
     ) -> dict[str:"System"] or SpaceTradersResponse:
         """View 20 systems at a time. No caching available for this method, as we can't guarantee a syncing between the order of the DB and the API."""
 
-        resp = self.api_client.systems_view_twenty(page_number)
+        start = datetime.now()
+        resp = self.api_client.systems_view_twenty(
+            page_number, (datetime.now() - start).total_seconds()
+        )
         self.logging_client.systems_view_twenty(resp)
 
         if not resp:
@@ -418,8 +432,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             if resp:
                 return resp
 
+        start = datetime.now()
         resp = self.api_client.systems_view_all()
-        self.logging_client.systems_view_all(resp)
+        self.logging_client.systems_view_all(
+            resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             for syst in resp:
                 syst: System
@@ -441,9 +458,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             resp = self.db_client.systems_view_one(system_symbol)
             if resp:
                 return resp
-
+        start = datetime.now()
         resp = self.api_client.systems_view_one(system_symbol)
-        self.logging_client.systems_view_one(system_symbol, resp)
+        self.logging_client.systems_view_one(
+            system_symbol, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             self.db_client.update(resp)
         return resp
@@ -464,8 +483,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             if bool(resp):
                 return resp
 
+        start = datetime.now()
         resp = self.api_client.system_shipyard(wp)
-        self.logging_client.system_shipyard(wp, resp)
+        self.logging_client.system_shipyard(
+            wp, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             self.db_client.update(resp)
         return resp
@@ -477,8 +499,10 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             resp = self.db_client.system_market(wp)
             if bool(resp):
                 return resp
+
+        start = datetime.now()
         resp = self.api_client.system_market(wp)
-        self.logging_client.system_market(wp)
+        self.logging_client.system_market(wp, (datetime.now() - start).total_seconds())
         if bool(resp):
             self.db_client.update(resp)
             return resp
@@ -500,9 +524,13 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             resp = self.db_client.system_jumpgate(wp)
             if bool(resp):
                 return resp
+
+        start = datetime.now()
         resp = self.api_client.system_jumpgate(wp)
 
-        self.logging_client.system_jumpgate(wp, resp)
+        self.logging_client.system_jumpgate(
+            wp, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             self.db_client.update(resp)
         return resp
@@ -647,8 +675,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         resp = self.db_client.find_waypoints_by_trait(system_symbol, trait)
         if resp:
             return resp
+
+        start = datetime.now()
         wayps = self.api_client.find_waypoints_by_trait(system_symbol, trait)
-        self.logging_client.find_waypoints_by_trait(system_symbol, trait, wayps)
+        self.logging_client.find_waypoints_by_trait(
+            system_symbol, trait, wayps, (datetime.now() - start).total_seconds()
+        )
         if isinstance(wayps, list):
             wayps: list
             for wayp in wayps:
@@ -693,8 +725,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             return LocalSpaceTradersRespose(
                 None, 200, "Ship is already in orbit", "client_mediator.ship_orbit()"
             )
+        start = datetime.now()
         resp = self.api_client.ship_orbit(ship)
-        self.logging_client.ship_orbit(ship, resp)
+        self.logging_client.ship_orbit(
+            ship, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             ship.update(resp.data)
             self.db_client.update(ship)
@@ -702,8 +737,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
     def ship_patch_nav(self, ship: "Ship", flight_mode: str):
         """my/ships/:shipSymbol/course"""
+        start = datetime.now()
         resp = self.api_client.ship_patch_nav(ship, flight_mode)
-        self.logging_client.ship_patch_nav(ship, flight_mode, resp)
+        self.logging_client.ship_patch_nav(
+            ship, flight_mode, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             ship.update({"nav": resp.data})
             self.update(ship)
@@ -719,8 +757,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 4204,
                 "client_mediator.ship_move()",
             )
+
+        start = datetime.now()
         resp = self.api_client.ship_move(ship, dest_waypoint_symbol)
-        self.logging_client.ship_move(ship, dest_waypoint_symbol, resp)
+        self.logging_client.ship_move(
+            ship, dest_waypoint_symbol, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             ship.update(resp.data)
             self.db_client.update(ship)
@@ -729,8 +771,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
     def ship_jump(self, ship: "Ship", dest_system_symbol: str):
         """my/ships/:shipSymbol/jump"""
+        start = datetime.now()
         resp = self.api_client.ship_jump(ship, dest_system_symbol)
-        self.logging_client.ship_jump(ship, dest_system_symbol, resp)
+        self.logging_client.ship_jump(
+            ship, dest_system_symbol, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             ship.update(resp.data)
             self.update(ship)
@@ -741,8 +786,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         """/my/ships/{shipSymbol}/negotiate/contract"""
         if ship.nav.status != "DOCKED":
             self.ship_dock(ship)
+
+        start = datetime.now()
         resp = self.api_client.ship_negotiate(ship)
-        self.logging_client.ship_negotiate(ship, resp)
+        self.logging_client.ship_negotiate(
+            ship, resp, (datetime.now() - start).total_seconds()
+        )
         if bool(resp):
             self.update(resp)
         return resp
@@ -751,8 +800,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         """/my/ships/{shipSymbol}/extract"""
         # 4228 / 400 - MAXIMUM CARGO, should not extract
         #
+
+        start = datetime.now()
         resp = self.api_client.ship_extract(ship, survey)
-        self.logging_client.ship_extract(ship, survey, resp)
+        self.logging_client.ship_extract(
+            ship, survey, resp, (datetime.now() - start).total_seconds()
+        )
         if resp.data is not None:
             ship.update(resp.data)
             self.update(ship)
@@ -770,8 +823,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
     def ship_refine(self, ship: Ship, trade_symbol: str):
         """/my/ships/{shipSymbol}/refine"""
+        start = datetime.now()
         resp = self.api_client.ship_refine(ship, trade_symbol)
-        self.logging_client.ship_refine(ship, trade_symbol, resp)
+        self.logging_client.ship_refine(
+            ship, trade_symbol, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             ship.update(resp.data)
             self.db_client.update(ship)
@@ -779,11 +835,14 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         return resp
 
     def ship_install_mount(
-        self, ship: "Ship", mount_symbol: str
+        self, ship: "Ship", mount_symbol: str, duration: float = None
     ) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/install"""
+        start = datetime.now()
         resp = self.api_client.ship_install_mount(ship, mount_symbol)
-        self.logging_client.ship_install_mount(ship, mount_symbol, resp)
+        self.logging_client.ship_install_mount(
+            ship, mount_symbol, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             ship.update(resp.data)
             self.update(ship)
@@ -796,8 +855,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
     def ship_dock(self, ship: "Ship"):
         """/my/ships/{shipSymbol}/dock"""
+
+        start = datetime.now()
         resp = self.api_client.ship_dock(ship)
-        self.logging_client.ship_dock(ship, resp)
+        self.logging_client.ship_dock(
+            ship, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             ship.update(resp.data)
             self.db_client.update(ship)
@@ -805,8 +868,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
     def ship_refuel(self, ship: "Ship"):
         """/my/ships/{shipSymbol}/refuel"""
+
+        start = datetime.now()
         resp = self.api_client.ship_refuel(ship)
-        self.logging_client.ship_refuel(ship, resp)
+        self.logging_client.ship_refuel(
+            ship, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             ship.update(resp.data)
             self.db_client.update(ship)
@@ -815,8 +882,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         self, ship: "Ship", symbol: str, quantity: int
     ) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/sell"""
+
+        start = datetime.now()
         resp = self.api_client.ship_sell(ship, symbol, quantity)
-        self.logging_client.ship_sell(ship, symbol, quantity, resp)
+        self.logging_client.ship_sell(
+            ship, symbol, quantity, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             ship.update(resp.data)
             self.update(ship)
@@ -826,8 +897,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
     def ship_purchase_cargo(
         self, ship: "Ship", symbol: str, quantity
     ) -> SpaceTradersResponse:
+        start = datetime.now()
         resp = self.api_client.ship_purchase_cargo(ship, symbol, quantity)
-        self.logging_client.ship_purchase_cargo(ship, symbol, quantity, resp)
+        self.logging_client.ship_purchase_cargo(
+            ship, symbol, quantity, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             self.update(resp.data)
             ship.update(resp.data)
@@ -835,8 +909,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
     def ship_survey(self, ship: "Ship") -> list[Survey] or SpaceTradersResponse:
         """/my/ships/{shipSymbol}/survey"""
+
+        start = datetime.now()
         resp = self.api_client.ship_survey(ship)
-        self.logging_client.ship_survey(ship, resp)
+        self.logging_client.ship_survey(
+            ship, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             surveys = [Survey.from_json(d) for d in resp.data.get("surveys", [])]
             for survey in surveys:
@@ -851,11 +929,18 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
     def ship_transfer_cargo(self, ship: "Ship", trade_symbol, units, target_ship_name):
         """/my/ships/{shipSymbol}/transfer"""
+
+        start = datetime.now()
         resp = self.api_client.ship_transfer_cargo(
             ship, trade_symbol, units, target_ship_name
         )
         self.logging_client.ship_transfer_cargo(
-            ship, trade_symbol, units, target_ship_name, resp
+            ship,
+            trade_symbol,
+            units,
+            target_ship_name,
+            resp,
+            (datetime.now() - start).total_seconds(),
         )
         if resp:
             ship.update(resp.data)
@@ -870,8 +955,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 ship.update(resp.data)
                 self.update(ship)
                 return resp
+
+        start = datetime.now()
         resp = self.api_client.ship_cooldown(ship)
-        self.logging_client.ship_cooldown(ship, resp)
+        self.logging_client.ship_cooldown(
+            ship, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             ship.update(resp.data)
             self.update(ship)
@@ -880,8 +969,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
     def ship_jettison_cargo(
         self, ship: Ship, trade_symbol: str, quantity: int
     ) -> SpaceTradersResponse:
+        start = datetime.now()
         resp = self.api_client.ship_jettison_cargo(ship, trade_symbol, quantity)
-        self.logging_client.ship_jettison_cargo(ship, trade_symbol, quantity, resp)
+        self.logging_client.ship_jettison_cargo(
+            ship, trade_symbol, quantity, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             ship.update(resp.data)
             self.update(ship)
@@ -890,8 +982,16 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
     def contracts_deliver(
         self, contract: Contract, ship: Ship, trade_symbol: str, units: int
     ) -> SpaceTradersResponse:
+        start = datetime.now()
         resp = self.api_client.contracts_deliver(contract, ship, trade_symbol, units)
-        self.logging_client.contracts_deliver(contract, ship, trade_symbol, units, resp)
+        self.logging_client.contracts_deliver(
+            contract,
+            ship,
+            trade_symbol,
+            units,
+            resp,
+            (datetime.now() - start).total_seconds(),
+        )
         if resp:
             self.update(resp.data)
             contract.update(resp.data.get("contract", {}))
@@ -901,8 +1001,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
     def contracts_fulfill(self, contract: "Contract") -> SpaceTradersResponse:
         """/my/contracts/{contractId}/fulfill"""
+        start = datetime.now()
         resp = self.api_client.contracts_fulfill(contract)
-        self.logging_client.contracts_fulfill(contract, resp)
+        self.logging_client.contracts_fulfill(
+            contract, resp, (datetime.now() - start).total_seconds()
+        )
         if resp:
             self.update(resp)
             self.db_client.update(contract)
