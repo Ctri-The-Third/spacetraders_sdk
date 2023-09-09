@@ -42,9 +42,9 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 user=db_user,
                 password=db_pass,
             )
-
+            self.connection.autocommit = True
         self.session_id = str(uuid.uuid4())
-        self.connection.autocommit = True
+
         self.current_agent_name = current_agent_name
         utils.st_log_client = self
 

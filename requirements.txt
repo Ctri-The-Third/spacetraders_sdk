@@ -5,3 +5,4 @@ networkx
 psycopg2-binary
 setuptools
 wheel
+build
