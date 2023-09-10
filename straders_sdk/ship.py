@@ -119,6 +119,18 @@ class Ship(SpaceTradersInteractive):
     def cargo_space_remaining(self) -> int:
         return self.cargo_capacity - self.cargo_units_used
 
+    @property
+    def extract_strength(self) -> int:
+        strength = 0
+        for mount in self.mounts:
+            if mount.symbol in [
+                "MOUNT_MINING_LASER_I",
+                "MOUNT_MINING_LASER_II",
+                "MOUNT_MINING_LASER_III",
+            ]:
+                strength += mount.strength
+        return strength
+
     @classmethod
     def from_json(
         cls,
@@ -215,13 +227,6 @@ class Ship(SpaceTradersInteractive):
                 units,
             )
         )
-
-    def force_update(self):
-        # /my/ships/{shipSymbol}
-        url = _url(f"my/ships/{self.name}")
-        resp = get_and_validate(url, headers=self._headers())
-        self.update(resp.data)
-        return resp
 
     def update(self, json_data: dict):
         "Update the ship with the contents of a response object"
