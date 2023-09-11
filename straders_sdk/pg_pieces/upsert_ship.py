@@ -17,19 +17,23 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
         return
     owner_faction = "" if not owner else owner.starting_faction
     sql = """INSERT into ships (ship_symbol, agent_name, faction_symbol, ship_role, cargo_capacity
-    , cargo_in_use, fuel_capacity, fuel_current, last_updated)
-        values (%s, %s, %s, %s, %s, %s, %s, %s, NOW() at time zone 'utc')
+    , cargo_in_use, fuel_capacity, fuel_current, mount_symbols, module_symbols, last_updated)
+        values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW() at time zone 'utc')
         ON CONFLICT (ship_symbol) DO UPDATE
-        SET agent_name = %s,
-            faction_symbol = %s,
-            ship_role = %s,
-            cargo_capacity = %s,
-            cargo_in_use = %s, 
-            fuel_capacity = %s,
-            fuel_current = %s,
-            last_updated = (NOW() at time zone 'utc') ;"""
+        SET agent_name = EXCLUDED.agent_name,
+            faction_symbol = EXCLUDED.faction_symbol,
+            ship_role = EXCLUDED.ship_role,
+            cargo_capacity = EXCLUDED.cargo_capacity,
+            cargo_in_use = EXCLUDED.cargo_in_use,
+            fuel_capacity = EXCLUDED.fuel_capacity,
+            fuel_current = EXCLUDED.fuel_current,
+            mount_symbols = EXCLUDED.mount_symbols,
+            module_symbols = EXCLUDED.module_symbols,
+            last_updated = NOW() at time zone 'utc';
 
-    try_execute_upsert(
+            """
+
+    resp = try_execute_upsert(
         connection,
         sql,
         (
@@ -41,15 +45,13 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
             ship.cargo_units_used,
             ship.fuel_capacity,
             ship.fuel_current,
-            owner_name,
-            owner_faction,
-            ship.role,
-            ship.cargo_capacity,
-            ship.cargo_units_used,
-            ship.fuel_capacity,
-            ship.fuel_current,
+            [m.symbol for m in ship.mounts],
+            [m.symbol for m in ship.modules],
         ),
     )
+    if not resp:
+        return resp
+
     resp = _upsert_ship_nav(connection, ship)
     if not resp:
         return resp

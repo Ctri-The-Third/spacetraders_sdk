@@ -29,7 +29,7 @@ from .pg_pieces.jump_gates import _upsert_jump_gate, select_jump_gate_one
 from .pg_pieces.agents import _upsert_agent, select_agent_one
 from .pg_pieces.contracts import _upsert_contract
 from .local_response import LocalSpaceTradersRespose
-from .ship import Ship, ShipInventory, ShipNav, RouteNode
+from .ship import Ship, ShipInventory, ShipNav, RouteNode, ShipModule, ShipMount
 from .utils import try_execute_select, try_execute_upsert
 import psycopg2
 
@@ -60,6 +60,8 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         self._connection = connection
         self.current_agent_symbol = current_agent_symbol
         self.logger = logging.getLogger(__name__)
+        self._ship_mounts = {}
+        self._ship_modules = {}
 
     @property
     def connection(self):
@@ -393,7 +395,8 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         self, ship: "Ship", symbol: str, quantity: int
     ) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/sell"""
-        return dummy_response(__class__.__name__, "ship_sell")
+        # on a sell we need to remove X of a value from the database.
+        #
         pass
 
     def ship_purchase_cargo(
@@ -546,7 +549,8 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         """/my/ships/{shipSymbol}"""
         resp = _select_ship_one(symbol, self)
         if resp:
-            return resp[symbol]
+            ship = self._extend_ship_mount_modules(resp[symbol])
+            return ship
         return
 
     def contracts_deliver(
@@ -558,6 +562,37 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
     def contracts_fulfill(self, contract: "Contract") -> SpaceTradersResponse:
         dummy_response(__class__.__name__, "contracts_fulfill")
         pass
+
+    def _extend_ship_mount_modules(self, ship: "Ship"):
+        """Extend the modules of a ship with the modules in the list."""
+        if len(self._ship_mounts) == 0:
+            sql = """select mount_symbol, mount_name, mount_Desc, strength, required_crew, required_power from ship_mounts"""
+
+            rows = try_execute_select(self.connection, sql, ())
+            for row in rows:
+                mount = ShipMount(
+                    {
+                        "symbol": row[0],
+                        "name": row[1],
+                        "description": row[2],
+                        "strength": row[3],
+                        "requirements": {
+                            "crew": row[4],
+                            "module_slots": -1,
+                            "power": row[5],
+                        },
+                    }
+                )
+                self._ship_mounts[row[0]] = mount
+
+        # for module in ship.modules:
+        #    if module.symbol in self._ship_modules.keys():
+        #        module = self._ship_modules[module.symbol]
+        for index in range(len(ship.mounts)):
+            mount = ship.mounts[index]
+            if isinstance(mount, str) and mount in self._ship_mounts.keys():
+                ship.mounts[index] = self._ship_mounts[mount]
+        return ship
 
 
 def dummy_response(class_name, method_name):
