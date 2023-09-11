@@ -1,153 +1,173 @@
-from ..ship import Ship
-from ..models import Agent
-import psycopg2
-import logging
-import re
-import datetime
 from ..local_response import LocalSpaceTradersRespose
+from ..ship import Ship, ShipFrame, ShipNav, RouteNode
+from ..client_interface import SpaceTradersClient
+from ..models import ShipRequirements
+from ..utils import try_execute_select, try_execute_upsert
 
-# from psycopg2 import connection
+
+def _select_ships(connection, agent_name, db_client: SpaceTradersClient):
+    sql = """select s.ship_symbol, s.agent_name, s.faction_symbol, s.ship_role, s.cargo_capacity, s.cargo_in_use
+                , n.waypoint_symbol, n.departure_time, n.arrival_time, n.o_waypoint_symbol, n.d_waypoint_symbol, n.flight_status, n.flight_mode
+                , sfl.condition --13
+                , sf.frame_symbol, sf.name, sf.description, sf.module_slots, sf.mount_points, sf.fuel_capacity, sf.required_power, sf.required_crew, sf.required_slots
+                , s.fuel_capacity, s.fuel_current --24  
+                , sc.expiration, sc.total_seconds --26
+                , o.waypoint_symbol, o.type, o.system_symbol, o.x, o.y --31
+				, d.waypoint_symbol, d.type, d.system_symbol, d.x, d.y --37
+                , s.mount_symbols, s.module_symbols --39
+
+                from ships s join ship_nav n on s.ship_symbol = n.ship_symbol
+                left join ship_frame_links sfl on s.ship_symbol = sfl.ship_symbol
+                left join ship_frames sf on sf.frame_symbol = sfl.frame_symbol
+                left join ship_cooldown sc on s.ship_symbol = sc.ship_symbol
+                left join waypoints o on n.o_waypoint_symbol = o.waypoint_symbol
+				left join waypoints d on n.d_waypoint_symbol = d.waypoint_symbol
+
+                where s.agent_name = %s
+                order by s.ship_symbol
+                """
+    return _select_some_ships(db_client, sql, (agent_name,))
 
 
-def _upsert_ship(connection, ship: Ship, owner: Agent = None):
+def _select_ship_one(ship_symbol: str, db_client: SpaceTradersClient):
+    sql = """select s.ship_symbol, s.agent_name, s.faction_symbol, s.ship_role, s.cargo_capacity, s.cargo_in_use
+                , n.waypoint_symbol, n.departure_time, n.arrival_time, n.o_waypoint_symbol, n.d_waypoint_symbol, n.flight_status, n.flight_mode
+                , sfl.condition --13
+                , sf.frame_symbol, sf.name, sf.description, sf.module_slots, sf.mount_points, sf.fuel_capacity, sf.required_power, sf.required_crew, sf.required_slots
+                , s.fuel_capacity, s.fuel_current --24  
+                , sc.expiration, sc.total_seconds --26
+                , o.waypoint_symbol, o.type, o.system_symbol, o.x, o.y --31
+				, d.waypoint_symbol, d.type, d.system_symbol, d.x, d.y --37
+                , s.mount_symbols, s.module_symbols --38
+
+
+                from ships s join ship_nav n on s.ship_symbol = n.ship_symbol
+                left join ship_frame_links sfl on s.ship_symbol = sfl.ship_symbol
+                left join ship_frames sf on sf.frame_symbol = sfl.frame_symbol
+                left join ship_cooldown sc on s.ship_symbol = sc.ship_symbol
+                left join waypoints o on n.o_waypoint_symbol = o.waypoint_symbol
+				left join waypoints d on n.d_waypoint_symbol = d.waypoint_symbol
+
+                where s.ship_symbol = %s
+                """
+    ships = _select_some_ships(db_client, sql, (ship_symbol,))
+
+    return ships
+
+
+def _select_some_ships(db_client: SpaceTradersClient, sql, params):
+    connection = db_client.connection
     try:
-        match = re.findall(r"(.*)-[0-9A-F]+", ship.name)
-        owner_name = match[0]
-    except:
-        return
-    owner_faction = "" if not owner else owner.starting_faction
-    sql = """INSERT into ships (ship_symbol, agent_name, faction_symbol, ship_role, cargo_capacity
-    , cargo_in_use, fuel_capacity, fuel_current, ship_mounts, ship_modules, last_updated)
-        values (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW() at time zone 'utc')
-        ON CONFLICT (ship_symbol) DO UPDATE
-        SET agent_name = EXCLUDED.agent_name,
-            faction_symbol = EXCLUDED.faction_symbol,
-            ship_role = EXCLUDED.ship_role,
-            cargo_capacity = EXCLUDED.cargo_capacity,
-            cargo_in_use = EXCLUDED.cargo_in_use,
-            fuel_capacity = EXCLUDED.fuel_capacity,
-            fuel_current = EXCLUDED.fuel_current,
-            last_updated = NOW() at time zone 'utc';
+        rows = try_execute_select(connection, sql, params)
+        if not rows:
+            return rows
+        ships = {}
+        for row in rows:
+            ship = Ship()
+            ship.name = row[0]
+            ship.faction = row[2]
+            ship.role = row[3]
+            ship.cargo_capacity = row[4]
+            ship.cargo_units_used = row[5]
+            ship.cargo_inventory = []
+            # , 6: n.waypoint_symbol, n.departure_time, n.arrival_time, n.origin_waypoint, n.destination_waypoint, n.flight_status, n.flight_mode
 
-            """
+            ship.nav = _nav_from_row(row[6:13], row[27:37])
+            ship.frame = _frame_from_row(row[13:24])
+            ship.fuel_capacity = row[23]
+            ship.fuel_current = row[24]
+            ship._cooldown_expiration = row[25]
+            ship._cooldown_length = row[26]
+            ship.mounts = row[37]
+            ship.modules = row[38]
+            ships[ship.name] = ship
 
-    resp = try_execute_upsert(
-        connection,
-        sql,
-        (
-            ship.name,
-            owner_name,
-            owner_faction,
-            ship.role,
-            ship.cargo_capacity,
-            ship.cargo_units_used,
-            ship.fuel_capacity,
-            ship.fuel_current,
-            [m.symbol for m in ship.mounts],
-            [m.symbol for m in ship.modules],
-        ),
-    )
-    if not resp:
-        return resp
-
-    resp = _upsert_ship_nav(connection, ship)
-    if not resp:
-        return resp
-
-    resp = _upsert_ship_frame(connection, ship)
-    if not resp:
-        return resp
-
-    resp = _upsert_ship_cooldown(connection, ship)
-    return resp
-
-
-def _upsert_ship_nav(connection, ship: Ship):
-    # we need to add offsets to the ship times to get them to UTC.
-    sql = """INSERT into ship_nav
-        (Ship_symbol, system_symbol, waypoint_symbol, departure_time, arrival_time, o_waypoint_symbol, d_waypoint_symbol, flight_status, flight_mode)
-        values (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (ship_symbol) DO UPDATE
-        SET system_symbol = EXCLUDED.system_symbol,
-            waypoint_symbol = EXCLUDED.waypoint_symbol,
-            departure_time = EXCLUDED.departure_time,
-            arrival_time = EXCLUDED.arrival_time,
-            o_waypoint_symbol = EXCLUDED.o_waypoint_symbol,
-            d_waypoint_symbol = EXCLUDED.d_waypoint_symbol,
-            flight_status = EXCLUDED.flight_status,
-            flight_mode = EXCLUDED.flight_mode;"""
-    values = (
-        ship.name,
-        ship.nav.system_symbol,
-        ship.nav.waypoint_symbol,
-        ship.nav.departure_time,
-        ship.nav.arrival_time,
-        ship.nav.origin.symbol,
-        ship.nav.destination.symbol,
-        ship.nav.status,
-        ship.nav.flight_mode,
-    )
-    resp = try_execute_upsert(connection, sql, values)
-    return resp
-
-
-def _upsert_ship_frame(connection, ship: Ship):
-    """
-    INSERT INTO public.ship_frames(
-        frame_symbol, name, description, module_slots, mount_points, fuel_capacity, required_power, required_crew, required_slots)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-    """
-    sql = """INSERT INTO ship_frames
-    (frame_symbol, name, description, module_slots, mount_points, fuel_capacity, required_power, required_crew, required_slots)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    ON CONFLICT (frame_symbol) DO NOTHING"""
-    values = (
-        ship.frame.symbol,
-        ship.frame.name,
-        ship.frame.description,
-        ship.frame.module_slots,
-        ship.frame.mounting_points,
-        ship.frame.fuel_capacity,
-        ship.frame.requirements.power,
-        ship.frame.requirements.crew,
-        ship.frame.requirements.module_slots,
-    )
-    resp = try_execute_upsert(connection, sql, values)
-    if not resp:
-        return resp
-
-    """INSERT INTO public.ship_frame_links(
-	ship_symbol, frame_symbol, condition)
-	VALUES (?, ?, ?);"""
-    sql = """INSERT INTO ship_frame_links 
-    (ship_symbol, frame_symbol, condition)
-    VALUES (%s, %s, %s) 
-    ON CONFLICT (ship_symbol, frame_symbol) DO UPDATE set condition = %s;"""
-    values = (ship.name, ship.frame.symbol, ship.frame.condition, ship.frame.condition)
-    resp = try_execute_upsert(connection, sql, values)
-    return resp
-
-
-def _upsert_ship_cooldown(connection, ship: Ship):
-    if ship.seconds_until_cooldown == 0:
-        return LocalSpaceTradersRespose(
-            None, None, None, url=f"{__name__}._upsert_ship_cooldown"
-        )
-    sql = """insert into ship_cooldowns  (ship_symbol, total_seconds, expiration)
-    values (%s, %s, %s) ON CONFLICT (ship_symbol, expiration) DO NOTHING;"""
-    values = (ship.name, ship._cooldown_length, ship._cooldown_expiration)
-    resp = try_execute_upsert(connection, sql, values)
-    return resp
-
-
-def try_execute_upsert(connection, sql, params) -> LocalSpaceTradersRespose:
-    try:
-        cur = connection.cursor()
-        cur.execute(sql, params)
-        return LocalSpaceTradersRespose(
-            None, None, None, url=f"{__name__}.try_execute_upsert"
-        )
+        return ships
     except Exception as err:
         return LocalSpaceTradersRespose(
-            error=err, status_code=0, error_code=0, url=f"{__name__}.try_execute_upsert"
+            error=err,
+            status_code=0,
+            error_code=0,
+            url=f"select_ship._select_ship",
         )
+
+
+def _nav_from_row(row, nav_row) -> ShipNav:
+    """
+    expected:
+    0: n.waypoint_symbol,
+    1: n.departure_time,
+    2: n.arrival_time,
+    3: n.origin_waypoint,
+    4: n.destination_waypoint,
+    5: n.flight_status,
+    6: n.flight_mode
+
+    nav_row
+    0: origin.waypoint_symbol,
+    1: origin.type,
+    2: origin.system_symbol,
+    3: origin.x,
+    4: origin.y,
+
+    5: destination.waypoint_symbol,
+    6: destination.type,
+    7: destination.system_symbol,
+    8: destination.x,
+    9: destination.y,
+    """
+
+    return_obj = ShipNav(
+        nav_row[7],
+        nav_row[5],
+        RouteNode(
+            nav_row[5],
+            nav_row[6],
+            nav_row[7],
+            nav_row[8],
+            nav_row[9],
+        ),
+        RouteNode(
+            nav_row[0],
+            nav_row[1],
+            nav_row[2],
+            nav_row[3],
+            nav_row[4],
+        ),
+        row[1],
+        row[2],
+        row[5],
+        row[6],
+    )
+    # SHIP NAV ENDS
+
+    return return_obj
+
+
+def _frame_from_row(row) -> ShipFrame:
+    """
+
+
+
+    0: sf.frame_symbol,
+    1: sf.name,
+    2: sf.description,
+    3: sf.module_slots,
+    4: sf.mount_points,
+    5: sf.fuel_capacity,
+    6: sf.required_power,
+    7: sf.required_crew,
+    8: sf.required_slots,
+    9: s.fuel_capacity,
+    10: s.fuel_current,
+    11: sfl.condition
+
+    """
+
+    ##crew moduels power
+    reqiurements = ShipRequirements(row[8], row[9], row[7])
+    return_obj = ShipFrame(
+        row[1], row[2], row[3], row[4], row[5], row[6], row[0], reqiurements
+    )
+
+    return return_obj
