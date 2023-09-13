@@ -32,6 +32,7 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
             last_updated = NOW() at time zone 'utc';
 
             """
+    resp = LocalSpaceTradersRespose(None, None, None, url=f"{__name__}._upsert_ship")
     if ship.dirty or ship.fuel_dirty or ship.cargo_dirty:
         resp = try_execute_upsert(
             connection,
