@@ -32,35 +32,50 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
             last_updated = NOW() at time zone 'utc';
 
             """
+    if ship.dirty or ship.fuel_dirty or ship.cargo_dirty:
+        resp = try_execute_upsert(
+            connection,
+            sql,
+            (
+                ship.name,
+                owner_name,
+                owner_faction,
+                ship.role,
+                ship.cargo_capacity,
+                ship.cargo_units_used,
+                ship.fuel_capacity,
+                ship.fuel_current,
+                [m.symbol for m in ship.mounts],
+                [m.symbol for m in ship.modules],
+            ),
+        )
+        if not resp:
+            return resp
+    if ship.mounts_dirty:
+        resp = _upsert_ship_mounts(connection, ship)
+        if not resp:
+            return resp
 
-    resp = try_execute_upsert(
-        connection,
-        sql,
-        (
-            ship.name,
-            owner_name,
-            owner_faction,
-            ship.role,
-            ship.cargo_capacity,
-            ship.cargo_units_used,
-            ship.fuel_capacity,
-            ship.fuel_current,
-            [m.symbol for m in ship.mounts],
-            [m.symbol for m in ship.modules],
-        ),
-    )
-    if not resp:
-        return resp
+    if ship.nav_dirty:
+        resp = _upsert_ship_nav(connection, ship)
+        if not resp:
+            return resp
+    if ship.dirty:
+        resp = _upsert_ship_frame(connection, ship)
+        if not resp:
+            return resp
+    if ship.cooldown_dirty:
+        resp = _upsert_ship_cooldown(connection, ship)
+    ship.mark_clean()
+    return resp
 
-    resp = _upsert_ship_nav(connection, ship)
-    if not resp:
-        return resp
 
-    resp = _upsert_ship_frame(connection, ship)
-    if not resp:
-        return resp
-
-    resp = _upsert_ship_cooldown(connection, ship)
+def _upsert_ship_mounts(connection, ship: Ship):
+    sql = """insert into ships (ship_symbol, mount_symbols)
+    values (%s, %s) ON CONFLICT (ship_symbol) DO UPDATE
+    SET mount_symbols = EXCLUDED.mount_symbols;"""
+    values = (ship.name, [m.symbol for m in ship.mounts])
+    resp = try_execute_upsert(connection, sql, values)
     return resp
 
 

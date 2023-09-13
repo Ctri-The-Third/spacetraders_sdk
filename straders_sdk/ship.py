@@ -86,7 +86,12 @@ class Ship(SpaceTradersInteractive):
 
     def __init__(self) -> None:
         pass
-
+        self.dirty = True
+        self.cargo_dirty = False
+        self.nav_dirty = False
+        self.fuel_dirty = False
+        self.mounts_dirty = False
+        self.cooldown_dirty = False
         self.logger = logging.getLogger("ship-logger")
 
     @property
@@ -178,41 +183,13 @@ class Ship(SpaceTradersInteractive):
         ship.mounts: list[ShipMount] = [ShipMount(d) for d in json_data["mounts"]]
         return ship
 
-    def orbit(self):
-        """my/ships/:miningShipSymbol/orbit takes the ship name or the ship object"""
-        raise NotImplementedError
-
-    def change_course(self, ship, dest_waypoint_symbol: str):
-        raise NotImplementedError
-
-    def move(self, dest_waypoint_symbol: str):
-        """my/ships/:shipSymbol/navigate"""
-
-        raise NotImplementedError
-
-    def extract(self, survey: Survey = None) -> SpaceTradersResponse:
-        """/my/ships/{shipSymbol}/extract"""
-        raise NotImplementedError
-
-    def dock(self):
-        """/my/ships/{shipSymbol}/dock"""
-        raise NotImplementedError
-
-    def refuel(self):
-        """/my/ships/{shipSymbol}/refuel"""
-        raise NotImplementedError
-
-    def sell(self, symbol: str, quantity: int):
-        """/my/ships/{shipSymbol}/sell"""
-        raise NotImplementedError
-
-    def survey(self) -> list[Survey] or SpaceTradersResponse:
-        """/my/ships/{shipSymbol}/survey"""
-        raise NotImplementedError
-
-    def transfer_cargo(self, trade_symbol, units, target_ship_name):
-        """/my/ships/{shipSymbol}/transfer"""
-        raise NotImplementedError
+    def mark_clean(self):
+        self.dirty = False
+        self.cargo_dirty = False
+        self.nav_dirty = False
+        self.fuel_dirty = False
+        self.mounts_dirty = False
+        self.cooldown_dirty = False
 
     def receive_cargo(self, trade_symbol, units):
         for inventory_item in self.cargo_inventory:
@@ -235,24 +212,32 @@ class Ship(SpaceTradersInteractive):
 
         if isinstance(json_data, dict):
             if "nav" in json_data:
+                self.nav_dirty = True
                 self.nav = ShipNav.from_json(json_data["nav"])
+
             if "cargo" in json_data:
+                self.cargo_dirty = True
                 self.cargo_capacity = json_data["cargo"]["capacity"]
                 self.cargo_units_used = json_data["cargo"]["units"]
                 self.cargo_inventory: list[ShipInventory] = [
                     ShipInventory.from_json(d) for d in json_data["cargo"]["inventory"]
                 ]
+
             if "cooldown" in json_data:
+                self.cooldown_dirty = True
                 self._cooldown_expiration = parse_timestamp(
                     json_data["cooldown"]["expiration"]
                 )
                 self._cooldown_length = json_data["cooldown"]["totalSeconds"]
                 if self.seconds_until_cooldown > 6000:
                     self.logger.warning("Cooldown is over 100 minutes")
+
             if "fuel" in json_data:
+                self.fuel_dirty = True
                 self.fuel_capacity = json_data["fuel"]["capacity"]
                 self.fuel_current = json_data["fuel"]["current"]
                 self.fuel_consumed_history = json_data["fuel"]["consumed"]
+
         # pass the updated ship to the client to be logged appropriately
 
     @property

@@ -953,6 +953,8 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             resp = self.db_client.ship_cooldown(ship)
             if resp:
                 ship.update(resp.data)
+                # we just updated it from the DB, so don't recommit
+                ship.cooldown_dirty = False
                 self.update(ship)
                 return resp
 
