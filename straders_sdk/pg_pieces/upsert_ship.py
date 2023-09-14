@@ -15,6 +15,7 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
         owner_name = match[0]
     except:
         return
+    resp = LocalSpaceTradersRespose(None, 0, 0, url=f"{__name__}._upsert_ship")
     owner_faction = "" if not owner else owner.starting_faction
     sql = """INSERT into ships (ship_symbol, agent_name, faction_symbol, ship_role, cargo_capacity
     , cargo_in_use, fuel_capacity, fuel_current, mount_symbols, module_symbols, last_updated)
@@ -32,7 +33,6 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
             last_updated = NOW() at time zone 'utc';
 
             """
-    resp = LocalSpaceTradersRespose(None, None, None, url=f"{__name__}._upsert_ship")
     if ship.dirty or ship.fuel_dirty or ship.cargo_dirty:
         resp = try_execute_upsert(
             connection,
@@ -52,12 +52,12 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
         )
         if not resp:
             return resp
-    if ship.mounts_dirty:
+    if ship.mounts_dirty or ship.dirty:
         resp = _upsert_ship_mounts(connection, ship)
         if not resp:
             return resp
 
-    if ship.nav_dirty:
+    if ship.nav_dirty or ship.dirty:
         resp = _upsert_ship_nav(connection, ship)
         if not resp:
             return resp

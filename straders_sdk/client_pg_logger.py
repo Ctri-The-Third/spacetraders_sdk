@@ -350,6 +350,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
     ) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/extract"""
         url = _url(f"my/ships/:ship_name/extract")
+        event_params = {response.data.get("extraction")}
         self.log_event(
             "ship_extract", ship.name, url, response, duration_seconds=duration
         )
