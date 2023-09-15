@@ -163,8 +163,8 @@ def _upsert_ship_cooldown(connection, ship: Ship):
     return resp
 
 
-def _upsert_ship_cargo(connection, ship:Ship):
-    
+def _upsert_ship_cargo(connection, ship: Ship):
+    pass
 
 
 def try_execute_upsert(connection, sql, params) -> LocalSpaceTradersRespose:
