@@ -273,8 +273,9 @@ def waypoint_slicer(waypoint_symbol: str) -> str:
 
 def try_execute_upsert(connection, sql, params) -> LocalSpaceTradersRespose:
     try:
-        cur = connection.cursor()
-        cur.execute(sql, params)
+        with connection.cursor() as cur:
+            cur.execute(sql, params)
+
         return LocalSpaceTradersRespose(
             None, None, None, url=f"{__name__}.try_execute_upsert"
         )
@@ -288,10 +289,11 @@ def try_execute_upsert(connection, sql, params) -> LocalSpaceTradersRespose:
 
 def try_execute_select(connection, sql, params) -> list:
     try:
-        cur = connection.cursor()
-        cur.execute(sql, params)
-        rows = cur.fetchall()
-        return rows
+        with connection.cursor() as cur:
+            cur.execute(sql, params)
+            cur.execute(sql, params)
+            rows = cur.fetchall()
+            return rows
     except Exception as err:
         logging.error("Couldn't execute select: %s", err)
         logging.debug("SQL: %s", sql)

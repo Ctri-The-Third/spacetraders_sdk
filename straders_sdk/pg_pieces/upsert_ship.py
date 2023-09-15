@@ -55,23 +55,30 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
     if ship.mounts_dirty or ship.dirty:
         resp = _upsert_ship_mounts(connection, ship)
         if not resp:
+            logging.warning("Failed to upsert ship mounts because %s", resp.error)
             return resp
 
     if ship.cargo_dirty or ship.dirty:
         resp = _upsert_ship_cargo(connection, ship)
         if not resp:
+            logging.warning("Failed to upsert ship cargo because %s", resp.error)
             return resp
 
     if ship.nav_dirty or ship.dirty:
         resp = _upsert_ship_nav(connection, ship)
         if not resp:
+            logging.warning("Failed to upsert ship nav because %s", resp.error)
             return resp
     if ship.dirty:
         resp = _upsert_ship_frame(connection, ship)
         if not resp:
+            logging.warning("Failed to upsert ship frame because %s", resp.error)
             return resp
     if ship.cooldown_dirty:
         resp = _upsert_ship_cooldown(connection, ship)
+        if not resp:
+            logging.warning("Failed to upsert ship cooldown because %s", resp.error)
+            return resp
     ship.mark_clean()
     return resp
 
@@ -164,7 +171,10 @@ def _upsert_ship_cooldown(connection, ship: Ship):
 
 
 def _upsert_ship_cargo(connection, ship: Ship):
-    return None
+    return LocalSpaceTradersRespose(
+        None, None, None, url=f"{__name__}._upsert_ship_cargo"
+    )
+    # not implemented yet
     pass
 
 

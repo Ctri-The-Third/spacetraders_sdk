@@ -15,6 +15,7 @@ from .models import (
     Market,
     JumpGate,
 )
+import psycopg2
 from .models import Shipyard, System
 from .ship import Ship
 from .client_api import SpaceTradersApiClient
@@ -57,6 +58,21 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         self.token = token
         self.current_agent = current_agent_symbol
         if db_host and db_name and db_user and db_pass:
+            if not connection:
+                connection = psycopg2.connect(
+                    host=db_host,
+                    port=db_port,
+                    database=db_name,
+                    user=db_user,
+                    password=db_pass,
+                    application_name="unspecified ST client",
+                    keepalives=1,
+                    keepalives_idle=30,
+                    keepalives_interval=10,
+                    keepalives_count=3,  # connection terminates after 30 seconds of silence
+                )
+                connection.autocommit = True
+
             self.db_client = SpaceTradersPostgresClient(
                 db_host=db_host,
                 db_name=db_name,
