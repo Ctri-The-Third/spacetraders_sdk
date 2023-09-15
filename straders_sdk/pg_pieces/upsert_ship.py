@@ -164,6 +164,7 @@ def _upsert_ship_cooldown(connection, ship: Ship):
 
 
 def _upsert_ship_cargo(connection, ship: Ship):
+    return None
     pass
 
 
