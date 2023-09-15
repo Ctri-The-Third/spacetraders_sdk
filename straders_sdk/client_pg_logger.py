@@ -350,9 +350,20 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
     ) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/extract"""
         url = _url(f"my/ships/:ship_name/extract")
-        event_params = {response.data.get("extraction")}
+        mining_yield = response.data.get("extraction", {}).get("yield", {})
+        event_params = None
+        if mining_yield.get("symbol"):
+            event_params = {
+                "trade_symbol": mining_yield.get("symbol"),
+                "units": mining_yield["units"],
+            }
         self.log_event(
-            "ship_extract", ship.name, url, response, duration_seconds=duration
+            "ship_extract",
+            ship.name,
+            url,
+            response,
+            duration_seconds=duration,
+            event_params=event_params,
         )
         pass
 
