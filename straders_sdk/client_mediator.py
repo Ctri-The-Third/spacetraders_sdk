@@ -260,7 +260,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         self.logging_client.view_my_contracts(
             resp, (datetime.now() - start).total_seconds()
         )
-        if resp or len(resp) == 0:
+        if resp or (isinstance(resp, dict) and len(resp) == 0):
             for c in resp:
                 self.update(c)
             self.contracts = self.contracts | {c.id: c for c in resp}

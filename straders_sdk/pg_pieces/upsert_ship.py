@@ -57,6 +57,11 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
         if not resp:
             return resp
 
+    if ship.cargo_dirty or ship.dirty:
+        resp = _upsert_ship_cargo(connection, ship)
+        if not resp:
+            return resp
+
     if ship.nav_dirty or ship.dirty:
         resp = _upsert_ship_nav(connection, ship)
         if not resp:
@@ -156,6 +161,10 @@ def _upsert_ship_cooldown(connection, ship: Ship):
     values = (ship.name, ship._cooldown_length, ship._cooldown_expiration)
     resp = try_execute_upsert(connection, sql, values)
     return resp
+
+
+def _upsert_ship_cargo(connection, ship:Ship):
+    
 
 
 def try_execute_upsert(connection, sql, params) -> LocalSpaceTradersRespose:
