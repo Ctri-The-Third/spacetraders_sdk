@@ -543,7 +543,14 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         # but the DB is home to many ships. Therefore, this client needs to become aware of the agent name on init.
         # WAIT WE ALREADY DO THAT. well done past C'tri
 
-        return _select_ships(self.connection, self.current_agent_symbol, self)
+        resp = _select_ships(self.connection, self.current_agent_symbol, self)
+
+        if resp:
+            return_obj = {}
+            for ship in resp.values():
+                return_obj[ship.name] = self._extend_ship_mount_modules(ship)
+            return return_obj
+        return
 
     def ships_view_one(self, symbol: str) -> "Ship" or SpaceTradersResponse:
         """/my/ships/{shipSymbol}"""
