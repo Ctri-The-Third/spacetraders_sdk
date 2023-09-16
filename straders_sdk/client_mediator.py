@@ -206,6 +206,8 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             new_ships = resp
             self.ships = self.ships | new_ships
             for ship in self.ships.values():
+                ship: Ship
+                ship.dirty = True  # force a refresh of the ship into the DB
                 self.db_client.update(ship)
             return new_ships
         return resp
@@ -229,6 +231,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         )
         if resp:
             resp: Ship
+            resp.dirty = True
             self.ships[symbol] = resp
             self.db_client.update(resp)
         return resp
