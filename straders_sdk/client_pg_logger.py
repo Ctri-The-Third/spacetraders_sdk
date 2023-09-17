@@ -5,6 +5,7 @@ from .client_interface import SpaceTradersClient
 import straders_sdk.utils as utils
 from .responses import SpaceTradersResponse
 from .pg_pieces.transactions import _upsert_transaction
+from .pg_pieces.extractions import _upsert_extraction
 from straders_sdk.utils import try_execute_select, try_execute_upsert
 import psycopg2
 import uuid
@@ -159,6 +160,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 _upsert_transaction(
                     self.connection, update_obj["transaction"], self.session_id
                 )
+
         return
 
     def register(
@@ -350,7 +352,8 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
     ) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/extract"""
         url = _url(f"my/ships/:ship_name/extract")
-        mining_yield = response.data.get("extraction", {}).get("yield", {})
+        extraction = response.data.get("extraction", {})
+        mining_yield = extraction.get("yield", {})
         event_params = None
         if mining_yield.get("symbol"):
             event_params = {
@@ -364,6 +367,13 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             response,
             duration_seconds=duration,
             event_params=event_params,
+        )
+        _upsert_extraction(
+            self.connection,
+            extraction,
+            self.session_id,
+            ship.nav.waypoint_symbol,
+            survey.signature,
         )
         pass
 
