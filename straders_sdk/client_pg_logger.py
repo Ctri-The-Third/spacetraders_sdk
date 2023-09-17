@@ -360,6 +360,14 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 "trade_symbol": mining_yield.get("symbol"),
                 "units": mining_yield["units"],
             }
+            _upsert_extraction(
+                self.connection,
+                extraction,
+                self.session_id,
+                ship.nav.waypoint_symbol,
+                survey.signature,
+            )
+
         self.log_event(
             "ship_extract",
             ship.name,
@@ -367,13 +375,6 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             response,
             duration_seconds=duration,
             event_params=event_params,
-        )
-        _upsert_extraction(
-            self.connection,
-            extraction,
-            self.session_id,
-            ship.nav.waypoint_symbol,
-            survey.signature,
         )
         pass
 
