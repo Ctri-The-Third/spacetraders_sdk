@@ -20,6 +20,6 @@ def _upsert_extraction(
             waypoint_symbol,
             survey_signature,
             extraction["yield"]["symbol"],
-            extraction["units"],
+            extraction["yield"]["units"],
         ),
     )
