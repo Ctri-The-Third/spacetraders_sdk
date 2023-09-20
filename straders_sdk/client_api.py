@@ -183,18 +183,19 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def ship_extract(self, ship: Ship, survey: Survey = None) -> SpaceTradersResponse:
         "/my/ships/{shipSymbol}/extract"
 
-        url = (
-            _url(f"my/ships/{ship.name}/extract/survey")
-            if survey
-            else _url(f"my/ships/{ship.name}/extract")
-        )
+        url = _url(f"my/ships/{ship.name}/extract")
+        # url = (
+        #    _url(f"my/ships/{ship.name}/extract/survey")
+        #    if survey
+        #    else _url(f"my/ships/{ship.name}/extract")
+        # )
         if not ship.can_extract:
             return LocalSpaceTradersRespose("Ship cannot extract", 0, 4227, url=url)
 
         if ship.seconds_until_cooldown > 0:
             return LocalSpaceTradersRespose("Ship still on cooldown", 0, 4200, url=url)
 
-        data = survey.to_json() if survey is not None else None
+        data = {"survey": survey.to_json()} if survey is not None else None
 
         resp = post_and_validate(
             url, json=data, headers=self._headers(), vip=True, session=self.session
