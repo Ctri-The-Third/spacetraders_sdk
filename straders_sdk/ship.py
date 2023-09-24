@@ -94,6 +94,29 @@ class Ship(SpaceTradersInteractive):
         self.cooldown_dirty = False
         self.logger = logging.getLogger("ship-logger")
 
+        self.name: str = ""
+        self.role: str = ""
+        self.faction: str = ""
+        self.nav = ShipNav("", "", "", None, None, None, "", "")
+        self.frame = ShipFrame("", "", "", 0, 0, 0, 0, ShipRequirements(0, 0, 0))
+        self.reactor = ShipReactor("", "", "", 0, 0, ShipRequirements(0, 0, 0))
+        self.engine = ShipEngine("", "", "", 0, 0, ShipRequirements(0, 0, 0))
+        self.crew_capacity: int = 0
+        self.crew_current: int = 0
+        self.crew_required: int = 0
+        self.crew_rotation: str = ""
+        self.crew_morale: int = 0
+        self.crew_wages: int = 0
+        self.cargo_capacity: int = 0
+        self.cargo_units_used: int = 0
+        self.cargo_inventory: list[ShipInventory] = []
+
+        self.fuel_capacity = 0
+        self.fuel_current = 0
+        self.fuel_consumed_history = {}
+        self.mounts = []
+        self.modules = []
+
     @property
     def can_survey(self) -> bool:
         for surveyor in SURVEYOR_SYMBOLS:

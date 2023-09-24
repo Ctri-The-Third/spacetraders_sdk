@@ -14,7 +14,7 @@ from .models import (
     JumpGate,
 )
 import logging
-from .contracts import Contract
+from .contracts import Contract, ContractDeliverGood
 from datetime import datetime
 from .responses import SpaceTradersResponse
 from .client_interface import SpaceTradersClient
@@ -111,9 +111,51 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         return select_agent_one(self.connection, self.current_agent_symbol)
 
     def view_my_contracts(self) -> list["Contract"] or SpaceTradersResponse:
-        return LocalSpaceTradersRespose(
-            "not implemented yet", 0, 0, f"{__name__}.view_my_contracts"
-        )
+        sql = """select id --0
+        , faction_symbol --1
+        , type       --2
+        , deadline   --3
+        , expiration --4
+        , fulfilled  --5
+        , accepted   --6
+        , co.payment_upfront  --7
+        , co.payment_on_completion --8
+        , ct.trade_symbol --9
+        , ct.destination_symbol --10
+        , ct.units_Required --11
+        , ct.units_fulfilled --12
+        from contracts co join contract_tradegoods ct on ct.contract_id = co.id
+        where co.agent_symbol = %s
+        """
+
+        rows = try_execute_select(self.connection, sql, (self.current_agent_symbol,))
+        if not rows:
+            return rows
+        contracts = []
+        current_contract_id = ""
+        new_contract = None
+        rows.append(["ENDING", "", "", "", "", "", "", "", "", "", "", "", ""])
+        for row in rows:
+            if row[0] != "" and row[0] != current_contract_id:
+                if new_contract is not None:
+                    contracts.append(new_contract)
+
+                new_contract = Contract(
+                    row[0],  # id
+                    row[1],  # faction
+                    row[2],  # type
+                    row[3],  # deadline
+                    row[4],  # deadline_to_accept
+                    row[4],
+                    row[7],  # payment_upfront
+                    row[8],  # payment_on_completion
+                    [],  # deliverables
+                    row[6],  # accepted
+                    row[5],  # fulfilled
+                )
+            deliverable = ContractDeliverGood(row[9], row[10], row[11], row[12])
+            new_contract.deliverables.append(deliverable)
+        return contracts
 
     def waypoints_view(
         self, system_symbol: str
