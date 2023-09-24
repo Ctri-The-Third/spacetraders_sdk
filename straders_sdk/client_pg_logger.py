@@ -253,10 +253,11 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
 
         pass
 
-    def find_waypoints_by_type(self, system_wp:str, waypoint_type:str ) -> list[Waypoint] or SpaceTradersResponse:
-        # don't log anything, not an API call 
-        pass 
-
+    def find_waypoints_by_type(
+        self, system_wp: str, waypoint_type: str
+    ) -> list[Waypoint] or SpaceTradersResponse:
+        # don't log anything, not an API call
+        pass
 
     def find_waypoints_by_trait_one(
         self, system_symbol: str, trait: str
@@ -372,7 +373,17 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 ship.nav.waypoint_symbol,
                 survey.signature,
             )
-
+        response: SpaceTradersResponse
+        if response is not None and response.error_code == 4224:
+            self.log_event(
+                "survey_exhausted",
+                ship.name,
+                url,
+                response,
+                {"survey_id": survey.signature},
+                duration,
+            )
+            pass
         self.log_event(
             "ship_extract",
             ship.name,
