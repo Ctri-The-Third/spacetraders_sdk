@@ -258,9 +258,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
         return resp
 
-    def view_my_contracts(
-        self, force=False
-    ) -> dict[str, Contract] or SpaceTradersResponse:
+    def view_my_contracts(self, force=False) -> list[Contract] or SpaceTradersResponse:
         """view the current contracts the agent has, uses cached values by default.
 
         Args:
@@ -272,7 +270,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         if not force:
             resp = self.db_client.view_my_contracts()
             if resp:
-                self.contracts = self.contracts | {c.contract: c for c in resp}
+                self.contracts = self.contracts | {c.id: c for c in resp}
                 return resp
         start = datetime.now()
         resp = self.api_client.view_my_contracts()
@@ -283,7 +281,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             for c in resp:
                 self.update(c)
             self.contracts = self.contracts | {c.id: c for c in resp}
-            return {c.id: c for c in resp}
+            return resp
 
     def contract_accept(self, contract_id) -> Contract or SpaceTradersResponse:
         """accept a contract
@@ -651,7 +649,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         for wayp in self.waypoints_view(system_wp).values():
             wayp: Waypoint
             if wayp.type == waypoint_type:
-                    resp.append(wayp)
+                resp.append(wayp)
 
         if isinstance(resp, list) and len(resp) > 0:
             return resp
@@ -676,6 +674,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             0,
             f"{__name__}.find_waypoints_by_trait",
         )
+
     def find_waypoints_by_type_one(
         self, system_wp, waypoint_type
     ) -> Waypoint or SpaceTradersResponse or None:

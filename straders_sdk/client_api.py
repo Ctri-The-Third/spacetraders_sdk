@@ -352,9 +352,10 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def find_waypoints_by_trait(self, system_symbol: str, trait: str) -> list[Waypoint]:
         return dummy_response(__class__.__name__, "find_waypoints_by_trait")
 
-    def find_waypoints_by_type(self, system_wp:str, waypoint_type:str ) -> list[Waypoint] or SpaceTradersResponse:
-        pass 
-
+    def find_waypoints_by_type(
+        self, system_wp: str, waypoint_type: str
+    ) -> list[Waypoint] or SpaceTradersResponse:
+        return dummy_response(__class__.__name__, "find_waypoints_by_type")
 
     def find_waypoints_by_type_one(self, system_wp, waypoint_type) -> Waypoint:
         return dummy_response(__class__.__name__, "find_waypoint_by_type")
