@@ -93,6 +93,10 @@ class SpaceTradersClient(Protocol):
         pass
 
     @abstractmethod
+    def find_waypoints_by_type(self, system_wp:str, waypoint_type:str ) -> list[Waypoint] or SpaceTradersResponse:
+        pass 
+
+    @abstractmethod
     def find_waypoints_by_type_one(
         self, system_wp, waypoint_type
     ) -> Waypoint or SpaceTradersResponse:

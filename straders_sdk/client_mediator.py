@@ -647,15 +647,35 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             Either a Waypoint object or a SpaceTradersResponse object on API failure.
             If no matching waypoint is found and no errors occur, None is returned."""
 
-        waypoints = self.waypoints_view(system_wp, waypoint_type)
-        if not waypoints:
-            return waypoints
-        return [
-            waypoint
-            for waypoint in waypoints.values()
-            if waypoint.type == waypoint_type
-        ]
+        resp = []
+        for wayp in self.waypoints_view(system_wp).values():
+            wayp: Waypoint
+            if wayp.type == waypoint_type:
+                    resp.append(wayp)
 
+        if isinstance(resp, list) and len(resp) > 0:
+            return resp
+        resp = self.db_client.find_waypoints_by_type(system_wp, waypoint_type)
+        if resp:
+            return resp
+
+        start = datetime.now()
+        wayps = self.api_client.find_waypoints_by_type(system_wp, waypoint_type)
+        self.logging_client.find_waypoints_by_trait(
+            system_wp, waypoint_type, wayps, (datetime.now() - start).total_seconds()
+        )
+        if isinstance(wayps, list):
+            wayps: list
+            for wayp in wayps:
+                self.db_client.update(wayp)
+                self.update(wayp)
+            return wayps
+        return LocalSpaceTradersRespose(
+            "Could not find any waypoints with that trait.",
+            0,
+            0,
+            f"{__name__}.find_waypoints_by_trait",
+        )
     def find_waypoints_by_type_one(
         self, system_wp, waypoint_type
     ) -> Waypoint or SpaceTradersResponse or None:

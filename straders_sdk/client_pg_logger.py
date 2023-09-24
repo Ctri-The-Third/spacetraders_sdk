@@ -253,6 +253,11 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
 
         pass
 
+    def find_waypoints_by_type(self, system_wp:str, waypoint_type:str ) -> list[Waypoint] or SpaceTradersResponse:
+        # don't log anything, not an API call 
+        pass 
+
+
     def find_waypoints_by_trait_one(
         self, system_symbol: str, trait: str
     ) -> Waypoint or SpaceTradersResponse:

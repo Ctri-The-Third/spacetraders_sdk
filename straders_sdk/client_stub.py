@@ -66,7 +66,7 @@ class SpaceTradersStubClient:
     ) -> Waypoint or SpaceTradersResponse:
         pass
 
-    def find_waypoint_by_type(
+    def find_waypoints_by_type(
         self, system_wp, waypoint_type
     ) -> Waypoint or SpaceTradersResponse or None:
         pass

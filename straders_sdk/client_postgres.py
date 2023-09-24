@@ -209,6 +209,11 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
     ) -> Waypoint or SpaceTradersResponse:
         pass
 
+    def find_waypoints_by_type(self, system_wp:str, waypoint_type:str ) -> list[Waypoint] or SpaceTradersResponse:
+        db_wayps = self.waypoints_view(system_wp)
+        if not db_wayps:
+            return db_wayps
+
     def find_waypoints_by_type_one(
         self, system_wp: str, waypoint_type
     ) -> Waypoint or SpaceTradersResponse:
