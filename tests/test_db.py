@@ -28,3 +28,5 @@ def test_find_waypoints_by_type():
     system = try_execute_select(client.connection, sql, ())[0][0]
     resp = client.find_waypoints_by_type(system, "ASTEROID_FIELD")
     assert resp
+    for wayp in resp:
+        assert wayp.type == "ASTEROID_FIELD"
