@@ -35,16 +35,19 @@ class RemoteSpaceTradersRespose:
         self.error = None
         self.status_code = response.status_code
         self.error_code = None
-        try:
-            self.response_json = json.loads(response.content)
-        except JSONDecodeError:
+        if response.status_code == 204:
             self.response_json = {}
-            logging.error(
-                "SPACE TRADERS REPSONSE DIDN'T HAVE VALID JSON URL: %s,  status code: %s, received content: %s",
-                response.url,
-                response.status_code,
-                response.content,
-            )
+        else:
+            try:
+                self.response_json = json.loads(response.content)
+            except JSONDecodeError:
+                self.response_json = {}
+                logging.error(
+                    "SPACE TRADERS REPSONSE DIDN'T HAVE VALID JSON URL: %s,  status code: %s, received content: %s",
+                    response.url,
+                    response.status_code,
+                    response.content,
+                )
 
         if "error" in self.response_json:
             self.error_parse()
