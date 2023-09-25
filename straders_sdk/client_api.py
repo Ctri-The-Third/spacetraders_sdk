@@ -366,7 +366,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def find_waypoints_by_trait_one(self, system_symbol: str, trait: str) -> Waypoint:
         return dummy_response(__class__.__name__, "find_waypoints_by_trait_one")
 
-    def surveys_remove_one(self, survey_signature) -> None:
+    def surveys_mark_exhausted(self, survey_signature) -> None:
         """Removes a survey from any caching - called after an invalid survey response."""
         return dummy_response(__class__.__name__, "surveys_remove_one")
         pass

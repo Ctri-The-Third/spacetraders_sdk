@@ -349,8 +349,17 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
 
         pass
 
-    def surveys_remove_one(self, survey_signature) -> None:
+    def surveys_mark_exhausted(self, survey_signature, ship_symbol: str = None) -> None:
         """Removes a survey from any caching - called after an invalid survey response."""
+        self.log_event(
+            "survey_exhausted",
+            ship_symbol or "GLOBAL",
+            "client.surveys_mark_exhausted",
+            None,
+            {"survey_id": survey_signature},
+            0,
+        )
+
         pass
 
     def ship_extract(
@@ -374,16 +383,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 survey.signature,
             )
         response: SpaceTradersResponse
-        if response is not None and response.error_code == 4224:
-            self.log_event(
-                "survey_exhausted",
-                ship.name,
-                url,
-                response,
-                {"survey_id": survey.signature},
-                duration,
-            )
-            pass
+
         self.log_event(
             "ship_extract",
             ship.name,

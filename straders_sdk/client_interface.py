@@ -93,8 +93,10 @@ class SpaceTradersClient(Protocol):
         pass
 
     @abstractmethod
-    def find_waypoints_by_type(self, system_wp:str, waypoint_type:str ) -> list[Waypoint] or SpaceTradersResponse:
-        pass 
+    def find_waypoints_by_type(
+        self, system_wp: str, waypoint_type: str
+    ) -> list[Waypoint] or SpaceTradersResponse:
+        pass
 
     @abstractmethod
     def find_waypoints_by_type_one(
@@ -113,7 +115,7 @@ class SpaceTradersClient(Protocol):
         pass
 
     @abstractmethod
-    def surveys_remove_one(self, survey_signature) -> None:
+    def surveys_mark_exhausted(self, survey_signature) -> None:
         """Removes a survey from any caching - called after an invalid survey response."""
         pass
 
