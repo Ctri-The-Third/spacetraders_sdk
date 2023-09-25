@@ -35,7 +35,7 @@ class RemoteSpaceTradersRespose:
         self.error = None
         self.status_code = response.status_code
         self.error_code = None
-        if response.status_code == 204:
+        if response.status_code == 204 or response.content == b"":
             self.response_json = {}
         else:
             try:
