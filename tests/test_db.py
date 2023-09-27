@@ -18,7 +18,7 @@ def test_environment_variables():
     assert ST_PORT
 
 
-def test_pytest():
+def test_contracts():
     client = SpaceTradersPostgresClient(
         ST_HOST, ST_NAME, ST_USER, ST_PASS, TEST_AGENT_NAME, db_port=ST_PORT
     )
