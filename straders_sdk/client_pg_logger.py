@@ -481,7 +481,27 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         """/my/ships/{shipSymbol}/equip"""
         url = _url(f"my/ships/:ship_name/equip")
         self.log_event(
-            "ship_install_mount", ship.name, url, response, duration_seconds=duration
+            "ship_install_mount",
+            ship.name,
+            url,
+            response,
+            duration_seconds=duration,
+            event_params={"installed_mount_symbol": mount_symbol},
+        )
+        pass
+
+    def ship_remove_mount(
+        self, ship: "Ship", mount_symbol: str, response=None, duration: float = None
+    ) -> SpaceTradersResponse:
+        """/my/ships/{shipSymbol}/mounts/remove"""
+        url = _url(f"my/ships/:ship_name/mounts/remove")
+        self.log_event(
+            "ship_remove_mount",
+            ship.name,
+            url,
+            response,
+            duration_seconds=duration,
+            event_params={"removed_mount_symbol": mount_symbol},
         )
         pass
 

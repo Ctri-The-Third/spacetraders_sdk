@@ -196,7 +196,15 @@ class SpaceTradersClient(Protocol):
     def ship_install_mount(
         self, ship: "Ship", mount_symbol: str
     ) -> SpaceTradersResponse:
-        """/my/ships/{shipSymbol}/equip"""
+        """/my/ships/{shipSymbol}/mounts/install"""
+
+        pass
+
+    @abstractmethod
+    def ship_remove_mount(
+        self, ship: "Ship", mount_symbol: str
+    ) -> SpaceTradersResponse:
+        """/my/ships/{shipSymbol}/mounts/remove"""
 
         pass
 

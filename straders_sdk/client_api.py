@@ -337,6 +337,21 @@ class SpaceTradersApiClient(SpaceTradersClient):
             self.update(ship)
         return resp
 
+    def ship_remove_mount(self, ship: Ship, mount_symbol: str) -> SpaceTradersResponse:
+        """/my/ships/{shipSymbol}/mounts/remove"""
+
+        url = _url(f"my/ships/{ship.name}/mounts/remove")
+        data = {"symbol": mount_symbol}
+        resp = post_and_validate(
+            url, data, headers=self._headers(), session=self.session
+        )
+        if resp:
+            self.update(resp.data)
+
+            ship.update(resp.data)
+            self.update(ship)
+        return resp
+
     def ship_jettison_cargo(
         self, ship: Ship, trade_symbol: str, quantity: int
     ) -> SpaceTradersResponse:

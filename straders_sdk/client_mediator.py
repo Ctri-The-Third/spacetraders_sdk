@@ -886,6 +886,20 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.update(ship)
         return resp
 
+    def ship_remove_mount(
+        self, ship: "Ship", mount_symbol: str
+    ) -> SpaceTradersResponse:
+        """/my/ships/{shipSymbol}/mounts/remove"""
+        start = datetime.now()
+        resp = self.api_client.ship_remove_mount(ship, mount_symbol)
+        self.logging_client.ship_remove_mount(
+            ship, mount_symbol, resp, (datetime.now() - start).total_seconds()
+        )
+        if resp:
+            ship.update(resp.data)
+            self.update(ship)
+        return resp
+
     def surveys_mark_exhausted(self, survey_signature) -> None:
         """Removes a survey from any caching - called after an invalid survey response."""
         self.db_client.surveys_mark_exhausted(survey_signature)

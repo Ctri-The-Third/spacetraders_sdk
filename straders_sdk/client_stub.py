@@ -129,6 +129,13 @@ class SpaceTradersStubClient:
 
         pass
 
+    def ship_remove_mount(
+        self, ship: "Ship", mount_symbol: str
+    ) -> SpaceTradersResponse:
+        """/my/ships/{shipSymbol}/mounts/remove"""
+
+        pass
+
     def ship_jettison_cargo(
         self, ship: "Ship", trade_symbol: str, units: int
     ) -> SpaceTradersResponse:

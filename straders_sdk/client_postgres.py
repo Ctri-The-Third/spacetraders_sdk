@@ -475,6 +475,13 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         return dummy_response(__class__.__name__, "ship_install_mount")
         pass
 
+    def ship_remove_mount(
+        self, ship: "Ship", mount_symbol: str
+    ) -> SpaceTradersResponse:
+        """/my/ships/{shipSymbol}/mounts/remove"""
+        return dummy_response(__class__.__name__, "ship_remove_mount")
+        pass
+
     def ship_jettison_cargo(
         self, ship: "Ship", trade_symbol: str, units: int
     ) -> SpaceTradersResponse:
