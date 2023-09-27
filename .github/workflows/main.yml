@@ -26,7 +26,11 @@ jobs:
       name: test environment
       url: none
     env:
-      SECRET: ${{ secrets.SECRET_NAME}}
+      ST_HOST: ${{ secrets.ST_HOST}}
+      ST_NAME: ${{ secrets.ST_NAME}}
+      ST_PASS: ${{ secrets.ST_PASS}}
+      ST_PORT: ${{ secrets.ST_PORT}}
+      ST_USER: ${{ secrets.ST_USER}}
       
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:

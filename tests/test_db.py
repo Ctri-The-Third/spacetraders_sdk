@@ -10,6 +10,14 @@ ST_PORT = os.getenv("ST_DB_PORT")
 TEST_AGENT_NAME = "CTRI-U-"
 
 
+def test_environment_variables():
+    assert ST_HOST
+    assert ST_NAME
+    assert ST_PASS
+    assert ST_USER
+    assert ST_PORT
+
+
 def test_pytest():
     client = SpaceTradersPostgresClient(
         ST_HOST, ST_NAME, ST_USER, ST_PASS, TEST_AGENT_NAME, db_port=ST_PORT
