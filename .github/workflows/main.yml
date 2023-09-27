@@ -26,11 +26,11 @@ jobs:
       name: test environment
       url: none
     env:
-      ST_HOST: ${{ secrets.ST_HOST}}
-      ST_NAME: ${{ secrets.ST_NAME}}
-      ST_PASS: ${{ secrets.ST_PASS}}
-      ST_PORT: ${{ secrets.ST_PORT}}
-      ST_USER: ${{ secrets.ST_USER}}
+      ST_DB_HOST: ${{ secrets.ST_HOST}}
+      ST_DB_NAME: ${{ secrets.ST_NAME}}
+      ST_DB_PASS: ${{ secrets.ST_PASS}}
+      ST_DB_PORT: ${{ secrets.ST_PORT}}
+      ST_DB_USER: ${{ secrets.ST_USER}}
       
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -46,10 +46,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest
           pip install -r requirements.txt
-      - name: Install hex helper
-        run: |
-          wget https://github.com/Ctri-The-Third/ServiceHelpers/releases/download/v2.4.0/hex_helpers-2.4.0-py3-none-any.whl -O hex_helpers-latest-py3-none-any.whl
-          pip install ./hex_helpers-latest-py3-none-any.whl
       # Runs a set of commands using the runners shell
       - name: Test with pytest
         run: pytest -vv
