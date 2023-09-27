@@ -28,7 +28,7 @@ jobs:
     env:
       ST_DB_HOST: ${{ secrets.ST_HOST}}
       ST_DB_NAME: ${{ secrets.ST_NAME}}
-      ST_DB_PASS: ${{ secrets.ST_PASS}}
+      ST_DB_PASSWORD: ${{ secrets.ST_PASS}}
       ST_DB_PORT: ${{ secrets.ST_PORT}}
       ST_DB_USER: ${{ secrets.ST_USER}}
       
