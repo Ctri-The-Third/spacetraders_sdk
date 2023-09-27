@@ -260,7 +260,11 @@ class Ship(SpaceTradersInteractive):
                 self.fuel_capacity = json_data["fuel"]["capacity"]
                 self.fuel_current = json_data["fuel"]["current"]
                 self.fuel_consumed_history = json_data["fuel"]["consumed"]
-
+            if "mounts" in json_data:
+                self.mounts_dirty = True
+                self.mounts: list[ShipMount] = [
+                    ShipMount(d) for d in json_data["mounts"]
+                ]
         # pass the updated ship to the client to be logged appropriately
 
     @property
