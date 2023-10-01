@@ -2,6 +2,7 @@ from ..models import Agent
 from ..local_response import LocalSpaceTradersRespose
 import logging
 import datetime
+from ..utils import try_execute_upsert
 
 
 def _upsert_extraction(
@@ -10,9 +11,8 @@ def _upsert_extraction(
     sql = """INSERT INTO public.extractions(
 	ship_symbol, session_id, event_timestamp, waypoint_symbol, survey_signature, trade_symbol, quantity)
 	VALUES (%s,%s,  now() at time zone 'utc', %s, %s, %s, %s); """
-
-    cur = connection.cursor()
-    cur.execute(
+    try_execute_upsert(
+        connection,
         sql,
         (
             extraction["shipSymbol"],
