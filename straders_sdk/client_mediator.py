@@ -160,6 +160,13 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.update(resp)
         return resp
 
+    def set_current_agent(self, agent_symbol: str, token: str = None):
+        self.current_agent_name = agent_symbol
+        self.token = token
+        self.db_client.set_current_agent(agent_symbol, token)
+        self.logging_client.set_current_agent(agent_symbol, token)
+        self.api_client.set_current_agent(agent_symbol, token)
+
     def view_my_self(self, force=False) -> Agent or SpaceTradersResponse:
         """view the current agent, uses cached value unless forced.
 

@@ -107,6 +107,10 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
     def agents_view_one(self, agent_symbol: str) -> Agent or SpaceTradersResponse:
         return select_agent_one(self.connection, agent_symbol)
 
+    def set_current_agent(self, agent_symbol: str, token: str = None):
+        self.current_agent_name = agent_symbol
+        self.token = token
+
     def view_my_self(self) -> Agent or SpaceTradersResponse:
         return select_agent_one(self.connection, self.current_agent_symbol)
 

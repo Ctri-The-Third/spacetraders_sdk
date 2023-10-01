@@ -38,6 +38,10 @@ class SpaceTradersClient(Protocol):
         pass
 
     @abstractmethod
+    def set_current_agent(self, agent_symbol: str, token: str = None):
+        pass
+
+    @abstractmethod
     def view_my_self(self) -> "Agent" or SpaceTradersResponse:
         pass
 

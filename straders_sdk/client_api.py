@@ -56,6 +56,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
             return Agent.from_json(resp.data)
         return resp
 
+    def set_current_agent(self, agent_symbol: str, token: str = None):
+        self.current_agent_symbol = agent_symbol
+        self.token = token
+        self.current_agent = None
+
     def view_my_self(self) -> "Agent" or SpaceTradersResponse:
         url = _url("my/agent")
         resp = get_and_validate(url, headers=self._headers(), session=self.session)

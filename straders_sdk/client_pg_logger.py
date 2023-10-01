@@ -71,6 +71,10 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             "BEGIN_BEHAVIOUR_SCRIPT", behaviour_name, ship_name, starting_credits
         )
 
+    def set_current_agent(self, agent_symbol: str, token: str = None):
+        self.current_agent_name = agent_symbol
+        self.token = token
+
     def log_ending(
         self, behaviour_name: str, ship_name="GLOBAL", starting_credits=None
     ):
