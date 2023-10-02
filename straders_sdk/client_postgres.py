@@ -29,7 +29,8 @@ from .pg_pieces.jump_gates import _upsert_jump_gate, select_jump_gate_one
 from .pg_pieces.agents import _upsert_agent, select_agent_one
 from .pg_pieces.contracts import _upsert_contract
 from .local_response import LocalSpaceTradersRespose
-from .ship import Ship, ShipInventory, ShipNav, RouteNode, ShipModule, ShipMount
+from .models import RouteNode
+from .ship import Ship, ShipInventory, ShipNav, ShipModule, ShipMount
 from .utils import try_execute_select, try_execute_upsert
 import psycopg2
 

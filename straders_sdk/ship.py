@@ -1,17 +1,13 @@
 from datetime import datetime, timedelta
 from dataclasses import dataclass
-from .models import CrewInfo, ShipFrame, FuelInfo, ShipModule, ShipMount
-from .models import RouteNode, ShipReactor, ShipEngine, RouteNode, ShipRoute
-from .models import ShipRequirements, ShipNav, Survey, Deposit
-from .client_interface import SpaceTradersInteractive, SpaceTradersClient
-from .client_stub import SpaceTradersStubClient
-from .responses import SpaceTradersResponse
-from .local_response import LocalSpaceTradersRespose
+from .models import ShipFrame, ShipModule, ShipMount
+from .models import ShipReactor, ShipEngine
+from .models import ShipRequirements, ShipNav
+from .client_interface import SpaceTradersInteractive
 import logging
-from .utils import parse_timestamp, get_and_validate, post_and_validate, _url
+from .utils import parse_timestamp
 from .utils import SURVEYOR_SYMBOLS
-
-from .responses import SpaceTradersResponse
+import re
 
 
 ### the question arises - if the Ship class is to have methods that interact with the server, which pattern do we use to implement that.
@@ -205,6 +201,18 @@ class Ship(SpaceTradersInteractive):
         ship.modules: list[ShipModule] = [ShipModule(d) for d in json_data["modules"]]
         ship.mounts: list[ShipMount] = [ShipMount(d) for d in json_data["mounts"]]
         return ship
+
+    @property
+    def index(self) -> int:
+        # take the hexadecimal suffix of the ship and convert it into decimal.
+        suffix_match = re.search(r"-(\w+)$", self.name).group()
+        suffix = 0
+        if suffix_match:
+            suffix = suffix_match[1:]
+            suffix = int(suffix, 16)
+        return suffix
+
+        pass
 
     def mark_clean(self):
         self.dirty = False
