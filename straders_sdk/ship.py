@@ -6,7 +6,7 @@ from .models import ShipRequirements, ShipNav
 from .client_interface import SpaceTradersInteractive
 import logging
 from .utils import parse_timestamp
-from .utils import SURVEYOR_SYMBOLS
+from .utils import SURVEYOR_SYMBOLS, MINING_SYMBOLS
 import re
 
 
@@ -122,11 +122,7 @@ class Ship(SpaceTradersInteractive):
 
     @property
     def can_extract(self) -> bool:
-        extractors = [
-            "MOUNT_MINING_LASER_I",
-            "MOUNT_MINING_LASER_II",
-            "MOUNT_MINING_LASER_III",
-        ]
+        extractors = MINING_SYMBOLS
         for extractor in extractors:
             if extractor in [d.symbol for d in self.mounts]:
                 return True
@@ -147,11 +143,15 @@ class Ship(SpaceTradersInteractive):
     def extract_strength(self) -> int:
         strength = 0
         for mount in self.mounts:
-            if mount.symbol in [
-                "MOUNT_MINING_LASER_I",
-                "MOUNT_MINING_LASER_II",
-                "MOUNT_MINING_LASER_III",
-            ]:
+            if mount.symbol in MINING_SYMBOLS:
+                strength += mount.strength
+        return strength
+
+    @property
+    def survey_strength(self) -> int:
+        strength = 0
+        for mount in self.mounts:
+            if mount.symbol in SURVEYOR_SYMBOLS:
                 strength += mount.strength
         return strength
 

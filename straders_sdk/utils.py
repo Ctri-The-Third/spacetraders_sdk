@@ -20,6 +20,11 @@ SEND_FREQUENCY_VIP = 3  # for every X requests, 1 is a VIP.  to decrease the num
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 SURVEYOR_SYMBOLS = ["MOUNT_SURVEYOR_I", "MOUNT_SURVEYOR_II", "MOUNT_SURVEYOR_III"]
+MINING_SYMBOLS = [
+    "MOUNT_MINING_LASER_I",
+    "MOUNT_MINING_LASER_II",
+    "MOUNT_MINING_LASER_III",
+]
 ERRROR_COOLDOWN = 4000
 from .responses import RemoteSpaceTradersRespose, SpaceTradersResponse
 
