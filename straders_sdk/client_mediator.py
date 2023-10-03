@@ -1088,7 +1088,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 }
                 self.logging_client.update(transaction)
 
-            self.db_client.update(resp.data)
+            self.db_client.update(resp)
         return resp
 
     def _headers(self) -> dict:

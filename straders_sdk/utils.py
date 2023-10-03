@@ -296,7 +296,6 @@ def try_execute_select(connection, sql, params) -> list:
     try:
         with connection.cursor() as cur:
             cur.execute(sql, params)
-            cur.execute(sql, params)
             rows = cur.fetchall()
             return rows
     except Exception as err:
