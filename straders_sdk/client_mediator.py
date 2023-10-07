@@ -305,6 +305,8 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             return resp
         new_contract = Contract.from_json(resp.data["contract"])
         self.contracts[new_contract.id] = new_contract
+        self.update(new_contract)
+
         return new_contract
 
     def update(self, json_data):
