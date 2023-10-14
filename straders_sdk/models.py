@@ -407,6 +407,17 @@ class System(SymbolClass):
             wayps,
         )
 
+    def to_json(self) -> dict:
+        "does not include waypoints"
+        return {
+            "symbol": self.symbol,
+            "sectorSymbol": self.sector_symbol,
+            "type": self.system_type,
+            "x": self.x,
+            "y": self.y,
+            "waypoints": [],
+        }
+
     def __hash__(self) -> int:
         return self.symbol.__hash__()
 

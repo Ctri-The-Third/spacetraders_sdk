@@ -1,5 +1,6 @@
 from straders_sdk.models import System
 import json
+import logging
 from datetime import datetime
 
 
@@ -23,11 +24,12 @@ class JumpGateRoute:
         self.route: list[System] = route
         self.seconds_to_destination: int = seconds_to_destination
         self.compilation_timestamp: datetime = compilation_timestamp
+        self.logger = logging.getLogger(__name__)
 
     def to_json(self):
         return {
-            "start_system": self.start_system.symbol,
-            "end_system": self.end_system.symbol,
+            "start_system": self.start_system.to_json(),
+            "end_system": self.end_system.to_json(),
             "jumps": self.jumps,
             "distance": self.distance,
             "route": [system.symbol for system in self.route],
@@ -38,22 +40,29 @@ class JumpGateRoute:
         }
 
     def save_to_file(self, destination_folder: str):
-        with open(
-            f"{destination_folder}{self.start_system.symbol}-{self.end_system.symbol}.json",
-            "w",
-            encoding="utf-8",
-        ) as f:
-            f.write(json.dumps(self.to_json()))
+        try:
+            with open(
+                f"{destination_folder}{self.start_system.symbol}-{self.end_system.symbol}.json",
+                "w",
+                encoding="utf-8",
+            ) as f:
+                f.write(json.dumps(self.to_json(), indent=2))
+        except Exception as e:
+            self.logger.warning(
+                "Failed to save route to file, does the folder %s exist? %s",
+                destination_folder,
+                e,
+            )
 
     @classmethod
     def from_json(cls, json_data):
         route = cls(
-            json_data["start_system"],
-            json_data["end_system"],
+            System.from_json(json_data["start_system"]),
+            System.from_json(json_data["end_system"]),
             json_data["jumps"],
             json_data["distance"],
             json_data["route"],
             json_data["seconds_to_destination"],
-            json_data["compilation_timestamp"],
+            datetime.fromisoformat(json_data["compilation_timestamp"]),
         )
         return route

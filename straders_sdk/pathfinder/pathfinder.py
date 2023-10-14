@@ -3,22 +3,33 @@ import logging
 import math
 import json
 from datetime import timedelta, datetime
-
+from networkx import Graph
 from straders_sdk.models import System
 from networkx import Graph
-from pathfinder.route import JumpGateRoute
+from straders_sdk.utils import try_execute_select
+from straders_sdk.pathfinder.route import JumpGateRoute
 
 OUTPUT_PATH = "resources/routes/"
 
 
 class PathFinder:
-    def __init__(self, graph=None) -> None:
-        self.graph = graph if graph else self.load_graph_from_file()
+    def __init__(self, graph=None, connection=None) -> None:
         self.logger = logging.getLogger(__name__)
         self.target_folder = OUTPUT_PATH
         self.expiration_window = timedelta(days=1)
-
+        self.connection = connection
+        self._graph: Graph = None
         pass
+
+    @property
+    def graph(self) -> Graph:
+        if not self._graph:
+            self._graph = self.load_graph_from_file()
+        if not self._graph:
+            self._graph = self.load_graph_from_db()
+            self.save_graph()
+
+        return self._graph
 
     def add_jump_gate_connection(self, system1: System, system2: System) -> None:
         self.graph.add_node(system1.symbol)
@@ -42,10 +53,75 @@ class PathFinder:
         except (FileNotFoundError, json.JSONDecodeError):
             return None
 
-    def load_graph_from_file(self, file_path="resources/graph.json"):
-        pass
+    def load_graph_from_file(self, file_path="resources/graph.json") -> Graph:
+        with open(file_path, "r") as f:
+            data = json.loads(f.read())
+            systems = {node["symbol"]: System.from_json(node) for node in data["nodes"]}
+            graph = Graph()
+            graph.add_nodes_from(systems)
+            compiled_edges = []
+            for edge in data["edges"]:
+                try:
+                    compiled_edges.append([systems[edge[0]], systems[edge[1]]])
+                except KeyError:
+                    continue
+            graph.add_edges_from(data["edges"])
+            return graph
+        return None
 
-    def save_graph(self):
+    def load_graph_from_db(self):
+        graph = Graph()
+        sql = """
+            select s_system_symbol, sector_symbol, type, x ,y 
+            from jumpgate_connections jc 
+            join systems s on jc.s_system_symbol = s.system_symbol
+            """
+
+        # the graph should be populated with Systems and Connections.
+        # but note that the connections themselves need to by systems.
+        # sql = """SELECT symbol, sector_symbol, type, x, y FROM systems"""
+        # for row in rows:
+        #    syst = System(row[0], row[1], row[2], row[3], row[4], [])
+
+        results = try_execute_select(self.connection, sql, ())
+
+        if results:
+            nodes = {
+                row[0]: System(row[0], row[1], row[2], row[3], row[4], [])
+                for row in results
+            }
+            graph.add_nodes_from(nodes)
+
+        else:
+            return graph
+        sql = """select s_system_symbol, d_system_symbol from jumpgate_connections 
+                """
+        results = try_execute_select(self.connection, sql, ())
+        connections = []
+        if not results:
+            return graph
+        for row in results:
+            try:
+                connections.append((nodes[row[0]], nodes[row[1]]))
+            except KeyError:
+                pass
+                # this happens when the gate we're connected to is not one that we've scanned yet.
+        if results:
+            graph.add_edges_from(connections)
+        return graph
+
+    def save_graph(self, file_path="resources/graph.json"):
+        output = {"nodes": [], "edges": [], "saved": datetime.now().isoformat()}
+        graph = self._graph
+        nodes = {}
+        System
+        for edge in graph.edges:
+            nodes[edge[0].symbol] = edge[0].to_json()
+            nodes[edge[1].symbol] = edge[1].to_json()
+            output["edges"].append([edge[0].symbol, edge[1].symbol])
+        output["nodes"] = list(nodes.values())
+        with open(file_path, "w+") as f:
+            f.write(json.dumps(output, indent=4))
         pass
 
     def astar(
@@ -53,13 +129,17 @@ class PathFinder:
         start: System,
         goal: System,
         bypass_check: bool = False,
+        force_recalc: bool = False,
     ) -> JumpGateRoute:
         graph = self.graph
-
-        route = self.load_astar(start, goal)
-        if route:
-            if route.compilation_timestamp < datetime.now() + self.expiration_window:
-                return route
+        if not force_recalc:
+            route = self.load_astar(start, goal)
+            if route:
+                if (
+                    route.compilation_timestamp
+                    < datetime.now() + self.expiration_window
+                ):
+                    return route
         self.logger.warning("Doing an A*")
         # check if there's a graph yet. There won't be if this is very early in the restart.
         if start == goal:
@@ -110,8 +190,10 @@ class PathFinder:
 
                 final_route = compile_route(start, goal, total_path)
                 final_route.save_to_file(self.target_folder)
-                inverted_route = compile_route(goal, start, total_path.reverse())
+                total_path.reverse()
+                inverted_route = compile_route(goal, start, total_path)
                 inverted_route.save_to_file(self.target_folder)
+                total_path.reverse()
                 return final_route
                 # Reconstruct the shortest path
                 # the path will have been filled with every other step we've taken so far.
