@@ -55,16 +55,15 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
     def connection(self):
         if not self._connection or self._connection.closed > 0:
             self._connection = psycopg2.connect(
-                host=self._db_host,
-                port=self._db_port,
-                database=self._db_name,
-                user=self._db_user,
-                password=self._db_pass,
+                host=self.db_host,
+                port=self.db_port,
+                database=self.db_name,
+                user=self.db_user,
+                password=self.db_pass,
             )
             self._connection.autocommit = True
             # self.logger.warning("lost connection to DB, restoring")
         return self._connection
-
 
     def log_beginning(
         self, behaviour_name: str, ship_name="GLOBAL", starting_credits=None
