@@ -386,7 +386,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 extraction,
                 self.session_id,
                 ship.nav.waypoint_symbol,
-                survey.signature,
+                survey.signature if survey is not None else None,
             )
         response: SpaceTradersResponse
 
