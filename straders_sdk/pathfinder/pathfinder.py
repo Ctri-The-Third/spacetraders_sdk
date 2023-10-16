@@ -54,19 +54,28 @@ class PathFinder:
             return None
 
     def load_graph_from_file(self, file_path="resources/graph.json") -> Graph:
-        with open(file_path, "r") as f:
-            data = json.loads(f.read())
-            systems = {node["symbol"]: System.from_json(node) for node in data["nodes"]}
-            graph = Graph()
-            graph.add_nodes_from(systems)
-            compiled_edges = []
-            for edge in data["edges"]:
-                try:
-                    compiled_edges.append([systems[edge[0]], systems[edge[1]]])
-                except KeyError:
-                    continue
-            graph.add_edges_from(data["edges"])
-            return graph
+        try:
+            with open(file_path, "r") as f:
+                data = json.loads(f.read())
+                systems = {
+                    node["symbol"]: System.from_json(node) for node in data["nodes"]
+                }
+                graph = Graph()
+                graph.add_nodes_from(systems)
+                compiled_edges = []
+                for edge in data["edges"]:
+                    try:
+                        compiled_edges.append([systems[edge[0]], systems[edge[1]]])
+                    except KeyError:
+                        continue
+                graph.add_edges_from(data["edges"])
+                return graph
+        except (FileNotFoundError, json.JSONDecodeError):
+            return None
+        except Exception as err:
+            self.logger.warning(
+                "Failed to load graph from file becase %s", err, exc_info=True
+            )
         return None
 
     def load_graph_from_db(self):
