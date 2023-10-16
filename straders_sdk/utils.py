@@ -277,6 +277,11 @@ def waypoint_slicer(waypoint_symbol: str) -> str:
 
 
 def try_execute_upsert(connection, sql, params) -> LocalSpaceTradersRespose:
+    if connection.closed > 1:
+        logging.error("Connection is closed")
+        return LocalSpaceTradersRespose(
+            "Connection is closed", 0, 0, url=f"{__name__}.try_execute_upsert"
+        )
     try:
         with connection.cursor() as cur:
             cur.execute(sql, params)
@@ -293,6 +298,11 @@ def try_execute_upsert(connection, sql, params) -> LocalSpaceTradersRespose:
 
 
 def try_execute_select(connection, sql, params) -> list:
+    if connection.closed > 1:
+        logging.error("Connection is closed")
+        return LocalSpaceTradersRespose(
+            "Connection is closed", 0, 0, url=f"{__name__}.try_execute_upsert"
+        )
     try:
         with connection.cursor() as cur:
             cur.execute(sql, params)
