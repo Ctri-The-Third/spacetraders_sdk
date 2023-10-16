@@ -175,8 +175,8 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         """
 
         # db handling of this should include MD5 hashing of the token for identification.
-        if self.current_agent and not force:
-            return self.current_agent
+        # if self.current_agent and not force:
+        #    return self.current_agent
 
         if not force:
             resp = self.db_client.view_my_self()
