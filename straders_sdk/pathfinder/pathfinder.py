@@ -143,16 +143,15 @@ class PathFinder:
         graph = self.graph
         if not force_recalc:
             route = self.load_astar(start, goal)
-            if route:
+            if route is not None:
                 if (
                     route.compilation_timestamp
                     < datetime.now() + self.expiration_window
                 ):
                     return route
-        self.logger.warning("Doing an A*")
         # check if there's a graph yet. There won't be if this is very early in the restart.
         if start == goal:
-            return [start]
+            return compile_route(start, goal, [goal.symbol])
         if not graph:
             return None
 
@@ -167,6 +166,7 @@ class PathFinder:
         # Priority queue to store nodes based on f-score (priority = f-score)
         # C'tri note - I think this will be 1 for all edges?
         # Update - no, F-score is the distance between the specific node and the start
+        self.logger.warning("Doing an A*")
 
         open_set = []
         heapq.heappush(open_set, (0, start))
@@ -230,7 +230,12 @@ class PathFinder:
 
                     # add this neighbour to the priority queue - the one with the lowest remaining distance will be the next one popped.
                     heapq.heappush(open_set, (f_score[neighbour], neighbour))
-
+        final_route = compile_route(start, goal, [])
+        final_route.jumps = -1
+        final_route.save_to_file(self.target_folder)
+        reversed_final_route = compile_route(goal, start, [])
+        reversed_final_route.jumps = -1
+        reversed_final_route.save_to_file(self.target_folder)
         return None
 
 
