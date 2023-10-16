@@ -66,3 +66,9 @@ class JumpGateRoute:
             datetime.fromisoformat(json_data["compilation_timestamp"]),
         )
         return route
+
+    def __bool__(self):
+        return bool(self.jumps > 0)
+
+    def __len__(self):
+        return self.jumps
