@@ -25,6 +25,7 @@ class PathFinder:
     def graph(self) -> Graph:
         if not self._graph:
             self._graph = self.load_graph_from_file()
+            pass
         if not self._graph:
             self._graph = self.load_graph_from_db()
             self.save_graph()
@@ -68,7 +69,7 @@ class PathFinder:
                         compiled_edges.append([systems[edge[0]], systems[edge[1]]])
                     except KeyError:
                         continue
-                graph.add_edges_from(data["edges"])
+                graph.add_edges_from(compiled_edges)
                 return graph
         except (FileNotFoundError, json.JSONDecodeError):
             return None
@@ -196,7 +197,7 @@ class PathFinder:
                     total_path.append(current)
                 # reverse so frist list_item = source.
                 logging.debug("Completed A* - total jumps = %s", len(total_path))
-
+                total_path.reverse()
                 final_route = compile_route(start, goal, total_path)
                 final_route.save_to_file(self.target_folder)
                 total_path.reverse()
