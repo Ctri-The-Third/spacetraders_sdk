@@ -88,6 +88,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 db_name=db_name,
                 db_user=db_user,
                 db_pass=db_pass,
+                current_agent_symbol=current_agent_symbol,
                 token=token,
                 connection=connection,
             )

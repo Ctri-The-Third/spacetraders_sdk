@@ -24,7 +24,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         db_name,
         db_user,
         db_pass,
-        current_agent_name="",
+        current_agent_symbol="",
         connection=None,
     ) -> None:
         self.token = token
@@ -46,7 +46,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             self.connection.autocommit = True
         self.session_id = str(uuid.uuid4())
 
-        self.current_agent_name = current_agent_name
+        self.current_agent_name = current_agent_symbol
         utils.st_log_client = self
 
     pass
