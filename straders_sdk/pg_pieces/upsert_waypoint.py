@@ -66,4 +66,5 @@ def _upsert_waypoint(connection, waypoint: Waypoint):
         connection.commit()
     except Exception as err:
         print(err)
-        connection.rollback()
+        if connection.closed == 0:
+            connection.rollback()
