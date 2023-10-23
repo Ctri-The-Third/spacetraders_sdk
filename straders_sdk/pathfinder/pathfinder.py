@@ -2,6 +2,7 @@ import heapq
 import logging
 import math
 import json
+import os
 from datetime import timedelta, datetime
 from networkx import Graph
 from straders_sdk.models import System
@@ -133,6 +134,24 @@ class PathFinder:
         with open(file_path, "w+") as f:
             f.write(json.dumps(output, indent=4))
         pass
+
+    def clear_graph(self, file_path="resources/graph.json", age=timedelta(days=1)):
+        self._graph = None
+
+        graph_file = json.loads(open(file_path, "r").read())
+        if "saved" in graph_file:
+            saved = datetime.fromisoformat(graph_file["saved"])
+            if saved + age > datetime.now():
+                # not old enough to delete
+                return
+        # is old enough, or "saved" not in graph_file
+
+        try:
+            os.remove(file_path)
+        except FileNotFoundError:
+            pass
+
+        # delete graph file
 
     def astar(
         self,
