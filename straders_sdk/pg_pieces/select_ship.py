@@ -82,6 +82,7 @@ def _select_some_ships(db_client: SpaceTradersClient, sql, params):
             ship.mounts = row[37]
             ship.modules = row[38]
             ships[ship.name] = ship
+            ship.mark_clean()
 
         return ships
     except Exception as err:
