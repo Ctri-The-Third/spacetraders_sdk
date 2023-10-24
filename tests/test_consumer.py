@@ -3,24 +3,26 @@ from threading import Event
 import straders_sdk.request_consumer as rc
 import pytest
 
+TEST_HOST = "https://api.spacetraders.io/v2/"
+
 
 def test_u_singleton():
     """test that the singleton is working"""
-    assert rc.RequestConsumer() is rc.RequestConsumer()
+    assert rc.RequestConsumer(TEST_HOST) is rc.RequestConsumer(TEST_HOST)
 
 
 def test_u_queue():
     """test that the queue is working"""
-    consumer = rc.RequestConsumer(auto_start=False)
+    consumer = rc.RequestConsumer(TEST_HOST, auto_start=False)
 
     consumer.queue.put(rc.PackageedRequest(0, None, None))
-    assert not rc.RequestConsumer().queue.empty()
+    assert not consumer.queue.empty()
 
 
 @pytest.mark.execution_timeout(5)
 def test_send_some_requets():
     """test that the queue is working"""
-    consumer = rc.RequestConsumer(auto_start=False)
+    consumer = rc.RequestConsumer(TEST_HOST, auto_start=False)
     request = requests.Request("GET", "https://api.spacetraders.io/v2/")
     prepared_request = request.prepare()
     request_1 = rc.PackageedRequest(2, prepared_request, Event())
