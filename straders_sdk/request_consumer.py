@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from threading import Event, Thread
 from requests import PreparedRequest
+from requests.adapters import HTTPAdapter
+
 from time import sleep
 import requests
 from queue import PriorityQueue
@@ -12,6 +14,15 @@ from queue import PriorityQueue
 instance = None
 
 
+class PackageedRequest:
+    def __init__(self, priority: float, request: PreparedRequest, event: Event):
+        self.priority = priority
+        self.request = request
+        self.response = None
+        self.event = event
+        self.time_added = datetime.now()
+
+
 class RequestConsumer:
     _instance = None
 
@@ -20,13 +31,18 @@ class RequestConsumer:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, auto_start=True) -> None:
+    def __init__(
+        self,
+        hostname: str = None,
+        auto_start: bool = True,
+    ) -> None:
         if hasattr(self, "stop_flag"):
             return
         self.queue = PriorityQueue()
         self.stop_flag = False
-        self._consumer_thread = Thread(target=self._consume_until_stopped)
+        self._consumer_thread = Thread(target=self._consume_until_stopped, daemon=True)
         self._session = requests.Session()
+        self._session.mount(hostname, HTTPAdapter(pool_maxsize=100))
         if auto_start:
             self.start()
         pass
@@ -37,6 +53,9 @@ class RequestConsumer:
     def start(self):
         self.stop_flag = False
         self._consumer_thread.start()
+
+    def put(self, packaged_request: PackageedRequest):
+        self.queue.put((packaged_request.priority, packaged_request))
 
     def _consume_until_stopped(self):
         """this method should be tied to the _consumer_thread"""
@@ -49,6 +68,9 @@ class RequestConsumer:
                 try:
                     print("Doing the thing")
                     package.response = self._session.send(package.request)
+                    if package.response.status_code == 429:
+                        package.event.clear()
+                        self.queue.put((0, tupe))
 
                 except Exception as e:
                     print(e)
@@ -57,12 +79,3 @@ class RequestConsumer:
 
     def validate(self, response: requests.Response):
         pass
-
-
-class PackageedRequest:
-    def __init__(self, priority: float, request: PreparedRequest, event: Event):
-        self.priority = priority
-        self.request = request
-        self.response = None
-        self.event = event
-        self.time_added = datetime.now()
