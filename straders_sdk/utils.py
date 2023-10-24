@@ -12,11 +12,10 @@ import threading
 import copy
 from requests import Session
 from requests_ratelimiter import LimiterSession
+from straders_sdk import request_consumer as rc
 
 st_log_client: "SpaceTradersClient" = None
 ST_LOGGER = logging.getLogger("API-Client")
-SEND_FREQUENCY = 0.33  # 3 requests per second
-SEND_FREQUENCY_VIP = 3  # for every X requests, 1 is a VIP.  to decrease the number of VIP allocations, increase this number.
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 SURVEYOR_SYMBOLS = ["MOUNT_SURVEYOR_I", "MOUNT_SURVEYOR_II", "MOUNT_SURVEYOR_III"]
@@ -49,12 +48,12 @@ class ApiConfig:
 
 
 def get_and_validate_page(
-    url, page_number, params=None, headers=None, session: Session = None
+    url, page_number, params=None, headers=None, priority=5
 ) -> SpaceTradersResponse or None:
     params = params or {}
     params["page"] = page_number
     params["limit"] = 20
-    return get_and_validate(url, params=params, headers=headers, session=session)
+    return get_and_validate(url, params=params, headers=headers, priority=priority)
 
 
 def get_and_validate_paginated(
@@ -63,7 +62,7 @@ def get_and_validate_paginated(
     page_limit: int,
     params=None,
     headers=None,
-    session: Session = None,
+    priority=5,
 ) -> SpaceTradersResponse or None:
     params = params or {}
     params["limit"] = per_page
@@ -71,7 +70,7 @@ def get_and_validate_paginated(
     for i in range(1, page_limit or 1):
         params["page"] = i
         response = get_and_validate(
-            url, params=params, headers=headers, session=session
+            url, params=params, headers=headers, priority=priority
         )
         if response and response.data:
             data.extend(response.data)
@@ -99,6 +98,7 @@ def request_and_validate(
     headers=None,
     params=None,
     session: Session = None,
+    priority=5,
 ) -> SpaceTradersResponse:
     if method == "GET":
         r_method = requests.get if not session else session.get
@@ -113,9 +113,29 @@ def request_and_validate(
     start = datetime.now()
     resp = False
     try:
-        response = r_method(
-            url, data=data, json=json, headers=headers, params=params, timeout=5
+        #
+        # BEGIN NEW CONSUMER METHOD
+        #
+        req = requests.Request(
+            method, url, data=data, json=json, headers=headers, params=params
         )
+        prepared_request = req.prepare()
+        packaged_request = rc.PackageedRequest(
+            priority, prepared_request, threading.Event()
+        )
+        rc.RequestConsumer().put(packaged_request)
+        packaged_request.event.wait(timeout=3600)
+
+        if not packaged_request.response:
+            response = LocalSpaceTradersRespose(
+                "Timed out waiting to send request", 0, 0, url
+            )
+        else:
+            response = RemoteSpaceTradersRespose(packaged_request.response)
+        # DISABLED OLD CODE METHOD - UNCOMMENT IF THE NEW API IS BORKED.
+        # response = r_method(
+        #    url, data=data, json=json, headers=headers, params=params, timeout=5
+        # )
     except (requests.exceptions.ConnectionError, TimeoutError, TypeError) as err:
         logging.error("ConnectionError: %s, %s", url, err)
         return LocalSpaceTradersRespose(
@@ -125,37 +145,41 @@ def request_and_validate(
     except Exception as err:
         logging.error("Error: %s, %s", url, err)
         return LocalSpaceTradersRespose(f"Could not connect!! {err}", 404, 0, url)
-    _log_response(response)
-    if response.status_code == 429:
-        logging.debug("Rate limited")
-        if st_log_client:
-            st_log_client.log_429(url, RemoteSpaceTradersRespose(response))
-        sleep(0.1)
-        return post_and_validate(url, data=data, json=json, headers=headers)
-    else:
-        return RemoteSpaceTradersRespose(response)
+    _log_response(packaged_request.response)
+    return response
 
 
 def get_and_validate(
-    url, params=None, headers=None, pages=None, per_page=None, session: Session = None
+    url,
+    params=None,
+    headers=None,
+    pages=None,
+    per_page=None,
+    priority=5,
 ) -> SpaceTradersResponse or None:
     "wraps the requests.get function to make it easier to use"
 
-    return request_and_validate("GET", url, params=params, headers=headers)
+    return request_and_validate(
+        "GET", url, params=params, headers=headers, priority=priority
+    )
 
 
 def post_and_validate(
-    url, data=None, json=None, headers=None, vip=False, session: Session = None
+    url, data=None, json=None, headers=None, session: Session = None, priority=5
 ) -> SpaceTradersResponse:
     "wraps the requests.post function to make it easier to use"
 
-    return request_and_validate("POST", url, data=data, json=json, headers=headers)
+    return request_and_validate(
+        "POST", url, data=data, json=json, headers=headers, priority=priority
+    )
 
 
 def patch_and_validate(
-    url, data=None, json=None, headers=None, session: Session = None
+    url, data=None, json=None, headers=None, priority=5
 ) -> SpaceTradersResponse:
-    return request_and_validate("PATCH", url, data=data, json=json, headers=headers)
+    return request_and_validate(
+        "PATCH", url, data=data, json=json, headers=headers, priority=priority
+    )
 
 
 def _url(endpoint) -> str:
