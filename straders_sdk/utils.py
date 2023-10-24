@@ -86,82 +86,28 @@ def get_and_validate_paginated(
     return response
 
 
-def get_and_validate(
-    url, params=None, headers=None, pages=None, per_page=None, session: Session = None
-) -> SpaceTradersResponse or None:
-    "wraps the requests.get function to make it easier to use"
-    resp = False
-
-    try:
-        if session:
-            response = session.get(url, params=params, headers=headers, timeout=5)
-        else:
-            response = requests.get(url, params=params, headers=headers, timeout=5)
-    except (
-        requests.exceptions.ConnectionError,
-        TimeoutError,
-        TypeError,
-        TimeoutError,
-        requests.ReadTimeout,
-    ) as err:
-        logging.error("ConnectionError: %s, %s", url, err)
-        return LocalSpaceTradersRespose(
-            "Could not connect!! network issue?", 404, 0, url
-        )
-
-    except Exception as err:
-        logging.error("Error: %s, %s", url, err)
-    _log_response(response)
-    if response.status_code == 429:
-        if st_log_client:
-            st_log_client.log_429(url, RemoteSpaceTradersRespose(response))
-        # logging.warning("Rate limited retrying!")
-        sleep(0.1)
-        return get_and_validate(url, params=params, headers=headers, session=session)
-
-    if response.status_code >= 500 and response.status_code < 600:
-        logging.error("SpaceTraders Server error: %s, %s", url, response.status_code)
-    return RemoteSpaceTradersRespose(response)
-
-
 def rate_limit_check(response: requests.Response):
     if response.status_code != 429:
         return
 
 
-def request_and_validate(
-    method, url, data=None, json=None, headers=None, session: Session = None
-):
+def request_and_validate(method, url, data=None, json=None, headers=None, params=None):
     if method == "GET":
-        return get_and_validate(url, params=data, headers=headers, session=session)
+        r_method = requests.get
     elif method == "POST":
-        return post_and_validate(
-            url, data=data, json=json, headers=headers, session=session
-        )
+        r_method = requests.post
     elif method == "PATCH":
-        return patch_and_validate(
-            url, data=data, json=json, headers=headers, session=session
-        )
+        r_method = requests.patch
+
     else:
         return LocalSpaceTradersRespose("Method %s not supported", 0, 0, url)
-
-
-def post_and_validate(
-    url, data=None, json=None, headers=None, vip=False, session: Session = None
-) -> SpaceTradersResponse:
-    "wraps the requests.post function to make it easier to use"
 
     start = datetime.now()
     resp = False
     try:
-        if session:
-            response = session.post(
-                url, data=data, json=json, headers=headers, timeout=5
-            )
-        else:
-            response = requests.post(
-                url, data=data, json=json, headers=headers, timeout=5
-            )
+        response = r_method(
+            url, data=data, json=json, headers=headers, params=params, timeout=5
+        )
     except (requests.exceptions.ConnectionError, TimeoutError, TypeError) as err:
         logging.error("ConnectionError: %s, %s", url, err)
         return LocalSpaceTradersRespose(
@@ -177,33 +123,31 @@ def post_and_validate(
         if st_log_client:
             st_log_client.log_429(url, RemoteSpaceTradersRespose(response))
         sleep(0.1)
-        return post_and_validate(
-            url, data=data, json=json, headers=headers, session=session
-        )
+        return post_and_validate(url, data=data, json=json, headers=headers)
     else:
         return RemoteSpaceTradersRespose(response)
+
+
+def get_and_validate(
+    url, params=None, headers=None, pages=None, per_page=None, session: Session = None
+) -> SpaceTradersResponse or None:
+    "wraps the requests.get function to make it easier to use"
+
+    return request_and_validate("GET", url, params=params, headers=headers)
+
+
+def post_and_validate(
+    url, data=None, json=None, headers=None, vip=False, session: Session = None
+) -> SpaceTradersResponse:
+    "wraps the requests.post function to make it easier to use"
+
+    return request_and_validate("POST", url, data=data, json=json, headers=headers)
 
 
 def patch_and_validate(
     url, data=None, json=None, headers=None, session: Session = None
 ) -> SpaceTradersResponse:
-    resp = False
-    try:
-        if session:
-            resp = session.patch(url, data=data, json=json, headers=headers, timeout=5)
-        else:
-            resp = requests.patch(url, data=data, json=json, headers=headers, timeout=5)
-    except (requests.exceptions.ConnectionError, TimeoutError) as err:
-        logging.error("ConnectionError: %s, %s", url, err)
-        return None
-    except Exception as err:
-        logging.error("Error: %s, %s", url, err)
-    _log_response(resp)
-    if resp.status_code == 429:
-        logging.warning("Rate limited")
-        return patch_and_validate(url, data=data, json=json, headers=headers)
-    else:
-        return RemoteSpaceTradersRespose(resp)
+    return request_and_validate("PATCH", url, data=data, json=json, headers=headers)
 
 
 def _url(endpoint) -> str:
