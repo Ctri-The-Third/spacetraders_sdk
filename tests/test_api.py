@@ -3,7 +3,7 @@ from straders_sdk.ship import Ship
 from straders_sdk.models import ShipMount
 from straders_sdk.utils import ApiConfig
 
-BASE_URL = "https://stoplight.io/"
+BASE_URL = "https://stoplight.io"
 VERSION = "mocks/spacetraders/spacetraders/96627693"
 TOKEN = "token"
 
@@ -11,6 +11,7 @@ TOKEN = "token"
 def test_ship_survey():
     client = SpaceTradersApiClient("token", BASE_URL, VERSION)
     ship = Ship()
+    ship.name = "test"
     ship.nav.status = "IN_ORBIT"
     ship.mounts.append(
         ShipMount(
@@ -29,6 +30,7 @@ def test_ship_survey():
 def test_ship_mount():
     client = SpaceTradersApiClient("token", BASE_URL, VERSION)
     ship = Ship()
+    ship.name = "test"
 
     resp = client.ship_install_mount(ship, "MINING_LASER_I")
     assert resp
