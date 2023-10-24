@@ -91,13 +91,21 @@ def rate_limit_check(response: requests.Response):
         return
 
 
-def request_and_validate(method, url, data=None, json=None, headers=None, params=None):
+def request_and_validate(
+    method,
+    url,
+    data=None,
+    json=None,
+    headers=None,
+    params=None,
+    session: Session = None,
+) -> SpaceTradersResponse:
     if method == "GET":
-        r_method = requests.get
+        r_method = requests.get if not session else session.get
     elif method == "POST":
-        r_method = requests.post
+        r_method = requests.post if not session else session.post
     elif method == "PATCH":
-        r_method = requests.patch
+        r_method = requests.patch if not session else session.patch
 
     else:
         return LocalSpaceTradersRespose("Method %s not supported", 0, 0, url)
