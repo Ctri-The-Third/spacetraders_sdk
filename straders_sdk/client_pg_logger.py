@@ -61,6 +61,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 user=self.db_user,
                 password=self.db_pass,
             )
+
             self._connection.autocommit = True
             # self.logger.warning("lost connection to DB, restoring")
         return self._connection
@@ -68,7 +69,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
     def log_beginning(
         self, behaviour_name: str, ship_name="GLOBAL", starting_credits=None
     ):
-        self.log_custom_event(
+        self.log_beginorend_event(
             "BEGIN_BEHAVIOUR_SCRIPT", behaviour_name, ship_name, starting_credits
         )
 
@@ -79,11 +80,11 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
     def log_ending(
         self, behaviour_name: str, ship_name="GLOBAL", starting_credits=None
     ):
-        self.log_custom_event(
+        self.log_beginorend_event(
             "END_BEHAVIOUR_SCRIPT", behaviour_name, ship_name, starting_credits
         )
 
-    def log_custom_event(
+    def log_beginorend_event(
         self, event_name, behaviour_name: str, ship_name="GLOBAL", starting_credits=None
     ):
         sql = """INSERT INTO public.logging( event_name, event_timestamp, agent_name, ship_symbol, session_id, endpoint_name, new_credits, status_code, error_code, event_params)
@@ -101,6 +102,27 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 0,
                 0,
                 json.dumps({"script_name": behaviour_name}),
+            ),
+        )
+
+    def log_custom_event(
+        self, event_name, ship_name, event_params={}
+    ) -> SpaceTradersResponse:
+        sql = """INSERT INTO public.logging( event_name, event_timestamp, agent_name, ship_symbol, session_id, endpoint_name, new_credits, status_code, error_code, event_params)
+        values (%s, NOW(), %s, %s, %s, %s, %s, %s, %s, %s) on conflict(ship_symbol, event_timestamp) do nothing;"""
+        return try_execute_upsert(
+            self.connection,
+            sql,
+            (
+                event_name,
+                self.current_agent_name,
+                ship_name,
+                self.session_id,
+                None,
+                None,
+                0,
+                0,
+                json.dumps(event_params),
             ),
         )
 
