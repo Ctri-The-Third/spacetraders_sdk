@@ -1,6 +1,8 @@
 import os
 from straders_sdk.client_postgres import SpaceTradersPostgresClient
 from straders_sdk.utils import try_execute_select
+from straders_sdk.models import Waypoint
+from straders_sdk.models import JumpGate, JumpGateConnection
 
 ST_HOST = os.getenv("ST_DB_HOST")
 ST_NAME = os.getenv("ST_DB_NAME")
@@ -38,3 +40,19 @@ def test_find_waypoints_by_type():
     assert resp
     for wayp in resp:
         assert wayp.type == "ASTEROID_FIELD"
+
+
+def test_get_jumpgates():
+    client = SpaceTradersPostgresClient(
+        ST_HOST, ST_NAME, ST_USER, ST_PASS, TEST_AGENT_NAME, db_port=ST_PORT
+    )
+
+    test_jumpgate = JumpGate(
+        "SECT-SYS-TESTJUMP", ["test_destination1", "test_destination2"]
+    )
+    client.update(test_jumpgate)
+
+    wayp = Waypoint("SECT-SYS", "SECT-SYS-TESTJUMP", "JUMP_GATE", 5, 5, [], [], {}, {})
+    jump = client.system_jumpgate(wayp)
+    assert jump.waypoint_symbol == "SECT-SYS-TESTJUMP"
+    assert jump.connected_waypoints == ["test_destination1", "test_destination2"]

@@ -364,22 +364,16 @@ class JumpGate:
     def __init__(
         self,
         waypoint_symbol: str,
-        jump_range: int,
-        connected_waypoints: list["JumpGateConnection"],
-        faction_symbol: str = "",
+        connected_waypoints: list["str"],
     ) -> None:
         self.waypoint_symbol = waypoint_symbol
-        self.jump_range = jump_range
-        self.faction_symbol = faction_symbol
         self.connected_waypoints = connected_waypoints
 
     @classmethod
-    def from_json(cls, json_data: dict):
+    def from_json(cls, waypoint_symbol, json_data: dict):
         return cls(
-            "",
-            json_data["jumpRange"],
-            [JumpGateConnection.from_json(wp) for wp in json_data["connectedSystems"]],
-            json_data.get("factionSymbol", ""),
+            waypoint_symbol,
+            [wp for wp in json_data["connections"]],
         )
 
 

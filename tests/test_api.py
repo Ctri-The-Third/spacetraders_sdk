@@ -40,3 +40,11 @@ def test_ship_unmount():
 
     resp = client.ship_remove_mount(ship, "MINING_LASER_I")
     assert resp
+
+
+def test_ship_jumpgate():
+    client = SpaceTradersApiClient("token", BASE_URL, VERSION)
+
+    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    resp = client.system_jumpgate(wp)
+    assert resp

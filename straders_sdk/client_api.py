@@ -462,7 +462,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
         url = _url(f"systems/{wp.system_symbol}/waypoints/{wp.symbol}/jump-gate")
         resp = get_and_validate(url, headers=self._headers(), session=self.session)
         if resp:
-            gate = JumpGate.from_json(resp.data)
+            gate = JumpGate.from_json(wp.symbol, resp.data)
             gate.waypoint_symbol = wp.symbol
             return gate
         return resp
