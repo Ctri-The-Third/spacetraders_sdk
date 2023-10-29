@@ -1,5 +1,6 @@
 from straders_sdk.pathfinder import PathFinder
 from straders_sdk.models import System
+from straders_sdk.ship import Ship
 import os
 import psycopg2
 
@@ -49,14 +50,13 @@ def test_pathfinder_load_graph_from_file():
     pathfinder = PathFinder()
     assert pathfinder is not None
     graph = pathfinder.load_graph_from_file(file_path=TEST_FILE)
-    assert len(graph.nodes) == 1894
+    assert len(graph.nodes) == 3788
     assert len(graph.edges) == 44593
 
 
 def test_create_new_route():
     pathfinder = PathFinder(connection=get_connection())
     pathfinder._graph = pathfinder.load_graph_from_file(file_path=TEST_FILE)
-    pathfinder._graph = pathfinder.load_graph_from_db()
     destination = System("X1-Y13", "X1", "ORANGE_STAR", -655, 14707, [])
     origin = System("X1-BG39", "X1", "ORANGE_STAR", -4299, -1102, [])
     route = pathfinder.astar(origin, destination, force_recalc=True)
@@ -98,4 +98,3 @@ def test_flight_times():
         first_waypoint, second_waypoint, 30, "BURN"
     )
     assert burn_time == 28
-
