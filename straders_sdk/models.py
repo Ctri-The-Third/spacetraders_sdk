@@ -552,10 +552,26 @@ class GameStatus:
 class MarketTradeGoodListing:
     symbol: str
     trade_volume: int
+    type: str  # EXPORT, IMPORT, or EXCHANGE
     supply: str
-    purchase: int
+
+    purchase_price: int
     sell_price: int
     recorded_ts: datetime = datetime.now()
+    activity: str = None
+
+    @classmethod
+    def from_json(cls, json_data: dict):
+        return cls(
+            json_data.get("symbol", None),
+            json_data.get("tradeVolume", None),
+            json_data.get("type", None),
+            json_data.get("supply", None),
+            json_data.get("purchasePrice", None),
+            json_data.get("sellPrice", None),
+            datetime.now(),
+            json_data.get("activity", None),
+        )
 
 
 @dataclass
@@ -580,11 +596,9 @@ class Market:
         exchange = [MarketTradeGood(**listing) for listing in json_data["exchange"]]
         listings = []
         if "tradeGoods" in json_data:
-            for listing in json_data["tradeGoods"]:
-                mtgl = MarketTradeGoodListing(*listing.values())
-                listings.append(mtgl)
-        else:
-            listings = []
+            listings = [
+                MarketTradeGoodListing.from_json(l) for l in json_data["tradeGoods"]
+            ]
         return cls(json_data["symbol"], exports, imports, exchange, listings)
 
     def is_stale(self, age: int = 60):

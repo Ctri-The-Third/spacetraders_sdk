@@ -81,26 +81,28 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
     def _headers(self) -> dict:
         return {}
 
-    def update(self, update_obj):
+    def update(self, update_obj) -> SpaceTradersResponse:
         "Accepts objects and stores them in the DB"
         if isinstance(update_obj, JumpGate):
-            _upsert_jump_gate(self.connection, update_obj)
+            return _upsert_jump_gate(self.connection, update_obj)
         if isinstance(update_obj, Survey):
-            _upsert_survey(self.connection, update_obj)
+            return _upsert_survey(self.connection, update_obj)
         if isinstance(update_obj, Waypoint):
-            _upsert_waypoint(self.connection, update_obj)
+            return _upsert_waypoint(self.connection, update_obj)
         if isinstance(update_obj, Shipyard):
-            _upsert_shipyard(self.connection, update_obj)
+            return _upsert_shipyard(self.connection, update_obj)
         if isinstance(update_obj, Market):
-            _upsert_market(self.connection, update_obj)
+            return _upsert_market(self.connection, update_obj)
         if isinstance(update_obj, Ship):
-            _upsert_ship(self.connection, update_obj)
+            return _upsert_ship(self.connection, update_obj)
         if isinstance(update_obj, System):
-            _upsert_system(self.connection, update_obj)
+            return _upsert_system(self.connection, update_obj)
         if isinstance(update_obj, Agent):
-            _upsert_agent(self.connection, update_obj)
+            return _upsert_agent(self.connection, update_obj)
         if isinstance(update_obj, Contract):
-            _upsert_contract(self.connection, self.current_agent_symbol, update_obj)
+            return _upsert_contract(
+                self.connection, self.current_agent_symbol, update_obj
+            )
 
     def register(self, callsign, faction="COSMIC", email=None) -> SpaceTradersResponse:
         return dummy_response(__class__.__name__, "register")
@@ -507,7 +509,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             exports = [MarketTradeGood(*row) for row in rows if row[2] == "sell"]
             exchanges = [MarketTradeGood(*row) for row in rows if row[2] == "exchange"]
 
-            listings_sql = """select trade_symbol, market_depth , supply, purchase_price, sell_price, last_updated
+            listings_sql = """select trade_symbol, market_depth , supply, purchase_price, sell_price, last_updated, type, activity
                             from market_tradegood_listings mtl
                             where market_symbol = %s"""
             rows = try_execute_select(self.connection, listings_sql, (wp.symbol,))
@@ -515,7 +517,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             return Market(wp.symbol, imports, exports, exchanges, listings)
         except Exception as err:
             return LocalSpaceTradersRespose(
-                "Could not find market data for that waypoint", 0, 0, sql
+                f"Could not find market data for that waypoint - {err}", 0, 0, sql
             )
 
     def system_jumpgate(self, wp: Waypoint) -> JumpGate or SpaceTradersResponse:

@@ -123,7 +123,7 @@ def request_and_validate(method, url, data=None, json=None, headers=None, params
         if st_log_client:
             st_log_client.log_429(url, RemoteSpaceTradersRespose(response))
         sleep(0.1)
-        return post_and_validate(url, data=data, json=json, headers=headers)
+        return request_and_validate(method, url, data, json, headers, params)
     else:
         return RemoteSpaceTradersRespose(response)
 

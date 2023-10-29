@@ -48,3 +48,11 @@ def test_ship_jumpgate():
     wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
     resp = client.system_jumpgate(wp)
     assert resp
+
+
+def test_market():
+    client = SpaceTradersApiClient("token", BASE_URL, VERSION)
+
+    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    resp = client.system_market(wp)
+    assert resp

@@ -111,6 +111,154 @@ def ship_module_json_data():
     }
 
 
+@pytest.fixture
+def market_response_data():
+    return {
+        "symbol": "X1-QV47-A1",
+        "imports": [
+            {
+                "symbol": "FOOD",
+                "name": "Galactic Cuisine",
+                "description": "A diverse range of foods from different planets, including fresh produce, meats, and prepared meals.",
+            },
+            {
+                "symbol": "JEWELRY",
+                "name": "Jewelry",
+                "description": "Exquisite and valuable pieces of jewelry made from rare materials and precious gems.",
+            },
+            {
+                "symbol": "MEDICINE",
+                "name": "Medicine",
+                "description": "Medical products, including drugs, treatments, and medical equipment.",
+            },
+            {
+                "symbol": "CLOTHING",
+                "name": "Clothing",
+                "description": "A wide range of clothing and fashion items, including garments, accessories, and textiles.",
+            },
+            {
+                "symbol": "EQUIPMENT",
+                "name": "Equipment",
+                "description": "Tools and equipment used in various industries and applications.",
+            },
+            {
+                "symbol": "MOOD_REGULATORS",
+                "name": "Mood Regulators",
+                "description": "Drugs or other medical treatments that are used to control or regulate mood and emotions.",
+            },
+        ],
+        "exports": [
+            {
+                "symbol": "GENE_THERAPEUTICS",
+                "name": "Gene Therapeutics",
+                "description": "Medical treatments that use genetic engineering to treat or prevent diseases, or to enhance the human body.",
+            },
+            {
+                "symbol": "MACHINERY",
+                "name": "Machinery",
+                "description": "A variety of mechanical devices and equipment, used for industrial, construction, and other practical purposes.",
+            },
+        ],
+        "exchange": [
+            {
+                "symbol": "FUEL",
+                "name": "Fuel",
+                "description": "High-energy fuel used in spacecraft propulsion systems to enable long-distance space travel.",
+            }
+        ],
+        "transactions": [],
+        "tradeGoods": [
+            {
+                "symbol": "FOOD",
+                "tradeVolume": 1000,
+                "type": "IMPORT",
+                "supply": "MODERATE",
+                "activity": "WEAK",
+                "purchasePrice": 534,
+                "sellPrice": 262,
+            },
+            {
+                "symbol": "JEWELRY",
+                "tradeVolume": 1000,
+                "type": "IMPORT",
+                "supply": "LIMITED",
+                "activity": "WEAK",
+                "purchasePrice": 1310,
+                "sellPrice": 646,
+            },
+            {
+                "symbol": "MEDICINE",
+                "tradeVolume": 1000,
+                "type": "IMPORT",
+                "supply": "SCARCE",
+                "activity": "WEAK",
+                "purchasePrice": 1250,
+                "sellPrice": 620,
+            },
+            {
+                "symbol": "CLOTHING",
+                "tradeVolume": 1000,
+                "type": "IMPORT",
+                "supply": "SCARCE",
+                "activity": "WEAK",
+                "purchasePrice": 646,
+                "sellPrice": 320,
+            },
+            {
+                "symbol": "EQUIPMENT",
+                "tradeVolume": 1000,
+                "type": "IMPORT",
+                "supply": "LIMITED",
+                "activity": "WEAK",
+                "purchasePrice": 1106,
+                "sellPrice": 548,
+            },
+            {
+                "symbol": "MOOD_REGULATORS",
+                "tradeVolume": 100,
+                "type": "IMPORT",
+                "supply": "LIMITED",
+                "activity": "WEAK",
+                "purchasePrice": 4810,
+                "sellPrice": 2360,
+            },
+            {
+                "symbol": "GENE_THERAPEUTICS",
+                "tradeVolume": 100,
+                "type": "EXPORT",
+                "supply": "ABUNDANT",
+                "activity": "WEAK",
+                "purchasePrice": 2452,
+                "sellPrice": 1174,
+            },
+            {
+                "symbol": "FUEL",
+                "tradeVolume": 10,
+                "type": "EXCHANGE",
+                "supply": "ABUNDANT",
+                "purchasePrice": 76,
+                "sellPrice": 34,
+            },
+            {
+                "symbol": "MACHINERY",
+                "tradeVolume": 10,
+                "type": "EXPORT",
+                "supply": "HIGH",
+                "activity": "WEAK",
+                "purchasePrice": 364,
+                "sellPrice": 168,
+            },
+        ],
+    }
+
+
+def test_market(market_response_data):
+    import straders_sdk.models as models
+
+    market = models.Market.from_json(market_response_data)
+    assert market is not None
+
+
 def test_ship_module_init(ship_module_json_data):
     module = ShipModule(ship_module_json_data)
     assert module.symbol == "S1"
