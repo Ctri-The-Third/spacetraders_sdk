@@ -39,8 +39,8 @@ class PathFinder:
         self.graph.add_edge(system1.symbol, system2.symbol, weight=1)
         pass
 
-    def get_distance_between(self, system1: System, system2: System) -> int:
-        return math.sqrt((system1.x - system2.x) ** 2 + (system1.y - system2.y) ** 2)
+    def calc_distance_between(self, system1: System, system2: System) -> int:
+        return calc_distance_between(system1, system2)
 
     def h(self, start: System, goal: System):
         return ((start.x - goal.x) ** 2 + (start.y - goal.y) ** 2) ** 0.5
@@ -86,7 +86,7 @@ class PathFinder:
         speeds = {"CRUISE": 1, "DRIFT": 0, "BURN": 2, "STEALTH": 1}
         return int(
             max(
-                self.get_distance_between(source_wp, target_wp) * speeds[flight_mode],
+                self.calc_distance_between(source_wp, target_wp) * speeds[flight_mode],
                 1,
             )
         )
@@ -288,12 +288,12 @@ class PathFinder:
 def compile_route(
     start_system: System, end_system: System, route: list[System]
 ) -> JumpGateRoute:
-    distance = calculate_distance(start_system, end_system)
+    distance = calc_distance_between(start_system, end_system)
     cooldown = 0
     last_system = start_system
     for system in route[:-1]:
         print(f"last system: {last_system.symbol} to {system.symbol}")
-        cooldown += calculate_distance(last_system, system) / 10
+        cooldown += calc_distance_between(last_system, system) / 10
         last_system = system
     route = JumpGateRoute(
         start_system,
@@ -307,5 +307,5 @@ def compile_route(
     return route
 
 
-def calculate_distance(src: System, dest: System):
+def calc_distance_between(src: System, dest: System):
     return math.sqrt((src.x - dest.x) ** 2 + (src.y - dest.y) ** 2)
