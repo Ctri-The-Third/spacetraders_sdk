@@ -80,6 +80,17 @@ class PathFinder:
             )
         return None
 
+    def determine_fuel_cost(
+        self, source_wp: "Waypoint", target_wp: "Waypoint", flight_mode="CRUISE"
+    ) -> int:
+        speeds = {"CRUISE": 1, "DRIFT": 0, "BURN": 2, "STEALTH": 1}
+        return int(
+            max(
+                self.get_distance_between(source_wp, target_wp) * speeds[flight_mode],
+                1,
+            )
+        )
+
     def calc_travel_time_between_wps(
         self,
         source_wp: "Waypoint",
