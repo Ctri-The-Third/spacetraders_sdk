@@ -80,6 +80,21 @@ class PathFinder:
             )
         return None
 
+    def calc_travel_time_between_wps(
+        self,
+        source_wp: "Waypoint",
+        target_wp: "Waypoint",
+        speed=30,
+        flight_mode="CRUISE",
+    ) -> int:
+        distance = math.sqrt(
+            (target_wp.x - source_wp.x) ** 2 + (target_wp.y - source_wp.y) ** 2
+        )
+        multiplier = {"CRUISE": 15, "DRIFT": 150, "BURN": 7.5, "STEALTH": 30}
+        return round(
+            math.floor(round(max(1, distance))) * (multiplier[flight_mode] / speed) + 15
+        )
+
     def load_graph_from_db(self):
         graph = Graph()
         sql = """

@@ -63,3 +63,39 @@ def test_create_new_route():
     assert route is not None
     cached_route = pathfinder.astar(origin, destination, force_recalc=False)
     assert cached_route is not None
+
+
+def test_distance_calc():
+    pathfinder = PathFinder(connection=get_connection())
+    ship = Ship()
+
+    first_waypoint = System("test", "test,", "test", 0, 0, [])
+    second_waypoint = System("test", "test,", "test", 5, 5, [])
+
+    distance = pathfinder.calc_distance_between(first_waypoint, second_waypoint)
+    assert distance == 7.0710678118654755
+
+    pass
+
+
+def test_flight_times():
+    pathfinder = PathFinder(connection=get_connection())
+
+    first_waypoint = System("test", "test,", "test", -167, 301, [])
+    second_waypoint = System("test", "test,", "test", -126, 331, [])
+
+    cruise_time = pathfinder.calc_travel_time_between_wps(
+        first_waypoint, second_waypoint, 30, "CRUISE"
+    )
+    assert cruise_time == 40
+
+    drift_time = pathfinder.calc_travel_time_between_wps(
+        first_waypoint, second_waypoint, 30, "DRIFT"
+    )
+    assert drift_time == 270
+
+    burn_time = pathfinder.calc_travel_time_between_wps(
+        first_waypoint, second_waypoint, 30, "BURN"
+    )
+    assert burn_time == 28
+
