@@ -159,10 +159,6 @@ def _upsert_ship_frame(connection, ship: Ship):
 
 
 def _upsert_ship_cooldown(connection, ship: Ship):
-    if ship.seconds_until_cooldown == 0:
-        return LocalSpaceTradersRespose(
-            None, None, None, url=f"{__name__}._upsert_ship_cooldown"
-        )
     sql = """insert into ship_cooldowns  (ship_symbol, total_seconds, expiration)
     values (%s, %s, %s) ON CONFLICT (ship_symbol, expiration) DO NOTHING;"""
     values = (ship.name, ship._cooldown_length, ship._cooldown_expiration)
