@@ -509,7 +509,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             exports = [MarketTradeGood(*row) for row in rows if row[2] == "sell"]
             exchanges = [MarketTradeGood(*row) for row in rows if row[2] == "exchange"]
 
-            listings_sql = """select trade_symbol, market_depth , supply, purchase_price, sell_price, last_updated, type, activity
+            listings_sql = """select trade_symbol, market_depth , type,  supply, purchase_price, sell_price, last_updated, activity
                             from market_tradegood_listings mtl
                             where market_symbol = %s"""
             rows = try_execute_select(self.connection, listings_sql, (wp.symbol,))
