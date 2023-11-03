@@ -480,8 +480,14 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         self, ship: "Ship", symbol: str, quantity, response=None, duration: float = None
     ) -> SpaceTradersResponse:
         url = _url(f"my/ships/:ship_name/purchase")
+        event_params = {"trade_symbol": symbol, "units": quantity}
         self.log_event(
-            "ship_purchase_cargo", ship.name, url, response, duration_seconds=duration
+            "ship_purchase_cargo",
+            ship.name,
+            url,
+            response,
+            duration_seconds=duration,
+            event_params=event_params,
         )
         self.update(response)
 
