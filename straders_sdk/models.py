@@ -610,3 +610,10 @@ class Market:
             if listing.recorded_ts < target_time:
                 return True
         return False
+
+    def get_tradegood(self, symbol) -> MarketTradeGoodListing:
+        for listing in self.listings:
+            if listing.symbol == symbol:
+                return listing
+
+        return None
