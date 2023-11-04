@@ -290,6 +290,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 self.update(c)
             self.contracts = self.contracts | {c.id: c for c in resp}
             return resp
+        return []
 
     def contract_accept(self, contract_id) -> Contract or SpaceTradersResponse:
         """accept a contract
