@@ -163,8 +163,10 @@ class PathFinder:
 
     def clear_graph(self, file_path="resources/graph.json", age=timedelta(days=1)):
         self._graph = None
-
-        graph_file = json.loads(open(file_path, "r").read())
+        try:
+            graph_file = json.loads(open(file_path, "r").read())
+        except FileNotFoundError:
+            return
         if "saved" in graph_file:
             saved = datetime.fromisoformat(graph_file["saved"])
             if saved + age > datetime.now():
