@@ -6,7 +6,7 @@ from .models import ShipRequirements, ShipNav
 from .client_interface import SpaceTradersInteractive
 import logging
 from .utils import parse_timestamp
-from .utils import SURVEYOR_SYMBOLS, MINING_SYMBOLS, SIPHON_SYMBOLS
+from .constants import SURVEYOR_SYMBOLS, MINING_SYMBOLS, SIPHON_SYMBOLS
 import re
 
 
