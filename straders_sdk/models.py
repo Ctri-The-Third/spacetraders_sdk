@@ -359,6 +359,36 @@ class Waypoint(SymbolClass):
             return self.symbol == o.symbol
         return False
 
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, Waypoint):
+            return self.symbol == o.symbol
+        return False
+
+    def __lt__(self, o: object) -> bool:
+        if isinstance(o, Waypoint):
+            return self.symbol < o.symbol
+        return False
+
+    def __le__(self, o: object) -> bool:
+        if isinstance(o, Waypoint):
+            return self.symbol <= o.symbol
+        return False
+
+    def __gt__(self, o: object) -> bool:
+        if isinstance(o, Waypoint):
+            return self.symbol > o.symbol
+        return False
+
+    def __ge__(self, o: object) -> bool:
+        if isinstance(o, Waypoint):
+            return self.symbol >= o.symbol
+        return False
+
+    def __ne__(self, o: object) -> bool:
+        if isinstance(o, Waypoint):
+            return self.symbol != o.symbol
+        return False
+
 
 class JumpGate:
     def __init__(
@@ -418,6 +448,31 @@ class System(SymbolClass):
     def __eq__(self, o: object) -> bool:
         if isinstance(o, System):
             return self.symbol == o.symbol
+        return False
+
+    def __lt__(self, o: object) -> bool:
+        if isinstance(o, System):
+            return self.symbol < o.symbol
+        return False
+
+    def __le__(self, o: object) -> bool:
+        if isinstance(o, System):
+            return self.symbol <= o.symbol
+        return False
+
+    def __gt__(self, o: object) -> bool:
+        if isinstance(o, System):
+            return self.symbol > o.symbol
+        return False
+
+    def __ge__(self, o: object) -> bool:
+        if isinstance(o, System):
+            return self.symbol >= o.symbol
+        return False
+
+    def __ne__(self, o: object) -> bool:
+        if isinstance(o, System):
+            return self.symbol != o.symbol
         return False
 
 
