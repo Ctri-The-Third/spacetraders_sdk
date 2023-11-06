@@ -426,6 +426,11 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
     def ship_negotiate(self, ship: "Ship") -> "Contract" or SpaceTradersResponse:
         return dummy_response(__class__.__name__, "ship_negotiate")
 
+    def ship_siphon(self, ship: "Ship") -> SpaceTradersResponse:
+        """/my/ships/{shipSymbol}/siphon"""
+        return dummy_response(__class__.__name__, "ship_siphon")
+        pass
+
     def ship_extract(self, ship: "Ship", survey: Survey = None) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/extract"""
 

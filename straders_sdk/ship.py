@@ -6,7 +6,7 @@ from .models import ShipRequirements, ShipNav
 from .client_interface import SpaceTradersInteractive
 import logging
 from .utils import parse_timestamp
-from .utils import SURVEYOR_SYMBOLS, MINING_SYMBOLS
+from .utils import SURVEYOR_SYMBOLS, MINING_SYMBOLS, SIPHON_SYMBOLS
 import re
 
 
@@ -127,6 +127,13 @@ class Ship(SpaceTradersInteractive):
             if extractor in [d.symbol for d in self.mounts]:
                 return True
         return False
+
+    @property
+    def can_siphon(self) -> bool:
+        siphons = SIPHON_SYMBOLS
+        for siphon in siphons:
+            if siphon in [d.symbol for d in self.mounts]:
+                return True
 
     @property
     def can_refine(self) -> bool:

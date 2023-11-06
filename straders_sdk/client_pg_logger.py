@@ -389,6 +389,28 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
 
         pass
 
+    def ship_siphon(self, ship: "Ship", response=None, duration: float = None):
+        url = _url(f"my/ships/:ship_name/siphon")
+        siphon = response.data.get("siphon", {})
+        siphon_yield = siphon.get("yield", {})
+        event_params = None
+        if siphon_yield.get("symbol"):
+            event_params = {
+                "trade_symbol": siphon_yield.get("symbol"),
+                "units": siphon_yield["units"],
+            }
+            _upsert_extraction(
+                self.connection, siphon, self.session_id, ship.nav.waypoint_symbol, None
+            )
+        self.log_event(
+            "ship_siphon",
+            ship.name,
+            url,
+            response,
+            duration_seconds=duration,
+            event_params=event_params,
+        )
+
     def ship_extract(
         self, ship: "Ship", survey: Survey = None, response=None, duration: float = None
     ) -> SpaceTradersResponse:

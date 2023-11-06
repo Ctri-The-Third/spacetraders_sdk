@@ -1,5 +1,5 @@
 from straders_sdk.pathfinder import PathFinder
-from straders_sdk.models import System
+from straders_sdk.models import System, Waypoint
 from straders_sdk.ship import Ship
 import os
 import psycopg2
@@ -40,23 +40,45 @@ def test_pathfinder_load_from_db():
     assert len(pathfinder.graph.edges) > 0
 
 
+def test_pathfinder_system_from_db():
+    pathfinder = PathFinder(connection=get_connection())
+    assert pathfinder is not None
+    test_graph = pathfinder.load_system_graph_from_db("X1-U49")
+    assert test_graph
+    assert len(test_graph.nodes) > 0
+    assert len(test_graph.edges) > 0
+
+
+def test_plot_system_nav():
+    pathfinder = PathFinder(connection=get_connection())
+    assert pathfinder is not None
+    source = Waypoint(
+        "X1-U49", "X1-U49-B6", "ORANGE_STAR", -57, 342, [], [], None, None
+    )
+    destination = Waypoint(
+        "X1-U49", "X1-U49-FA4A", "ORANGE_STAR", -25, -7, [], [], None, None
+    )
+    return_route = pathfinder.plot_system_nav("X1-U49", source, destination, 400)
+    assert return_route is not None
+
+
 def test_pathfinder_save_graph():
     pathfinder = PathFinder(connection=get_connection())
-    pathfinder._graph = pathfinder.load_graph_from_db()
+    pathfinder._graph = pathfinder.load_jump_graph_from_db()
     pathfinder.save_graph()
 
 
 def test_pathfinder_load_graph_from_file():
     pathfinder = PathFinder()
     assert pathfinder is not None
-    graph = pathfinder.load_graph_from_file(file_path=TEST_FILE)
+    graph = pathfinder.load_jump_graph_from_file(file_path=TEST_FILE)
     assert len(graph.nodes) == 3788
     assert len(graph.edges) == 44593
 
 
 def test_create_new_route():
     pathfinder = PathFinder(connection=get_connection())
-    pathfinder._graph = pathfinder.load_graph_from_file(file_path=TEST_FILE)
+    pathfinder._graph = pathfinder.load_jump_graph_from_file(file_path=TEST_FILE)
     destination = System("X1-Y13", "X1", "ORANGE_STAR", -655, 14707, [])
     origin = System("X1-BG39", "X1", "ORANGE_STAR", -4299, -1102, [])
     route = pathfinder.astar(origin, destination, force_recalc=True)

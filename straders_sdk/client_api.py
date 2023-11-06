@@ -185,6 +185,22 @@ class SpaceTradersApiClient(SpaceTradersClient):
             resp = Contract.from_json(resp.data.get("contract"))
         return resp
 
+    def ship_siphon(self, ship: "Ship") -> SpaceTradersResponse:
+        """/my/ships/{shipSymbol}/siphon"""
+
+        url = f"my/ships/{ship.name}/siphon"
+
+        if not ship.can_siphon:
+            return LocalSpaceTradersRespose("Ship cannot siphon", 0, 0, url=url)
+        if ship.seconds_until_cooldown > 0:
+            return LocalSpaceTradersRespose("Ship still on cooldown", 0, 4200, url=url)
+
+        resp = post_and_validate(url=url, headers=self._headers(), session=self.session)
+        if resp:
+            self.update(resp.data)
+            ship.update(resp.data)
+        return resp
+
     def ship_extract(self, ship: Ship, survey: Survey = None) -> SpaceTradersResponse:
         "/my/ships/{shipSymbol}/extract"
 

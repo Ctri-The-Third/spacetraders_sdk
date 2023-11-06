@@ -845,6 +845,25 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.update(resp)
         return resp
 
+    def ship_siphon(self, ship: "Ship") -> SpaceTradersResponse:
+        start = datetime.now()
+        resp = self.api_client.ship_siphon(ship)
+        self.logging_client.ship_siphon(
+            ship, resp, (datetime.now() - start).total_seconds()
+        )
+
+        if resp.data is not None:
+            ship.update(resp.data)
+            self.update(ship)
+
+        if not resp:
+            self.logger.error(
+                "status_code = %s, error_code = %s,  error = %s",
+                resp.status_code,
+                resp.error_code,
+                resp.error,
+            )
+
     def ship_extract(self, ship: "Ship", survey: Survey = None) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/extract"""
         # 4228 / 400 - MAXIMUM CARGO, should not extract

@@ -88,6 +88,10 @@ class SpaceTradersStubClient:
 
         pass
 
+    def ship_siphon(self, ship: "Ship") -> SpaceTradersResponse:
+        """/my/ships/{shipSymbol}/siphon"""
+        pass
+
     def ship_extract(self, ship: "Ship", survey: Survey = None) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/extract"""
 

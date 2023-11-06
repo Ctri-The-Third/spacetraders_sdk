@@ -34,6 +34,8 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
 
             """
     if ship.dirty or ship.fuel_dirty or ship.cargo_dirty:
+        modules = [m if isinstance(m, str) else m.symbol for m in ship.modules]
+        mounts = [m if isinstance(m, str) else m.symbol for m in ship.mounts]
         resp = try_execute_upsert(
             connection,
             sql,
@@ -46,8 +48,8 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
                 ship.cargo_units_used,
                 ship.fuel_capacity,
                 ship.fuel_current,
-                [m.symbol for m in ship.mounts],
-                [m.symbol for m in ship.modules],
+                mounts,
+                modules,
             ),
         )
         if not resp:

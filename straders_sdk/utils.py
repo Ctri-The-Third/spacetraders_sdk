@@ -25,6 +25,7 @@ MINING_SYMBOLS = [
     "MOUNT_MINING_LASER_II",
     "MOUNT_MINING_LASER_III",
 ]
+SIPHON_SYMBOLS = ["MOUNT_GAS_SIPHON_I", "MOUNT_GAS_SIPHON_II", "MOUNT_GAS_SIPHON_III"]
 ERRROR_COOLDOWN = 4000
 from .responses import RemoteSpaceTradersRespose, SpaceTradersResponse
 

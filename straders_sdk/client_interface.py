@@ -148,6 +148,10 @@ class SpaceTradersClient(Protocol):
         pass
 
     @abstractmethod
+    def ship_siphon(self, ship: "Ship") -> SpaceTradersResponse:
+        """/my/ships/{shipSymbol}/siphon"""
+
+    @abstractmethod
     def ship_extract(self, ship: "Ship", survey: Survey = None) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/extract"""
 
