@@ -155,6 +155,13 @@ class Ship(SpaceTradersInteractive):
         return strength
 
     @property
+    def siphon_strength(self) -> int:
+        strength = 0
+        for mount in self.mounts:
+            if mount.symbol in SIPHON_SYMBOLS:
+                strength += mount.strength
+
+    @property
     def survey_strength(self) -> int:
         strength = 0
         for mount in self.mounts:
