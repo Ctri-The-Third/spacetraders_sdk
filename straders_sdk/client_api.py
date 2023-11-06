@@ -188,7 +188,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def ship_siphon(self, ship: "Ship") -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/siphon"""
 
-        url = f"my/ships/{ship.name}/siphon"
+        url = _url(f"my/ships/{ship.name}/siphon")
 
         if not ship.can_siphon:
             return LocalSpaceTradersRespose("Ship cannot siphon", 0, 0, url=url)
