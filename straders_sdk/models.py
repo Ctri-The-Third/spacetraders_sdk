@@ -359,11 +359,6 @@ class Waypoint(SymbolClass):
             return self.symbol == o.symbol
         return False
 
-    def __eq__(self, o: object) -> bool:
-        if isinstance(o, Waypoint):
-            return self.symbol == o.symbol
-        return False
-
     def __lt__(self, o: object) -> bool:
         if isinstance(o, Waypoint):
             return self.symbol < o.symbol
