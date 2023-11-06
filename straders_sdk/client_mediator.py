@@ -863,6 +863,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 resp.error_code,
                 resp.error,
             )
+        return resp
 
     def ship_extract(self, ship: "Ship", survey: Survey = None) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/extract"""

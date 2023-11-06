@@ -615,5 +615,14 @@ class Market:
         for listing in self.listings:
             if listing.symbol == symbol:
                 return listing
+        for listing in self.exports:
+            if listing.symbol == symbol:
+                return listing
+        for listing in self.imports:
+            if listing.symbol == symbol:
+                return listing
+        for listing in self.exchange:
+            if listing.symbol == symbol:
+                return listing
 
         return None
