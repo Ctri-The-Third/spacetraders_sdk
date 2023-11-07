@@ -98,26 +98,6 @@ class PathFinder:
             )
         )
 
-    def calc_travel_time_between_wps(
-        self,
-        source_wp: "Waypoint",
-        target_wp: "Waypoint",
-        speed=30,
-        flight_mode="CRUISE",
-        warp=False,
-    ) -> int:
-        "determines the travel time between two systems or waypoints."
-
-        distance = self.calc_distance_between(source_wp, target_wp)
-        if warp:
-            multiplier = {"CRUISE": 50, "DRIFT": 500, "BURN": 15, "STEALTH": 60}
-        else:
-            multiplier = {"CRUISE": 25, "DRIFT": 250, "BURN": 7.5, "STEALTH": 30}
-
-        return round(
-            math.floor(round(max(1, distance))) * (multiplier[flight_mode] / speed) + 15
-        )
-
     def load_jump_graph_from_db(self):
         graph = Graph()
         sql = """
@@ -193,7 +173,7 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
                         nodes[r[0]],
                         nodes[r[1]],
                         {
-                            "weight": self._calc_travel_time_between_wps(
+                            "weight": _calc_travel_time_between_wps(
                                 nodes[r[0]], nodes[r[1]], fuel_capacity=fuel_capacity
                             )
                         },
@@ -436,16 +416,78 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
         reversed_final_route.save_to_file(self.target_folder)
         return None
 
-    def _calc_travel_time_between_wps(
+    def calc_travel_time_between_wps(
+        self,
+        source_wp: "Waypoint",
+        target_wp: "Waypoint",
+        speed=30,
+        flight_mode="CRUISE",
+        warp=False,
+    ) -> int:
+        return calc_travel_time_between_wps(
+            source_wp, target_wp, speed, flight_mode, warp
+        )
+
+    def calc_travel_time_between_wps_with_fuel(
         self, start: Waypoint, end: Waypoint, speed=30, warp=False, fuel_capacity=400
     ) -> float:
-        "determines the travel time between two systems or waypoints, swapping flight mode if it exceeds a fuel capacity"
+        return _calc_travel_time_between_wps(start, end, speed, warp, fuel_capacity)
 
-        distance = calc_distance_between(start, end)
-        if distance >= fuel_capacity:
-            return self.calc_travel_time_between_wps(start, end, speed, "DRIFT", warp)
-        else:
-            return self.calc_travel_time_between_wps(start, end, speed, "CRUISE", warp)
+
+def _calc_travel_time_between_wps(
+    start: Waypoint, end: Waypoint, speed=30, warp=False, fuel_capacity=400
+) -> float:
+    "determines the travel time between two systems or waypoints, swapping flight mode if it exceeds a fuel capacity"
+
+    distance = calc_distance_between(start, end)
+    if distance >= fuel_capacity:
+        return calc_travel_time_between_wps(start, end, speed, "DRIFT", warp)
+    else:
+        return calc_travel_time_between_wps(start, end, speed, "CRUISE", warp)
+
+
+def calc_travel_time_between_wps(
+    source_wp: "Waypoint",
+    target_wp: "Waypoint",
+    speed=30,
+    flight_mode="CRUISE",
+    warp=False,
+) -> int:
+    "determines the travel time between two systems or waypoints."
+
+    distance = calc_distance_between(source_wp, target_wp)
+    if warp:
+        multiplier = {"CRUISE": 50, "DRIFT": 500, "BURN": 15, "STEALTH": 60}
+    else:
+        multiplier = {"CRUISE": 25, "DRIFT": 250, "BURN": 7.5, "STEALTH": 30}
+
+    return round(
+        math.floor(round(max(1, distance))) * (multiplier[flight_mode] / speed) + 15
+    )
+
+
+def compile_system_route(
+    start_wp: System, end_wp: System, route: list[System], fuel_capacity: int
+) -> NavRoute:
+    distance = calc_distance_between(start_wp, end_wp)
+    travel_time = 0
+    last_wp = start_wp
+    for wp in route[1:]:
+        travel_time += _calc_travel_time_between_wps(
+            last_wp, wp, fuel_capacity=fuel_capacity
+        )
+        last_wp = wp
+    route = NavRoute(
+        start_wp,
+        end_wp,
+        len(route),
+        distance,
+        route,
+        travel_time,
+        datetime.now(),
+        fuel_capacity,
+    )
+    return route
 
 
 def compile_route(
@@ -501,9 +543,7 @@ if __name__ == "__main__":
     )
 
     d_wp = st.waypoints_view_one("X1-U49", "X1-U49-A1")
-    time_taken = pathfinder._calc_travel_time_between_wps(
-        source, d_wp, fuel_capacity=400
-    )
+    time_taken = _calc_travel_time_between_wps(source, d_wp, fuel_capacity=400)
     route = pathfinder.plot_system_nav("X1-U49", source, destination, 400)
 
     print(route)
