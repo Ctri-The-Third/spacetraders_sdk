@@ -287,6 +287,17 @@ class WaypointTrait(SymbolClass):
     name: str = ""
     description: str = ""
 
+    @classmethod
+    def from_json(cls, json_data: dict):
+        return cls(json_data["symbol"], json_data["name"], json_data["description"])
+
+    def to_json(self):
+        return {
+            "symbol": self.symbol,
+            "name": self.name,
+            "description": self.description,
+        }
+
 
 @dataclass
 class Waypoint(SymbolClass):
@@ -328,6 +339,20 @@ class Waypoint(SymbolClass):
             new_traits.append(WaypointTrait(*old_trait.values()))
         return_obj.traits = new_traits
         return return_obj
+
+    def to_json(self) -> dict:
+        "does not include waypoints"
+        return {
+            "systemSymbol": self.system_symbol,
+            "symbol": self.symbol,
+            "type": self.type,
+            "x": self.x,
+            "y": self.y,
+            "orbitals": [],
+            "traits": [t.to_json() for t in self.traits],
+            "chart": {},
+            "faction": {},
+        }
 
     @property
     def is_charted(self) -> bool:
