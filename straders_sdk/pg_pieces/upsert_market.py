@@ -83,7 +83,8 @@ ON CONFLICT (symbol) DO NOTHING;"""
                     , sell_price = EXCLUDED.sell_price
                     , last_updated = EXCLUDED.last_updated
                     , type = EXCLUDED.type
-                    , activity = EXCLUDED.activity"""
+                    , activity = EXCLUDED.activity
+                    , market_depth = EXCLUDED.market_depth"""
         for listing in market.listings:
             listing: MarketTradeGoodListing
             resp = try_execute_upsert(
