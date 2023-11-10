@@ -55,7 +55,7 @@ class SpaceTradersStubClient:
             Either a Waypoint object or a SpaceTradersResponse object on failure."""
         pass
 
-    def find_waypoint_by_coords(
+    def find_waypoints_by_coords(
         self, system_symbol: str, x: int, y: int
     ) -> Waypoint or SpaceTradersResponse:
         pass

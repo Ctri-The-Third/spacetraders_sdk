@@ -627,7 +627,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         survey = self.db_client.find_survey_best(waypoint_symbol)
         return survey
 
-    def find_waypoint_by_coords(self, system: str, x: int, y: int) -> Waypoint or None:
+    def find_waypoints_by_coords(self, system: str, x: int, y: int) -> Waypoint or None:
         """find a waypoint by its coordinates. Only searches cached values.
 
         Args:
@@ -638,10 +638,8 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         Returns:
             Either a Waypoint object or None if no matching waypoint is found.
         """
-        for waypoint in self.waypoints.values():
-            if waypoint.system_symbol == system and waypoint.x == x and waypoint.y == y:
-                return waypoint
-        return None
+        resp = self.db_client.find_waypoints_by_coords(system, x, y)
+        return resp
 
     def find_waypoints_by_type(
         self, system_wp, waypoint_type

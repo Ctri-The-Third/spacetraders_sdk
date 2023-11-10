@@ -33,6 +33,7 @@ from .models import RouteNode
 from .ship import Ship, ShipInventory, ShipNav, ShipModule, ShipMount
 from .utils import try_execute_select, try_execute_upsert
 import psycopg2
+from .constants import ORBITAL_TYPES, PARENT_TYPES
 
 
 class SpaceTradersPostgresClient(SpaceTradersClient):
@@ -243,10 +244,16 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
                 "Could not find waypoint with that symbol in DB", 0, 0, sql
             )
 
-    def find_waypoint_by_coords(
+    def find_waypoints_by_coords(
         self, system_symbol: str, x: int, y: int
     ) -> Waypoint or SpaceTradersResponse:
-        pass
+        sql = """select waypoint_symbol, type, system_symbol, x, y from waypoints 
+        where system_symbol = %s and x = %s and y = %s"""
+        rows = try_execute_select(self.connection, sql, (system_symbol, x, y))
+        if not rows:
+            return rows
+
+        return [Waypoint(*row, [], [], {}, {}) for row in rows]
 
     def find_waypoints_by_trait(
         self, system_symbol: str, trait: str

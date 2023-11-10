@@ -79,7 +79,7 @@ class SpaceTradersClient(Protocol):
         pass
 
     @abstractmethod
-    def find_waypoint_by_coords(
+    def find_waypoints_by_coords(
         self, system_symbol: str, x: int, y: int
     ) -> Waypoint or SpaceTradersResponse:
         pass

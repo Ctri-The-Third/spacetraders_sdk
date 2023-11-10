@@ -80,6 +80,30 @@ def test_load_market(market_response_data, waypoint_response_data):
     assert actual_market.symbol == test_market.symbol
 
 
+def test_waypoints_by_coordinate():
+    client = SpaceTradersPostgresClient(
+        ST_HOST, ST_NAME, ST_USER, ST_PASS, TEST_AGENT_NAME, db_port=ST_PORT
+    )
+    targeting_query = """with co_located_waypoint_symbols as (
+        select count(waypoint_symbol), system_symbol, x,y from waypoints
+            group by system_symbol, x,y
+            having count(waypoint_symbol) > 1 
+        )
+        select * from co_located_waypoint_symbols
+        order by 1 desc 
+        limit 1 """
+    connection = client.connection
+    results = try_execute_select(connection, targeting_query, ())
+    if not results:
+        pytest.skip("No co-located waypoints found")
+    waypoints = client.find_waypoints_by_coords(
+        results[0][1], results[0][2], results[0][3]
+    )
+
+    assert waypoints
+    assert len(waypoints) > 1
+
+
 @pytest.fixture
 def market_response_data():
     return {
