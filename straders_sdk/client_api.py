@@ -396,7 +396,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def find_waypoints_by_type_one(self, system_wp, waypoint_type) -> Waypoint:
         return dummy_response(__class__.__name__, "find_waypoint_by_type")
 
-    def find_waypoint_by_coords(self, system_symbol: str, x: int, y: int) -> Waypoint:
+    def find_waypoints_by_coords(self, system_symbol: str, x: int, y: int) -> Waypoint:
         return dummy_response(__class__.__name__, "find_waypoint_by_coords")
 
     def find_waypoints_by_trait_one(self, system_symbol: str, trait: str) -> Waypoint:
