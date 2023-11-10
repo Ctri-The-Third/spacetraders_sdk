@@ -258,7 +258,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             symbol, type, system_symbol, x, y, trait_symbol, name, description = row
             if symbol not in waypoints:
                 waypoints[symbol] = Waypoint(
-                    symbol, type, system_symbol, x, y, [], [], {}, {}
+                    system_symbol, symbol, type, x, y, [], [], {}, {}
                 )
             waypoints[symbol].traits.append(
                 WaypointTrait(trait_symbol, name, description)

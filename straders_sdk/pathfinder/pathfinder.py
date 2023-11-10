@@ -343,7 +343,7 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
 
         # check if there's a graph yet. There won't be if this is very early in the restart.
         if start == goal:
-            return compile_route(start, goal, [goal.symbol])
+            return compile_route(start, goal, [goal])
         if not graph:
             return None
 
