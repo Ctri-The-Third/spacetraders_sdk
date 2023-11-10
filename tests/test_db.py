@@ -102,6 +102,8 @@ def test_waypoints_by_coordinate():
 
     assert waypoints
     assert len(waypoints) > 1
+    for _, w in waypoints.items():
+        assert w.traits
 
 
 @pytest.fixture

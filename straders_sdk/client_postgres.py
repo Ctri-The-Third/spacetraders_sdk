@@ -246,14 +246,24 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
 
     def find_waypoints_by_coords(
         self, system_symbol: str, x: int, y: int
-    ) -> Waypoint or SpaceTradersResponse:
-        sql = """select waypoint_symbol, type, system_symbol, x, y from waypoints 
+    ) -> list[Waypoint] or SpaceTradersResponse:
+        sql = """select w.waypoint_symbol, type, system_symbol, x, y, wt.trait_symbol, wt.name, wt.description 
+        from waypoints w join waypoint_traits wt 
+        on w.waypoint_symbol = wt.waypoint_symbol
         where system_symbol = %s and x = %s and y = %s"""
         rows = try_execute_select(self.connection, sql, (system_symbol, x, y))
-        if not rows:
-            return rows
-
-        return [Waypoint(*row, [], [], {}, {}) for row in rows]
+        waypoints = {}
+        waypoints: dict[str:Waypoint]
+        for row in rows:
+            symbol, type, system_symbol, x, y, trait_symbol, name, description = row
+            if symbol not in waypoints:
+                waypoints[symbol] = Waypoint(
+                    symbol, type, system_symbol, x, y, [], [], {}, {}
+                )
+            waypoints[symbol].traits.append(
+                WaypointTrait(trait_symbol, name, description)
+            )
+        return waypoints
 
     def find_waypoints_by_trait(
         self, system_symbol: str, trait: str
