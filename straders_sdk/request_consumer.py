@@ -64,7 +64,7 @@ class RequestConsumer:
                     )
                 else:
                     package.priority = 0
-                    self.queue.put(0, package)
+                    self.queue.put((0, package))
                 sleep(max(0, (next_request - datetime.now()).total_seconds()))
             else:
                 sleep(interval.total_seconds())
