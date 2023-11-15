@@ -183,8 +183,8 @@ def _upsert_ship_cargo(connection, ship: Ship):
             return resp
     if len(values) > 0:
         sql = """ 
-delete from ship_cargo where ship_symbol = %s and trade_symbol != ANY(%s);"""
-        values = (ship.name, [t.symbol for t in ship.cargo_inventory])
+delete from ship_cargo where ship_symbol = %s and trade_symbol not in %s;"""
+        values = (ship.name, tuple([t.symbol for t in ship.cargo_inventory]))
         resp = try_execute_upsert(connection, sql, values)
     else:
         sql = "delete from ship_cargo where ship_symbol = %s;"
