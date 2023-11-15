@@ -169,9 +169,27 @@ def _upsert_ship_cooldown(connection, ship: Ship):
 
 
 def _upsert_ship_cargo(connection, ship: Ship):
-    return LocalSpaceTradersRespose(
-        None, None, None, url=f"{__name__}._upsert_ship_cargo"
-    )
+    sql = """
+    
+    INSERT INTO SHIP_CARGO (ship_symbol, trade_symbol, quantity)
+    VALUES (%s, %s, %s) ON CONFLICT (ship_symbol, trade_symbol) DO UPDATE
+    SET quantity = EXCLUDED.quantity;
+    """
+
+    values = [(ship.name, t.symbol, t.units) for t in ship.cargo_inventory]
+    for value in values:
+        resp = try_execute_upsert(connection, sql, value)
+        if not resp:
+            return resp
+    if len(values) > 0:
+        sql = """ 
+delete from ship_cargo where ship_symbol = %s and trade_symbol != ANY(%s);"""
+        values = (ship.name, [t.symbol for t in ship.cargo_inventory])
+        resp = try_execute_upsert(connection, sql, values)
+    else:
+        sql = "delete from ship_cargo where ship_symbol = %s;"
+        resp = try_execute_upsert(connection, sql, (ship.name,))
+    return resp
     # not implemented yet
     pass
 
