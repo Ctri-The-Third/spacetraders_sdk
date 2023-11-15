@@ -2,6 +2,7 @@ import requests
 from threading import Event
 import straders_sdk.request_consumer as rc
 import pytest
+from datetime import datetime, timedelta
 
 
 def test_u_singleton():
@@ -42,3 +43,34 @@ def test_send_some_requets():
             responses.append(3)
     consumer.stop()
     assert responses == [3, 2, 1]
+
+
+@pytest.mark.execution_timeout(5)
+def test_send_a_lot_of_requests():
+    """test that the consumer is staggering things appropriately"""
+    consumer = rc.RequestConsumer(auto_start=False)
+    request = requests.Request("GET", "https://api.spacetraders.io/v2/")
+    prepared_request = request.prepare()
+
+    start_time = datetime.now()
+    many_requests = []
+    for i in range(100):
+        tupple = (i, rc.PackageedRequest(i, prepared_request, Event()))
+        consumer.queue.put(tupple)
+        many_requests.append(tupple)
+        print(f"request {i} queued")
+    consumer.start()
+    for i in range(10):
+        tupple = (i + 0.5, rc.PackageedRequest(i + 0.5, prepared_request, Event()))
+        consumer.queue.put(tupple)
+        many_requests.append(tupple)
+        print(f"request {i+0.5} queued")
+    for tupple in many_requests:
+        priority, packaged_request = tupple
+        packaged_request: rc.PackageedRequest
+        packaged_request.event.wait()
+        print(f"request {priority} took {datetime.now() - start_time}")
+
+
+if __name__ == "__main__":
+    test_send_a_lot_of_requests()

@@ -12,6 +12,7 @@ import threading
 import copy
 from requests import Session
 from requests_ratelimiter import LimiterSession
+import straders_sdk.request_consumer as rc
 
 st_log_client: "SpaceTradersClient" = None
 ST_LOGGER = logging.getLogger("API-Client")
@@ -84,7 +85,25 @@ def rate_limit_check(response: requests.Response):
         return
 
 
-def request_and_validate(method, url, data=None, json=None, headers=None, params=None):
+def request_and_validate(
+    method, url, data=None, json=None, headers=None, params=None, priority=5
+):
+    request = requests.Request(
+        method, url=url, data=data, json=json, headers=headers, params=params
+    )
+    prepared_request = request.prepare()
+    packaged_request = rc.PackageedRequest(
+        priority, prepared_request, threading.Event()
+    )
+    consumer = rc.RequestConsumer()
+    consumer.queue.put((packaged_request.priority, packaged_request))
+    packaged_request.event.wait()
+    return RemoteSpaceTradersRespose(packaged_request.response)
+
+
+def old_request_and_validate(
+    method, url, data=None, json=None, headers=None, params=None
+):
     if method == "GET":
         r_method = requests.get
     elif method == "POST":
