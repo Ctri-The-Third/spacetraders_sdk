@@ -29,6 +29,8 @@ from requests_ratelimiter import LimiterSession
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
+COOLDOWN_OFFSET = -2
+MOVEMENT_OFFSET = -2
 
 
 class SpaceTradersApiClient(SpaceTradersClient):
@@ -41,17 +43,21 @@ class SpaceTradersApiClient(SpaceTradersClient):
         version=None,
         session: LimiterSession = None,
         connection=None,
+        request_priority_baseline=5,
     ) -> None:
         self.token = token
         self.config = ApiConfig(base_url, version)
         self.current_agent = None
         self.current_agent_symbol = None
         self.session = session
+        self.priority = request_priority_baseline
         pass
 
     def agents_view_one(self, agent_symbol: str) -> "Agent" or SpaceTradersResponse:
         url = f"/agents/{agent_symbol}"
-        resp = get_and_validate(url, headers=self._headers(), session=self.session)
+        resp = get_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp:
             return Agent.from_json(resp.data)
         return resp
@@ -63,7 +69,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
 
     def view_my_self(self) -> "Agent" or SpaceTradersResponse:
         url = _url("my/agent")
-        resp = get_and_validate(url, headers=self._headers(), session=self.session)
+        resp = get_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp:
             self.current_agent = Agent.from_json(resp.data)
             self.current_agent_symbol = self.current_agent.symbol
@@ -73,7 +81,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
 
     def view_my_contracts(self) -> list["Contract"] or SpaceTradersResponse:
         url = _url("my/contracts")
-        resp = get_and_validate(url, headers=self._headers(), session=self.session)
+        resp = get_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp:
             return [Contract.from_json(d) for d in resp.data]
         return resp
@@ -84,7 +94,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
         if waypoint_symbol == "":
             raise ValueError("waypoint_symbol cannot be empty")
         url = _url(f"systems/{system_symbol}/waypoints/{waypoint_symbol}")
-        resp = get_and_validate(url, headers=self._headers(), session=self.session)
+        resp = get_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if not resp:
             print(resp.error)
             return resp
@@ -107,7 +119,12 @@ class SpaceTradersApiClient(SpaceTradersClient):
 
         url = _url(f"systems/{system_symbol}/waypoints")
         resp = get_and_validate_paginated(
-            url, 20, 50, headers=self._headers(), session=self.session
+            url,
+            20,
+            50,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
         )
         if resp:
             new_wayps = {d["symbol"]: Waypoint.from_json(d) for d in resp.data}
@@ -125,7 +142,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
         data = {"symbol": callsign, "faction": faction}
         if email is not None:
             data["email"] = email
-        resp = post_and_validate(url, data, session=self.session)
+        resp = post_and_validate(
+            url, data, session=self.session, priority=self.priority
+        )
         if resp:
             self.token = resp.data.get("token")
         return resp
@@ -135,7 +154,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
         url = _url(f"my/ships/{ship.name}/orbit")
         if ship.nav.status == "IN_ORBIT":
             return LocalSpaceTradersRespose(None, 0, None, url=url)
-        resp = post_and_validate(url, headers=self._headers(), session=self.session)
+        resp = post_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp:
             self.update(resp.data)
         return resp
@@ -145,7 +166,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
         url = _url(f"my/ships/{ship.name}/nav")
         data = {"flightMode": flight_mode}
         resp = patch_and_validate(
-            url, data, headers=self._headers(), session=self.session
+            url,
+            data,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
         )
         if resp:
             self.update(resp.data)
@@ -160,7 +185,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
         url = _url(f"my/ships/{ship.name}/navigate")
         data = {"waypointSymbol": dest_waypoint_symbol}
         resp = post_and_validate(
-            url, data, headers=self._headers(), vip=True, session=self.session
+            url,
+            data,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority + MOVEMENT_OFFSET,
         )
         if resp:
             self.update(resp.data)
@@ -171,7 +200,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
         url = _url(f"my/ships/{ship.name}/jump")
         data = {"systemSymbol": dest_system_symbol}
         resp = post_and_validate(
-            url, data, headers=self._headers(), vip=True, session=self.session
+            url,
+            data,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority + COOLDOWN_OFFSET,
         )
         if resp:
             self.update(resp.data)
@@ -180,7 +213,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def ship_negotiate(self, ship: "Ship") -> "Contract" or SpaceTradersResponse:
         "/my/ships/{shipSymbol}/negotiate/contract"
         url = _url(f"my/ships/{ship.name}/negotiate/contract")
-        resp = post_and_validate(url, headers=self._headers(), session=self.session)
+        resp = post_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp:
             resp = Contract.from_json(resp.data.get("contract"))
         return resp
@@ -218,7 +253,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
         data = survey.to_json() if survey is not None else None
 
         resp = post_and_validate(
-            url, json=data, headers=self._headers(), vip=True, session=self.session
+            url,
+            json=data,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority + COOLDOWN_OFFSET,
         )
         if resp:
             self.update(resp.data)
@@ -317,7 +356,10 @@ class SpaceTradersApiClient(SpaceTradersClient):
             return LocalSpaceTradersRespose("Ship still on cooldown", 0, 4000)
         url = _url(f"my/ships/{ship.name}/survey")
         resp = post_and_validate(
-            url, headers=self._headers(), vip=True, session=self.session
+            url,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority + COOLDOWN_OFFSET,
         )
 
         self.update(resp.data)
@@ -337,7 +379,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
             "shipSymbol": target_ship_name,
         }
         resp = post_and_validate(
-            url, data, headers=self._headers(), session=self.session
+            url,
+            data,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
         )
         self.update(resp.data)
 
@@ -349,7 +395,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
         url = _url(f"my/ships/{ship.name}/mounts/install")
         data = {"symbol": mount_symbol}
         resp = post_and_validate(
-            url, data, headers=self._headers(), session=self.session
+            url,
+            data,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
         )
         if resp:
             self.update(resp.data)
@@ -364,7 +414,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
         url = _url(f"my/ships/{ship.name}/mounts/remove")
         data = {"symbol": mount_symbol}
         resp = post_and_validate(
-            url, data, headers=self._headers(), session=self.session
+            url,
+            data,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
         )
         if resp:
             self.update(resp.data)
@@ -378,7 +432,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
     ) -> SpaceTradersResponse:
         url = _url(f"my/ships/{ship.name}/jettison")
         data = {"symbol": trade_symbol, "units": quantity}
-        resp = post_and_validate(url, data, headers=self._headers())
+        resp = post_and_validate(
+            url, data, headers=self._headers(), priority=self.priority
+        )
         if resp:
             ship.update(resp.data)
         return resp
@@ -420,7 +476,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
     ) -> list["System"] or SpaceTradersResponse:
         url = _url("systems")
         resp = get_and_validate_page(
-            url, page_number, headers=self._headers(), session=self.session
+            url,
+            page_number,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
         )
 
         if resp:
@@ -435,6 +495,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
             page_limit=999,
             headers=self._headers(),
             session=self.session,
+            priority=self.priority,
         )
         if resp:
             resp = [System.from_json(d) for d in resp.data]
@@ -442,7 +503,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
 
     def systems_view_one(self, system_symbol: str) -> System or SpaceTradersResponse:
         url = _url(f"systems/{system_symbol}")
-        resp = get_and_validate(url, headers=self._headers(), session=self.session)
+        resp = get_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp:
             return System.from_json(resp.data)
         return resp
@@ -450,7 +513,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def system_market(self, wp: Waypoint) -> Market:
         # /systems/{systemSymbol}/waypoints/{waypointSymbol}/market
         url = _url(f"systems/{wp.system_symbol}/waypoints/{wp.symbol}/market")
-        resp = get_and_validate(url, headers=self._headers(), session=self.session)
+        resp = get_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp:
             resp = Market.from_json(resp.data)
         return resp
@@ -466,7 +531,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
         """
 
         url = _url(f"systems/{wp.system_symbol}/waypoints/{wp.symbol}/shipyard")
-        resp = get_and_validate(url, headers=self._headers(), session=self.session)
+        resp = get_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
 
         if resp:
             return Shipyard.from_json(resp.data)
@@ -476,7 +543,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def system_jumpgate(self, wp: Waypoint) -> JumpGate or SpaceTradersResponse:
         """/systems/{systemSymbol}/waypoints/{waypointSymbol}/jump-gate"""
         url = _url(f"systems/{wp.system_symbol}/waypoints/{wp.symbol}/jump-gate")
-        resp = get_and_validate(url, headers=self._headers(), session=self.session)
+        resp = get_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp:
             gate = JumpGate.from_json(wp.symbol, resp.data)
             gate.waypoint_symbol = wp.symbol
@@ -487,7 +556,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
         """/my/ships/{shipSymbol}/cooldown"""
         # /my/ships/{shipSymbol}/cooldown
         url = _url(f"my/ships/{ship.name}/cooldown")
-        resp = get_and_validate(url, headers=self._headers(), session=self.session)
+        resp = get_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp and "expiration" in resp.data:
             ship.update({"cooldown": resp.data})
         else:
@@ -499,7 +570,12 @@ class SpaceTradersApiClient(SpaceTradersClient):
         """/my/ships"""
         url = _url("my/ships")
         resp = get_and_validate_paginated(
-            url, 20, 10, headers=self._headers(), session=self.session
+            url,
+            20,
+            10,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
         )
         if resp:
             resp = {ship["symbol"]: Ship.from_json(ship) for ship in resp.data}
@@ -509,7 +585,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def ships_view_one(self, symbol: str) -> "Ship" or SpaceTradersResponse:
         "/my/ships/{shipSymbol}"
         url = _url(f"my/ships/{symbol}")
-        resp = get_and_validate(url, headers=self._headers(), session=self.session)
+        resp = get_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp:
             return Ship.from_json(resp.data)
         return resp
@@ -520,7 +598,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
         url = _url("my/ships")
         data = {"shipType": ship_type, "waypointSymbol": shipyard_waypoint}
         resp = post_and_validate(
-            url, data, headers=self._headers(), session=self.session
+            url,
+            data,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
         )
         if not resp:
             return resp
@@ -534,7 +616,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
         url = _url(f"/my/contracts/{contract.id}/deliver")
         data = {"shipSymbol": ship.name, "tradeSymbol": trade_symbol, "units": units}
         headers = self._headers()
-        resp = post_and_validate(url, data, headers=headers, session=self.session)
+        resp = post_and_validate(
+            url, data, headers=headers, session=self.session, priority=self.priority
+        )
         if not resp:
             print(f"failed to deliver to contract {resp.status_code}, {resp.error}")
             return resp
@@ -543,7 +627,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def contracts_fulfill(self, contract: Contract):
         url = _url(f"/my/contracts/{contract.id}/fulfill")
         headers = self._headers()
-        resp = post_and_validate(url, headers=headers, session=self.session)
+        resp = post_and_validate(
+            url, headers=headers, session=self.session, priority=self.priority
+        )
         if not resp:
             print(f"failed to fulfill contract {resp.status_code}, {resp.error}")
             return resp

@@ -38,7 +38,8 @@ class RequestConsumer:
 
     def start(self):
         self.stop_flag = False
-        self._consumer_thread.start()
+        if not self._consumer_thread.is_alive():
+            self._consumer_thread.start()
 
     def _consume_until_stopped(self):
         """this method should be tied to the _consumer_thread"""
@@ -58,10 +59,13 @@ class RequestConsumer:
                     print(e)
                 if package.response.status_code != 429:
                     package.event.set()
+                    print(
+                        f"* Completed priority {package.priority} request {package.request.url} after {datetime.now() - package.time_added}"
+                    )
                 else:
                     package.priority = 0
                     self.queue.put(0, package)
-                sleep(min(0, (next_request - datetime.now()).total_seconds()))
+                sleep(max(0, (next_request - datetime.now()).total_seconds()))
             else:
                 sleep(interval.total_seconds())
 
@@ -76,3 +80,28 @@ class PackageedRequest:
         self.response = None
         self.event = event
         self.time_added = datetime.now()
+
+    def __lt__(self, other: "PackagedRequest"):
+        if not isinstance(other, PackageedRequest):
+            return True
+        if self.priority < other.priority:
+            return True
+
+        if self.time_added < other.time_added:
+            return True
+
+    def __eq__(self, other):
+        if not isinstance(other, PackageedRequest):
+            return False
+        return self.priority == other.priority and self.time_added == other.time_added
+
+    def __gt__(self, other):
+        if not isinstance(other, PackageedRequest):
+            return False
+        return not self < other and not self == other
+
+    def __le__(self, other):
+        return self < other or self == other
+
+    def __ge__(self, other):
+        return self > other or self == other

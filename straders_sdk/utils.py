@@ -43,12 +43,14 @@ class ApiConfig:
 
 
 def get_and_validate_page(
-    url, page_number, params=None, headers=None, session: Session = None
+    url, page_number, params=None, headers=None, session: Session = None, priority=5
 ) -> SpaceTradersResponse or None:
     params = params or {}
     params["page"] = page_number
     params["limit"] = 20
-    return get_and_validate(url, params=params, headers=headers, session=session)
+    return get_and_validate(
+        url, params=params, headers=headers, session=session, priority=priority
+    )
 
 
 def get_and_validate_paginated(
@@ -58,6 +60,7 @@ def get_and_validate_paginated(
     params=None,
     headers=None,
     session: Session = None,
+    priority=5,
 ) -> SpaceTradersResponse or None:
     params = params or {}
     params["limit"] = per_page
@@ -65,7 +68,7 @@ def get_and_validate_paginated(
     for i in range(1, page_limit or 1):
         params["page"] = i
         response = get_and_validate(
-            url, params=params, headers=headers, session=session
+            url, params=params, headers=headers, session=session, priority=priority
         )
         if response and response.data:
             data.extend(response.data)
@@ -86,8 +89,10 @@ def rate_limit_check(response: requests.Response):
 
 
 def request_and_validate(
-    method, url, data=None, json=None, headers=None, params=None, priority=5
+    method, url, data=None, json=None, headers=None, params=None, priority=6
 ):
+    if priority == 6:
+        logging.warning("Priority not set in url %s", url)
     request = requests.Request(
         method, url=url, data=data, json=json, headers=headers, params=params
     )
@@ -97,6 +102,8 @@ def request_and_validate(
     )
     consumer = rc.RequestConsumer()
     consumer.queue.put((packaged_request.priority, packaged_request))
+    if not consumer._consumer_thread.is_alive():
+        consumer.start()
     packaged_request.event.wait()
     return RemoteSpaceTradersRespose(packaged_request.response)
 
@@ -141,25 +148,37 @@ def old_request_and_validate(
 
 
 def get_and_validate(
-    url, params=None, headers=None, pages=None, per_page=None, session: Session = None
+    url,
+    params=None,
+    headers=None,
+    pages=None,
+    per_page=None,
+    session: Session = None,
+    priority=5,
 ) -> SpaceTradersResponse or None:
     "wraps the requests.get function to make it easier to use"
 
-    return request_and_validate("GET", url, params=params, headers=headers)
+    return request_and_validate(
+        "GET", url, params=params, headers=headers, priority=priority
+    )
 
 
 def post_and_validate(
-    url, data=None, json=None, headers=None, vip=False, session: Session = None
+    url, data=None, json=None, headers=None, priority=5, session: Session = None
 ) -> SpaceTradersResponse:
     "wraps the requests.post function to make it easier to use"
 
-    return request_and_validate("POST", url, data=data, json=json, headers=headers)
+    return request_and_validate(
+        "POST", url, data=data, json=json, headers=headers, priority=priority
+    )
 
 
 def patch_and_validate(
-    url, data=None, json=None, headers=None, session: Session = None
+    url, data=None, json=None, headers=None, session: Session = None, priority=5
 ) -> SpaceTradersResponse:
-    return request_and_validate("PATCH", url, data=data, json=json, headers=headers)
+    return request_and_validate(
+        "PATCH", url, data=data, json=json, headers=headers, priority=priority
+    )
 
 
 def _url(endpoint) -> str:
