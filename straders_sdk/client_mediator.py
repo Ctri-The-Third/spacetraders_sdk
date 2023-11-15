@@ -52,6 +52,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         current_agent_symbol=None,
         session=None,
         connection=None,
+        priority=5,
     ) -> None:
         self.logger = logging.getLogger(__name__)
 
@@ -106,7 +107,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 db_pass,
             )
         self.api_client = SpaceTradersApiClient(
-            token=token, base_url=base_url, version=version, session=session
+            token=token,
+            base_url=base_url,
+            version=version,
+            session=session,
+            priority=priority,
         )
         self.config = ApiConfig(
             base_url=base_url, version=version

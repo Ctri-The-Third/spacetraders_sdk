@@ -11,7 +11,7 @@ from .utils import (
     get_and_validate_paginated,
     get_and_validate_page,
 )
-from .local_response import LocalSpaceTradersRespose
+from .local_response import LocalSpaceTradersRespose  #
 from .models import (
     Waypoint,
     Survey,
@@ -43,14 +43,14 @@ class SpaceTradersApiClient(SpaceTradersClient):
         version=None,
         session: LimiterSession = None,
         connection=None,
-        request_priority_baseline=5,
+        priority=5,
     ) -> None:
         self.token = token
         self.config = ApiConfig(base_url, version)
         self.current_agent = None
         self.current_agent_symbol = None
         self.session = session
-        self.priority = request_priority_baseline
+        self.priority = priority
         pass
 
     def agents_view_one(self, agent_symbol: str) -> "Agent" or SpaceTradersResponse:
