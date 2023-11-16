@@ -226,6 +226,10 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         return resp
 
     def ships_view_one(self, symbol: str, force=False):
+        if symbol == "":
+            return LocalSpaceTradersRespose(
+                "No ship symbol provided", 0, 0, "client_mediator.ships_view_one()"
+            )
         if not force and symbol in self.ships:
             resp = self.ships.get(symbol, None)
             if resp:
