@@ -312,7 +312,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
             ship.update(resp.data)
         return resp
 
-    def ship_sell(self, ship: Ship, symbol: str, quantity: int):
+    def ship_sell(self, ship: Ship, symbol: str, quantity: int) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/sell"""
         url = _url(f"my/ships/{ship.name}/sell")
 
@@ -323,7 +323,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
 
         data = {"symbol": symbol, "units": quantity}
         resp = post_and_validate(
-            url, data, headers=self._headers(), session=self.session
+            url,
+            data,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
         )
         if resp:
             self.update(resp.data)
