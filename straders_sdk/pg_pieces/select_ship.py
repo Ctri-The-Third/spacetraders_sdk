@@ -1,5 +1,5 @@
 from ..local_response import LocalSpaceTradersRespose
-from ..ship import Ship, ShipFrame, ShipNav
+from ..ship import Ship, ShipFrame, ShipNav, ShipInventory
 from ..models import RouteNode
 from ..client_interface import SpaceTradersClient
 from ..models import ShipRequirements
@@ -27,7 +27,9 @@ def _select_ships(connection, agent_name, db_client: SpaceTradersClient):
                 where s.agent_name = %s
                 order by s.ship_symbol
                 """
-    return _select_some_ships(db_client, sql, (agent_name,))
+    ships = _select_some_ships(db_client, sql, (agent_name,))
+    ships = _expand_ships_with_inventory(db_client, ships, agent_name)
+    return ships
 
 
 def _select_ship_one(ship_symbol: str, db_client: SpaceTradersClient):
@@ -52,7 +54,42 @@ def _select_ship_one(ship_symbol: str, db_client: SpaceTradersClient):
                 where s.ship_symbol = %s
                 """
     ships = _select_some_ships(db_client, sql, (ship_symbol,))
+    for ship_symbol, ship in ships.items():
+        ship = _expand_ship_with_inventory(db_client, ship)
+    return ships
 
+
+def _expand_ship_with_inventory(db_client: SpaceTradersClient, ship: Ship):
+    sql = """
+        select sc.ship_Symbol, agent_name, trade_symbol from ship_cargo sc join ships s 
+        on sc.ship_symbol = s.ship_symbol
+        where ship_symbol = %s
+        order by 1, 2 """
+
+    rows = try_execute_select(db_client.connection, sql, (ship.name,))
+    for row in rows:
+        trade_symbol = row[2]
+        units = row[3]
+        ship.cargo_inventory.append(ShipInventory(trade_symbol, "", "", units))
+    return ship
+
+
+def _expand_ships_with_inventory(
+    db_client: SpaceTradersClient, ships: dict, agent_name: str
+):
+    sql = """
+    select sc.ship_Symbol, agent_name, trade_symbol from ship_cargo sc join ships s 
+        on sc.ship_symbol = s.ship_symbol
+        where agent_name = %s
+        order by 1, 2 """
+    rows = try_execute_select(db_client.connection, sql, (agent_name,))
+    for row in rows:
+        trade_symbol = row[2]
+        units = row[3]
+        ship = ships.get(row[0], None)
+        if ship:
+            ship: Ship
+            ship.cargo_inventory.append(ShipInventory(trade_symbol, "", "", units))
     return ships
 
 
