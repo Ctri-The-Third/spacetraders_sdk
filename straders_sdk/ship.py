@@ -134,6 +134,7 @@ class Ship(SpaceTradersInteractive):
         for siphon in siphons:
             if siphon in [d.symbol for d in self.mounts]:
                 return True
+        return False
 
     @property
     def can_refine(self) -> bool:
@@ -141,6 +142,7 @@ class Ship(SpaceTradersInteractive):
         for refinery in refineries:
             if refinery in [d.symbol for d in self.modules]:
                 return True
+        return False
 
     @property
     def cargo_space_remaining(self) -> int:

@@ -61,9 +61,9 @@ def _select_ship_one(ship_symbol: str, db_client: SpaceTradersClient):
 
 def _expand_ship_with_inventory(db_client: SpaceTradersClient, ship: Ship):
     sql = """
-        select sc.ship_Symbol, agent_name, trade_symbol from ship_cargo sc join ships s 
+        select sc.ship_Symbol, agent_name, trade_symbol, quantity from ship_cargo sc join ships s 
         on sc.ship_symbol = s.ship_symbol
-        where ship_symbol = %s
+        where sc.ship_symbol = %s
         order by 1, 2 """
 
     rows = try_execute_select(db_client.connection, sql, (ship.name,))
@@ -78,7 +78,7 @@ def _expand_ships_with_inventory(
     db_client: SpaceTradersClient, ships: dict, agent_name: str
 ):
     sql = """
-    select sc.ship_Symbol, agent_name, trade_symbol from ship_cargo sc join ships s 
+    select sc.ship_Symbol, agent_name, trade_symbol, quantity from ship_cargo sc join ships s 
         on sc.ship_symbol = s.ship_symbol
         where agent_name = %s
         order by 1, 2 """
