@@ -968,6 +968,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         if resp:
             ship.update(resp.data)
             self.db_client.update(ship)
+            self.db_client.update(resp.data)
 
     def ship_sell(
         self, ship: "Ship", symbol: str, quantity: int
