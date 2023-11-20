@@ -78,7 +78,7 @@ def _expand_ships_with_inventory(
     db_client: SpaceTradersClient, ships: dict, agent_name: str
 ):
     sql = """
-    select sc.ship_Symbol, agent_name, trade_symbol, quantity from ship_cargo sc join ships s 
+    select sc.ship_Symbol, agent_name, trade_symbol, quantity::integer from ship_cargo sc join ships s 
         on sc.ship_symbol = s.ship_symbol
         where agent_name = %s
         order by 1, 2 """
