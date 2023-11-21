@@ -5,7 +5,7 @@ import json
 import os
 from datetime import timedelta, datetime
 from networkx import Graph
-from straders_sdk.models import System, Waypoint
+from straders_sdk.models import System, Waypoint, WaypointTrait
 from networkx import Graph
 from straders_sdk.utils import try_execute_select
 from straders_sdk.pathfinder.route import JumpGateRoute
@@ -142,14 +142,17 @@ class PathFinder:
     def load_system_graph_from_db(self, system_s: str, fuel_capacity=400):
         "Creates a graph for a given system's refuel points, based on the waypoints in the database."
         graph = Graph()
-        sql = """select waypoint_symbol, x,y from waypoints 
-                where system_symbol = %s"""
+        sql = """select w.waypoint_symbol, x,y, wt.trait_symbol = 'MARKETPLACE' from waypoints w
+left join waypoint_Traits wt on wt.waypoint_symbol = w.waypoint_symbol and wt.trait_symbol = 'MARKETPLACE'
+                where system_symbol = %s
+"""
         results = try_execute_select(self.connection, sql, (system_s,))
-
+        t = [WaypointTrait("MARKETPLACE", "Marketplace", "")]
         if not results:
             return None
         nodes = {
-            r[0]: Waypoint("", r[0], "", r[1], r[2], [], [], {}, {}) for r in results
+            r[0]: Waypoint("", r[0], "", r[1], r[2], [], t if r[3] else [], {}, {})
+            for r in results
         }
 
         graph.add_nodes_from(nodes)
@@ -358,6 +361,12 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
         g_score = {node: float("inf") for node in graph.nodes}
         g_score[start.symbol] = 0
 
+        #
+        if self.determine_fuel_cost(start, goal) < fuel_capacity:
+            route = [start, goal]
+            return compile_system_route(start, goal, route, fuel_capacity)
+        #
+
         # this is how we reconstruct our route back.Z came from Y. Y came from X. X came from start.
         came_from = {}
         while open_set:
@@ -435,15 +444,25 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
 
 
 def _calc_travel_time_between_wps(
-    start: Waypoint, end: Waypoint, speed=30, warp=False, fuel_capacity=400
+    start: Waypoint,
+    end: Waypoint,
+    speed=30,
+    warp=False,
+    fuel_capacity=400,
 ) -> float:
-    "determines the travel time between two systems or waypoints, swapping flight mode if it exceeds a fuel capacity"
+    """determines the travel time between two systems or waypoints, swapping flight mode if it exceeds a fuel capacity.
+
+    Note - if either of the waypoints are not marketplaces (fuel stops), then it will assume a drift.
+    """
+    if not (start.has_market and end.has_market):
+        return calc_travel_time_between_wps(start, end, speed, "DRIFT", warp)
 
     distance = calc_distance_between(start, end)
     if distance >= fuel_capacity:
         return calc_travel_time_between_wps(start, end, speed, "DRIFT", warp)
-    else:
-        return calc_travel_time_between_wps(start, end, speed, "CRUISE", warp)
+    if distance < fuel_capacity / 2:
+        return calc_travel_time_between_wps(start, end, speed, "BURN", warp)
+    return calc_travel_time_between_wps(start, end, speed, "CRUISE", warp)
 
 
 def calc_travel_time_between_wps(
@@ -519,6 +538,7 @@ def calc_distance_between(src: System, dest: System):
 if __name__ == "__main__":
     import psycopg2
     import straders_sdk.client_postgres
+    from straders_sdk.utils import set_logging
 
     DB_HOST = os.environ.get("ST_DB_HOST", "localhost")
     DB_PORT = os.environ.get("ST_DB_PORT", "5432")
@@ -536,14 +556,14 @@ if __name__ == "__main__":
         password=DB_PASSWORD,
         database=DB_NAME,
     )
+    set_logging(logging.DEBUG)
     pathfinder = PathFinder(connection=connection)
-    source = Waypoint("X1-U49", "X1-U49-C42", "GAS_GIANT", 1, -154, [], [], None, None)
+    source = Waypoint("X1-YG29", "X1-YG29-F46", "PLANET", -37, -64, [], [], None, None)
     destination = Waypoint(
-        "X1-U49", "X1-U49-I57", "JUMP_GATE", 432, 127, [], [], None, None
+        "X1-YG29", "X1-YG29-J57", "ASTEROID_BASE", -702, 163, [], [], None, None
     )
 
-    d_wp = st.waypoints_view_one("X1-U49", "X1-U49-A1")
-    time_taken = _calc_travel_time_between_wps(source, d_wp, fuel_capacity=400)
-    route = pathfinder.plot_system_nav("X1-U49", source, destination, 400)
+    time_taken = _calc_travel_time_between_wps(source, destination, fuel_capacity=400)
+    route = pathfinder.plot_system_nav("X1-YG29", source, destination, 400)
 
     print(route)
