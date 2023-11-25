@@ -251,6 +251,14 @@ def waypoint_slicer(waypoint_symbol: str) -> str:
     return f"{pieces[0]}-{pieces[1]}"
 
 
+def waypoint_suffix(anything: str) -> str:
+    "returns the text after the last - in a given string"
+    if not anything:
+        return ""
+    pieces = anything.split("-")
+    return pieces[-1]
+
+
 def try_execute_upsert(connection, sql, params) -> LocalSpaceTradersRespose:
     if connection.closed > 1:
         logging.error("Connection is closed")
