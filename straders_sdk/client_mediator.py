@@ -1097,6 +1097,8 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         """/my/contracts/{contractId}/fulfill"""
         start = datetime.now()
         resp = self.api_client.contracts_fulfill(contract)
+        if not resp and resp.error_code == 4504:
+            contract.fulfilled = True
         self.logging_client.contracts_fulfill(
             contract, resp, (datetime.now() - start).total_seconds()
         )
