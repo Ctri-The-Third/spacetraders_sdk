@@ -1121,6 +1121,9 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 self.logging_client.update(transaction)
 
             self.db_client.update(resp)
+        elif resp.error_code == 4504:
+            contract.fulfilled = True
+            self.db_client.update(contract)
         return resp
 
     def _headers(self) -> dict:
