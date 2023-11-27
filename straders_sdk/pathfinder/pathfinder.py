@@ -386,10 +386,14 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
                 # reverse so frist list_item = source.
                 logging.debug("Completed A* - total jumps = %s", len(total_path))
                 total_path.reverse()
-                final_route = compile_route(start, goal, total_path)
+                final_route = compile_system_route(
+                    start, goal, total_path, fuel_capacity
+                )
                 final_route.save_to_file(self.target_folder)
                 total_path.reverse()
-                inverted_route = compile_route(goal, start, total_path)
+                inverted_route = compile_system_route(
+                    goal, start, total_path, fuel_capacity
+                )
                 inverted_route.save_to_file(self.target_folder)
                 total_path.reverse()
                 return final_route
@@ -558,12 +562,15 @@ if __name__ == "__main__":
     )
     set_logging(logging.DEBUG)
     pathfinder = PathFinder(connection=connection)
-    source = Waypoint("X1-YG29", "X1-YG29-F46", "PLANET", -37, -64, [], [], None, None)
-    destination = Waypoint(
-        "X1-YG29", "X1-YG29-J57", "ASTEROID_BASE", -702, 163, [], [], None, None
-    )
+    source = st.waypoints_view_one("X1-YG29", "X1-YG29-I55")
+    destination = st.waypoints_view_one("X1-YG29", "X1-YG29-K86")
+    # "X1-YG29-B13"	"X1-YG29-D42"
 
-    time_taken = _calc_travel_time_between_wps(source, destination, fuel_capacity=400)
-    route = pathfinder.plot_system_nav("X1-YG29", source, destination, 400)
+    fuel = 400
+    time_taken = _calc_travel_time_between_wps(source, destination, fuel_capacity=fuel)
+    route = pathfinder.plot_system_nav("X1-YG29", source, destination, fuel)
 
-    print(route)
+    print(route.hops)
+    print(route.total_distance)
+    print(time_taken)
+    print(route.seconds_to_destination)

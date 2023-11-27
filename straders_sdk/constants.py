@@ -32,6 +32,11 @@ EXTRACTABLES = [
     "URANITE_ORE",
     "MERITIUM_ORE",
 ]
+SHIPONABLES = [
+    "HYDROCARBON",
+    "LIQUID_HYDROGEN",
+    "LIQUID_NITROGEN",
+]
 #
 # mounts
 #

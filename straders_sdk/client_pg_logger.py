@@ -534,7 +534,12 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
     ) -> SpaceTradersResponse:
         url = _url(f"my/ships/:ship_name/transfer")
         self.log_event(
-            "ship_transfer_cargo", ship.name, url, response, duration_seconds=duration
+            "ship_transfer_cargo",
+            ship.name,
+            url,
+            response,
+            duration_seconds=duration,
+            event_params={"trade_symbol": trade_symbol, "units": units},
         )
 
         """/my/ships/{shipSymbol}/transfer"""

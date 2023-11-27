@@ -292,7 +292,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
 
         if ship.nav.status == "DOCKED":
             return LocalSpaceTradersRespose(None, 200, None, url=url)
-        resp = post_and_validate(url, headers=self._headers(), session=self.session)
+        resp = post_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp:
             self.update(resp.data)
             ship.update(resp.data)
@@ -306,7 +308,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
             ship.logger.error("Ship must be docked to refuel")
 
         url = _url(f"my/ships/{ship.name}/refuel")
-        resp = post_and_validate(url, headers=self._headers(), session=self.session)
+        resp = post_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
         if resp:
             self.update(resp.data)
             ship.update(resp.data)
