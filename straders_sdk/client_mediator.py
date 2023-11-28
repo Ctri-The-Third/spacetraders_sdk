@@ -93,6 +93,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 token=token,
                 connection=connection,
             )
+            self.connection = self.db_client.connection
         else:
             self.db_client = SpaceTradersStubClient()
             self.logging_client = SpaceTradersStubClient()
