@@ -54,6 +54,8 @@ def _select_ship_one(ship_symbol: str, db_client: SpaceTradersClient):
                 where s.ship_symbol = %s
                 """
     ships = _select_some_ships(db_client, sql, (ship_symbol,))
+    if not ships:
+        return ships
     for ship_symbol, ship in ships.items():
         ship = _expand_ship_with_inventory(db_client, ship)
     return ships
