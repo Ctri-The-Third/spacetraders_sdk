@@ -77,8 +77,7 @@ def get_and_validate_paginated(
             return response
         else:
             return response
-        if page_limit >= 10:
-            sleep(1)
+
     response.data = data
     return response
 
