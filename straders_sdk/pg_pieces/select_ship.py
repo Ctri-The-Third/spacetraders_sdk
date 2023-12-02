@@ -54,8 +54,6 @@ def _select_ship_one(ship_symbol: str, db_client: SpaceTradersClient):
                 where s.ship_symbol = %s
                 """
     ships = _select_some_ships(db_client, sql, (ship_symbol,))
-    if not ships:
-        return ships
     for ship_symbol, ship in ships.items():
         ship = _expand_ship_with_inventory(db_client, ship)
     return ships
@@ -63,7 +61,7 @@ def _select_ship_one(ship_symbol: str, db_client: SpaceTradersClient):
 
 def _expand_ship_with_inventory(db_client: SpaceTradersClient, ship: Ship):
     sql = """
-        select sc.ship_Symbol, agent_name, trade_symbol, quantity::integer from ship_cargo sc join ships s 
+        select sc.ship_Symbol, agent_name, trade_symbol, quantity from ship_cargo sc join ships s 
         on sc.ship_symbol = s.ship_symbol
         where sc.ship_symbol = %s
         order by 1, 2 """
@@ -175,8 +173,8 @@ def _nav_from_row(row, nav_row) -> ShipNav:
             nav_row[3],
             nav_row[4],
         ),
-        row[1],
         row[2],
+        row[1],
         row[5],
         row[6],
     )
