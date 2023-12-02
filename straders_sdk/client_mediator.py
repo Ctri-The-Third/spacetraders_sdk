@@ -231,10 +231,6 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             return LocalSpaceTradersRespose(
                 "No ship symbol provided", 0, 0, "client_mediator.ships_view_one()"
             )
-        if not force and symbol in self.ships:
-            resp = self.ships.get(symbol, None)
-            if resp:
-                return self.ships[symbol]
 
         if not force:
             resp = self.db_client.ships_view_one(symbol)
