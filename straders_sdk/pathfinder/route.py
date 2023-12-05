@@ -85,6 +85,7 @@ class NavRoute(JumpGateRoute):
         seconds_to_destination: int,
         compilation_timestamp: datetime,
         max_fuel: int,
+        needs_drifting: bool,
     ) -> None:
         pass
         self.start_waypoint: Waypoint = start_waypoint
@@ -95,6 +96,7 @@ class NavRoute(JumpGateRoute):
         self.seconds_to_destination: int = seconds_to_destination
         self.compilation_timestamp: datetime = compilation_timestamp
         self.max_fuel: int = max_fuel
+        self.needs_drifting: bool = needs_drifting
 
     def to_json(self):
         return {
@@ -108,12 +110,13 @@ class NavRoute(JumpGateRoute):
                 "%Y-%m-%d %H:%M:%S"
             ),
             "max_fuel": self.max_fuel,
+            "needs_drifting": self.needs_drifting,
         }
 
     def save_to_file(self, destination_folder: str):
         try:
             with open(
-                f"{destination_folder}{self.start_waypoint.symbol}-{self.end_waypoint.symbol}.json",
+                f"{destination_folder}{self.start_waypoint.symbol}-{self.end_waypoint.symbol}[{self.max_fuel}].json",
                 "w",
                 encoding="utf-8",
             ) as f:
@@ -136,5 +139,12 @@ class NavRoute(JumpGateRoute):
             json_data["seconds_to_destination"],
             datetime.fromisoformat(json_data["compilation_timestamp"]),
             json_data["max_fuel"],
+            json_data["needs_drifting"],
         )
         return route
+
+    @classmethod
+    def from_file(cls, file_path: str):
+        with open(file_path, "r", encoding="utf-8") as f:
+            json_data = json.load(f)
+        return cls.from_json(json_data)
