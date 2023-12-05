@@ -4,6 +4,7 @@ from requests import PreparedRequest
 from time import sleep
 import requests
 from queue import PriorityQueue
+import logging
 
 # this consumer should be a singleton.
 # it will have a priority queue of special request objects
@@ -25,6 +26,7 @@ class RequestConsumer:
             return
         self.queue = PriorityQueue()
         self.stop_flag = False
+        self.logger = logging.getLogger("RequestConsumer")
         self._consumer_thread = Thread(
             target=self._consume_until_stopped, daemon=auto_start
         )
@@ -56,7 +58,14 @@ class RequestConsumer:
                     package.response = self._session.send(package.request)
 
                 except Exception as e:
-                    print(e)
+                    package.priority = 0
+                    self.queue.put((0, package))
+                    self.logger.warning(
+                        "Request failed, retrying in 30 seconds - reason %s", e
+                    )
+                    sleep(30)
+                    continue
+
                 if package.response.status_code != 429:
                     package.event.set()
                     print(
