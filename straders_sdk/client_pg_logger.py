@@ -67,10 +67,18 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         return self._connection
 
     def log_beginning(
-        self, behaviour_name: str, ship_name="GLOBAL", starting_credits=None
+        self,
+        behaviour_name: str,
+        ship_name="GLOBAL",
+        starting_credits=None,
+        behaviour_params=None,
     ):
         self.log_beginorend_event(
-            "BEGIN_BEHAVIOUR_SCRIPT", behaviour_name, ship_name, starting_credits
+            "BEGIN_BEHAVIOUR_SCRIPT",
+            behaviour_name,
+            ship_name,
+            starting_credits,
+            behaviour_params,
         )
 
     def set_current_agent(self, agent_symbol: str, token: str = None):
@@ -78,15 +86,31 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         self.token = token
 
     def log_ending(
-        self, behaviour_name: str, ship_name="GLOBAL", starting_credits=None
+        self,
+        behaviour_name: str,
+        ship_name="GLOBAL",
+        starting_credits=None,
+        behaviour_params=None,
     ):
         self.log_beginorend_event(
-            "END_BEHAVIOUR_SCRIPT", behaviour_name, ship_name, starting_credits
+            "END_BEHAVIOUR_SCRIPT",
+            behaviour_name,
+            ship_name,
+            starting_credits,
+            behaviour_params,
         )
 
     def log_beginorend_event(
-        self, event_name, behaviour_name: str, ship_name="GLOBAL", starting_credits=None
+        self,
+        event_name,
+        behaviour_name: str,
+        ship_name="GLOBAL",
+        starting_credits=None,
+        behaviour_params=None,
     ):
+        if behaviour_params is None:
+            behaviour_params = {}
+        behaviour_params["script_name"] = behaviour_name
         sql = """INSERT INTO public.logging( event_name, event_timestamp, agent_name, ship_symbol, session_id, endpoint_name, new_credits, status_code, error_code, event_params)
         values (%s, NOW(), %s, %s, %s, %s, %s, %s, %s, %s) on conflict(ship_symbol, event_timestamp) do nothing;"""
         return try_execute_upsert(
@@ -101,7 +125,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 starting_credits,
                 0,
                 0,
-                json.dumps({"script_name": behaviour_name}),
+                json.dumps(behaviour_params),
             ),
         )
 
