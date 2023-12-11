@@ -53,10 +53,10 @@ def test_plot_system_nav():
     pathfinder = PathFinder(connection=get_connection())
     assert pathfinder is not None
     source = Waypoint(
-        "X1-U49", "X1-U49-B6", "ORANGE_STAR", -57, 342, [], [], None, None
+        "X1-U49", "X1-U49-B6", "ORANGE_STAR", -57, 342, [], [], None, None, [], False
     )
     destination = Waypoint(
-        "X1-U49", "X1-U49-FA4A", "ORANGE_STAR", -25, -7, [], [], None, None
+        "X1-U49", "X1-U49-FA4A", "ORANGE_STAR", -25, -7, [], [], None, None, [], False
     )
     return_route = pathfinder.plot_system_nav("X1-U49", source, destination, 400)
     assert return_route is not None

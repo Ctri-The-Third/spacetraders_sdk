@@ -1,5 +1,5 @@
 from typing import Protocol, runtime_checkable
-from .models import Waypoint, Survey, Market, Shipyard, JumpGate
+from .models import Waypoint, Survey, Market, Shipyard, JumpGate, ConstructionSite
 from .responses import SpaceTradersResponse
 from abc import abstractmethod
 
@@ -221,6 +221,14 @@ class SpaceTradersClient(Protocol):
         self, ship: "Ship", trade_symbol: str, units: int
     ) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/jettison"""
+
+        pass
+
+    @abstractmethod
+    def system_construction(
+        self, wp: Waypoint
+    ) -> ConstructionSite or SpaceTradersResponse:
+        """/systems/{symbol}/waypoints/{waypointSymbol}/construction}"""
 
         pass
 

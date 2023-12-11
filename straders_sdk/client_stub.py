@@ -151,6 +151,11 @@ class SpaceTradersStubClient:
 
         pass
 
+    def system_construction(self, wp: Waypoint) -> SpaceTradersResponse:
+        """/systems/{systemSymbol}/waypoints/{waypointSymbol}/construct"""
+
+        pass
+
     def system_market(
         self, system_symbol: str, waypoint_symbol: str
     ) -> Market or SpaceTradersResponse:

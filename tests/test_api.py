@@ -3,7 +3,7 @@ from straders_sdk.ship import Ship
 from straders_sdk.models import ShipMount
 from straders_sdk.utils import ApiConfig
 
-BASE_URL = "https://stoplight.io/"
+BASE_URL = "https://stoplight.io"
 VERSION = "mocks/spacetraders/spacetraders/96627693"
 TOKEN = "token"
 
@@ -55,4 +55,30 @@ def test_market():
 
     wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
     resp = client.system_market(wp)
+    assert resp
+
+
+def test_waypoint():
+    client = SpaceTradersApiClient("token", BASE_URL, VERSION)
+
+    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+
+    assert wp
+
+
+def test_construction():
+    client = SpaceTradersApiClient("token", BASE_URL, VERSION)
+
+    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    resp = client.system_construction(wp)
+    assert resp
+
+
+def test_supply_construction_site():
+    client = SpaceTradersApiClient("token", BASE_URL, VERSION)
+    ship = Ship()
+    ship.name = "test"
+    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    resp = client.construction_supply(wp, ship, "CONSTRUCTION_MATERIALS", 1)
+
     assert resp

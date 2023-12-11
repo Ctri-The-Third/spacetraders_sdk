@@ -30,6 +30,31 @@ class FuelInfo:
 
 
 @dataclass
+class ConstructionSite:
+    waypoint_symbol: str
+    materials: list["ConstructionSiteMaterial"]
+    complete: bool
+
+    @classmethod
+    def from_json(cls, json_data: dict):
+        return cls(
+            json_data["symbol"],
+            [
+                ConstructionSiteMaterial(*material.values())
+                for material in json_data.get("materials", [])
+            ],
+            json_data["isComplete"],
+        )
+
+
+@dataclass
+class ConstructionSiteMaterial:
+    symbol: str
+    required: int
+    fulfilled: int
+
+
+@dataclass
 class ShipRequirements:
     crew: int = 0
     module_slots: int = 0
@@ -310,6 +335,8 @@ class Waypoint(SymbolClass):
     traits: list[WaypointTrait]
     chart: dict
     faction: dict
+    modifiers: list
+    under_construction: bool
 
     @classmethod
     def from_json(cls, json_data: dict):
@@ -323,6 +350,8 @@ class Waypoint(SymbolClass):
             json_data["chart"] = {}
         if "faction" not in json_data:
             json_data["faction"] = {}
+        modifiers = [s["symbol"] for s in json_data.get("modifiers", [])]
+
         return_obj = cls(
             json_data["systemSymbol"],
             json_data["symbol"],
@@ -333,6 +362,8 @@ class Waypoint(SymbolClass):
             json_data["traits"],
             json_data["chart"],
             json_data["faction"],
+            modifiers,
+            json_data.get("isUnderConstruction", False),
         )
         new_traits = []
         for old_trait in return_obj.traits:

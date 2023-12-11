@@ -12,14 +12,12 @@ def _upsert_waypoint(connection, waypoint: Waypoint):
         )  # a system waypoint will not return any traits. Even if it's uncharted, we've checked it.
         # a waypoint with exactly zero traits that has been checked is a jump gate, and will have a chart
         # if it'snot been charted, then it's UNCHARTED and the first condition gets it.
-        sql = """INSERT INTO waypoints (waypoint_symbol, type, system_symbol, x, y, checked)
-                VALUES (%s, %s, %s, %s, %s, %s)
+        sql = """INSERT INTO waypoints (waypoint_symbol, type, system_symbol, x, y, modifiers, under_construction, checked)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (waypoint_symbol) DO UPDATE
-                    SET 
-                    type = EXCLUDED.type
-                , system_symbol = EXCLUDED.system_symbol
-                , x = EXCLUDED.x, y = EXCLUDED.y
-                , checked = EXCLUDED.checked"""
+                    SET checked = EXCLUDED.checked
+                , modifiers = EXCLUDED.modifiers
+                , under_construction = EXCLUDED.under_construction"""
         try_execute_upsert(
             connection,
             sql,
@@ -29,6 +27,8 @@ def _upsert_waypoint(connection, waypoint: Waypoint):
                 waypoint.system_symbol,
                 waypoint.x,
                 waypoint.y,
+                waypoint.modifiers,
+                waypoint.under_construction,
                 checked,
             ),
         )
@@ -36,8 +36,7 @@ def _upsert_waypoint(connection, waypoint: Waypoint):
         for trait in waypoint.traits:
             sql = """INSERT INTO waypoint_traits (waypoint_symbol, trait_symbol, name, description)
                     VALUES (%s, %s, %s, %s)
-                    ON CONFLICT (waypoint_symbol, trait_symbol) DO UPDATE
-                        SET name = EXCLUDED.name, description = EXCLUDED.description"""
+                    ON CONFLICT (waypoint_symbol, trait_symbol) DO nothing;"""
             try_execute_upsert(
                 connection,
                 sql,

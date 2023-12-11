@@ -17,6 +17,8 @@ from .models import (
     Survey,
     Market,
     MarketTradeGoodListing,
+    ConstructionSite,
+    ConstructionSiteMaterial,
     Shipyard,
     System,
     JumpGate,
@@ -518,6 +520,17 @@ class SpaceTradersApiClient(SpaceTradersClient):
             return System.from_json(resp.data)
         return resp
 
+    def system_construction(
+        self, wp: Waypoint
+    ) -> ConstructionSite or SpaceTradersResponse:
+        url = _url(f"systems/{wp.system_symbol}/waypoints/{wp.symbol}/construction")
+        resp = get_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
+        if resp:
+            return ConstructionSite.from_json(resp.data)
+        return resp
+
     def system_market(self, wp: Waypoint) -> Market:
         # /systems/{systemSymbol}/waypoints/{waypointSymbol}/market
         url = _url(f"systems/{wp.system_symbol}/waypoints/{wp.symbol}/market")
@@ -617,6 +630,22 @@ class SpaceTradersApiClient(SpaceTradersClient):
         new_ship = Ship.from_json(resp.data.get("ship"))
         new_self = Agent.from_json(resp.data.get("agent"))
         return (new_ship, new_self)
+
+    def construction_supply(
+        self, waypoint: Waypoint, ship: Ship, trade_symbol: str, units: int
+    ):
+        url = _url(
+            f"systems/{waypoint.system_symbol}/waypoints/{waypoint.symbol}/construction/supply"
+        )
+        data = {"shipSymbol": ship.name, "tradeSymbol": trade_symbol, "units": units}
+        resp = post_and_validate(
+            url,
+            data,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
+        )
+        return resp
 
     def contracts_deliver(
         self, contract: Contract, ship: Ship, trade_symbol: str, units: int

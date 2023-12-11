@@ -1,5 +1,5 @@
 from typing import Protocol, runtime_checkable
-from .models import Waypoint, Survey, Market, Shipyard, Agent
+from .models import Waypoint, Survey, Market, Shipyard, Agent, ConstructionSite
 from .ship import Ship
 from .client_interface import SpaceTradersClient
 import straders_sdk.utils as utils
@@ -613,6 +613,23 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         self.log_event(
             "ship_jettison_cargo", ship.name, url, response, duration_seconds=duration
         )
+        pass
+
+    def system_construction(
+        self, wp: Waypoint, response=None, duration: float = None
+    ) -> ConstructionSite or SpaceTradersResponse:
+        """/systems/{symbol}/waypoints/{waypointSymbol}/construction}"""
+        url = _url(f"systems/:system_symbol/waypoints/:waypoint_symbol/construction")
+        self.log_event(
+            "system_construction", "GLOBAL", url, response, duration_seconds=duration
+        )
+
+        pass
+
+    def construction_supply(
+        self, wp: Waypoint, ship: "Ship", trade_symbol, quantity, response, duration
+    ):
+        # put this down with the contracts stuff
         pass
 
     def system_market(

@@ -501,6 +501,22 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.db_client.update(resp)
         return resp
 
+    def system_construction(self, wp: Waypoint):
+        """View any construction site at a given waypoint. If there is no construction site, updates the supplied waypoint to reflect that."""
+
+        start = datetime.now()
+        resp = self.api_client.system_construction(wp)
+        self.logging_client.system_construction(
+            wp, resp, (datetime.now() - start).total_seconds()
+        )
+
+        if resp:
+            self.db_client.update(resp)
+        if not resp and resp.status_code == 404:
+            wp.under_construction = False
+            self.db_client.update(wp)
+        return resp
+
     def system_shipyard(
         self, wp: Waypoint, force_update=False
     ) -> Shipyard or SpaceTradersResponse:
@@ -1068,6 +1084,27 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         )
         if resp:
             ship.update(resp.data)
+            self.update(ship)
+        return resp
+
+    def construction_supply(
+        self, waypoint: Waypoint, ship: Ship, trade_symbol: str, quantity: int
+    ) -> SpaceTradersResponse:
+        start = datetime.now()
+        resp = self.api_client.construction_supply(
+            waypoint, ship, trade_symbol, quantity
+        )
+        self.logging_client.construction_supply(
+            waypoint,
+            ship,
+            trade_symbol,
+            quantity,
+            resp,
+            (datetime.now() - start).total_seconds(),
+        )
+        if resp:
+            ship.update(resp.data)
+            self.update(resp.data)
             self.update(ship)
         return resp
 

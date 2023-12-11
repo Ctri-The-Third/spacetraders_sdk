@@ -53,7 +53,9 @@ def test_get_jumpgates():
     )
     client.update(test_jumpgate)
 
-    wayp = Waypoint("SECT-SYS", "SECT-SYS-TESTJUMP", "JUMP_GATE", 5, 5, [], [], {}, {})
+    wayp = Waypoint(
+        "SECT-SYS", "SECT-SYS-TESTJUMP", "JUMP_GATE", 5, 5, [], [], {}, {}, [], False
+    )
     jump = client.system_jumpgate(wayp)
     assert jump.waypoint_symbol == "SECT-SYS-TESTJUMP"
     assert jump.connected_waypoints == ["test_destination1", "test_destination2"]
@@ -104,12 +106,42 @@ def test_waypoints_by_coordinate():
     assert len(waypoints) > 1
     for _, w in waypoints.items():
         assert w.traits
+        assert w.modifiers
+
+
+def test_waypoint(waypoint_response_data):
+    client = SpaceTradersPostgresClient(
+        ST_HOST, ST_NAME, ST_USER, ST_PASS, TEST_AGENT_NAME, db_port=ST_PORT
+    )
+    test_waypoint = Waypoint.from_json(waypoint_response_data)
+    resp = client.update(test_waypoint)
+
+    wp = client.waypoints_view_one("X1-TEST", "X1-TEST-A1")
+    assert wp
+    assert "STRIPPED" in wp.modifiers
+    assert wp.under_construction
+
+
+def test_waypoints(waypoint_response_data):
+    client = SpaceTradersPostgresClient(
+        ST_HOST, ST_NAME, ST_USER, ST_PASS, TEST_AGENT_NAME, db_port=ST_PORT
+    )
+    test_waypoint = Waypoint.from_json(waypoint_response_data)
+    resp = client.update(test_waypoint)
+
+    wayps = client.waypoints_view("X1-TEST")
+    assert wayps
+    for symbol, wp in wayps.items():
+        assert isinstance(wp, Waypoint)
+        assert wp
+        assert "STRIPPED" in wp.modifiers
+        assert wp.under_construction
 
 
 @pytest.fixture
 def market_response_data():
     return {
-        "symbol": "X1-QV47-A1",
+        "symbol": "X1-TEST-A1",
         "imports": [
             {
                 "symbol": "FOOD",
@@ -250,12 +282,12 @@ def market_response_data():
 @pytest.fixture
 def waypoint_response_data():
     return {
-        "systemSymbol": "X1-QV47",
-        "symbol": "X1-QV47-A1",
+        "systemSymbol": "X1-TEST",
+        "symbol": "X1-TEST-A1",
         "type": "PLANET",
         "x": 17,
         "y": 18,
-        "orbitals": [{"symbol": "X1-QV47-A3"}, {"symbol": "X1-QV47-A2"}],
+        "orbitals": [{"symbol": "X1-TEST-A3"}, {"symbol": "X1-TEST-A2"}],
         "traits": [
             {
                 "symbol": "ROCKY",
@@ -298,8 +330,10 @@ def waypoint_response_data():
                 "description": "A thriving center of commerce where traders from across the galaxy gather to buy, sell, and exchange goods.",
             },
         ],
-        "modifiers": [],
+        "modifiers": [
+            {"symbol": "STRIPPED", "name": "string", "description": "string"}
+        ],
         "chart": {"submittedBy": "VOID", "submittedOn": "2023-10-28T15:58:08.579Z"},
         "faction": {"symbol": "VOID"},
-        "isUnderConstruction": False,
+        "isUnderConstruction": True,
     }

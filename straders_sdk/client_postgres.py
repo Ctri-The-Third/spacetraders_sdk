@@ -199,7 +199,17 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
                 "submittedOn": row[8],
             }
             waypoint = Waypoint(
-                row[2], row[0], row[1], row[3], row[4], [], traits, {}, {}
+                row[2],
+                row[0],
+                row[1],
+                row[3],
+                row[4],
+                [],
+                traits,
+                {},
+                {},
+                row[6],
+                row[7],
             )
             waypoints[waypoint.symbol] = waypoint
         return waypoints
@@ -232,7 +242,17 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             for trait_row in trait_rows:
                 traits.append(WaypointTrait(trait_row[1], trait_row[2], trait_row[3]))
             waypoint = Waypoint(
-                row[2], row[0], row[1], row[3], row[4], [], traits, {}, {}
+                row[2],
+                row[0],
+                row[1],
+                row[3],
+                row[4],
+                [],
+                traits,
+                {},
+                {},
+                row[6],
+                row[7],
             )
             waypoints.append(waypoint)
 
@@ -247,7 +267,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
     def find_waypoints_by_coords(
         self, system_symbol: str, x: int, y: int
     ) -> list[Waypoint] or SpaceTradersResponse:
-        sql = """select w.waypoint_symbol, type, system_symbol, x, y, wt.trait_symbol, wt.name, wt.description 
+        sql = """select w.waypoint_symbol, type, system_symbol, x, y, modifiers, under_construction, wt.trait_symbol, wt.name, wt.description 
         from waypoints w join waypoint_traits wt 
         on w.waypoint_symbol = wt.waypoint_symbol
         where system_symbol = %s and x = %s and y = %s"""
@@ -255,10 +275,31 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         waypoints = {}
         waypoints: dict[str:Waypoint]
         for row in rows:
-            symbol, type, system_symbol, x, y, trait_symbol, name, description = row
+            (
+                symbol,
+                type,
+                system_symbol,
+                x,
+                y,
+                modifiers,
+                under_construction,
+                trait_symbol,
+                name,
+                description,
+            ) = row
             if symbol not in waypoints:
                 waypoints[symbol] = Waypoint(
-                    system_symbol, symbol, type, x, y, [], [], {}, {}
+                    system_symbol,
+                    symbol,
+                    type,
+                    x,
+                    y,
+                    [],
+                    [],
+                    {},
+                    {},
+                    modifiers,
+                    under_construction,
                 )
             waypoints[symbol].traits.append(
                 WaypointTrait(trait_symbol, name, description)
@@ -516,6 +557,13 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
     ) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/jettison"""
 
+        pass
+
+    def system_construction(self, wp: Waypoint) -> SpaceTradersResponse:
+        """/game/systems/{symbol}/construction"""
+        pass
+
+    def construction_supply(self, wp, ship, trade_symbol, quantity):
         pass
 
     def system_market(self, wp: Waypoint) -> Market or SpaceTradersResponse:
