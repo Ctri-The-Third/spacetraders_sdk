@@ -96,5 +96,9 @@ class Contract:
             fulfilled,
         )
 
+    @property
+    def is_expired(self):
+        return self.expiration < datetime.now()
+
     def update(self, json_data: dict):
         self.from_json(json_data)
