@@ -142,7 +142,7 @@ class PathFinder:
     def load_system_graph_from_db(self, system_s: str, fuel_capacity=400):
         "Creates a graph for a given system's refuel points, based on the waypoints in the database."
         graph = Graph()
-        sql = """select w.waypoint_symbol, x,y, wt.trait_symbol = 'MARKETPLACE' from waypoints w
+        sql = """select w.waypoint_symbol, x,y, wt.trait_symbol, modifiers, under_construction = 'MARKETPLACE' from waypoints w
 left join waypoint_Traits wt on wt.waypoint_symbol = w.waypoint_symbol and wt.trait_symbol = 'MARKETPLACE'
                 where system_symbol = %s
 """
@@ -151,7 +151,19 @@ left join waypoint_Traits wt on wt.waypoint_symbol = w.waypoint_symbol and wt.tr
         if not results:
             return None
         nodes = {
-            r[0]: Waypoint("", r[0], "", r[1], r[2], [], t if r[3] else [], {}, {})
+            r[0]: Waypoint(
+                "",
+                r[0],
+                "",
+                r[1],
+                r[2],
+                [],
+                t if r[3] else [],
+                {},
+                {},
+                modifiers=r[4],
+                under_construction=r[5],
+            )
             for r in results
         }
 
