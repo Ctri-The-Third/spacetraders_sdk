@@ -98,6 +98,21 @@ class PathFinder:
             )
         )
 
+    def determine_best_speed(
+        self, source_wp: "Waypoint", target_wp: "Waypoint", fuel_capacity=400
+    ):
+        speeds = ["CRUISE", "BURN", "DRIFT", "STEALTH"]
+        best_speed = "DRIFT"
+        best_time = float("inf")
+        for speed in speeds:
+            new_time = self.calc_travel_time_between_wps_with_fuel(
+                source_wp, target_wp, speed=speed, fuel_capacity=fuel_capacity
+            )
+            if new_time < best_time:
+                best_time = new_time
+                best_speed = speed
+        return best_speed
+
     def load_jump_graph_from_db(self):
         graph = Graph()
         sql = """
