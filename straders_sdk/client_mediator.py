@@ -970,11 +970,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.db_client.update(ship)
         return resp
 
-    def ship_refuel(self, ship: "Ship"):
+    def ship_refuel(self, ship: "Ship", from_cargo: bool = False):
         """/my/ships/{shipSymbol}/refuel"""
 
         start = datetime.now()
-        resp = self.api_client.ship_refuel(ship)
+        resp = self.api_client.ship_refuel(ship, from_cargo)
         self.logging_client.ship_refuel(
             ship, resp, (datetime.now() - start).total_seconds()
         )

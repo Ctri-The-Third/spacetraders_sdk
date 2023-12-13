@@ -169,7 +169,9 @@ class SpaceTradersClient(Protocol):
         pass
 
     @abstractmethod
-    def ship_refuel(self, ship: "Ship") -> SpaceTradersResponse:
+    def ship_refuel(
+        self, ship: "Ship", from_cargo: bool = False
+    ) -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/refuel"""
         pass
 

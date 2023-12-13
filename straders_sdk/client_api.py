@@ -302,8 +302,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
             ship.update(resp.data)
         return resp
 
-    def ship_refuel(self, ship: Ship):
+    def ship_refuel(self, ship: Ship, from_cargo: bool = False):
         "/my/ships/{shipSymbol}/refuel"
+        body = {"fromCargo": from_cargo}
         if ship.nav.status == "IN_ORBIT":
             self.ship_dock(ship)
         if ship.nav.status != "DOCKED":
@@ -311,7 +312,11 @@ class SpaceTradersApiClient(SpaceTradersClient):
 
         url = _url(f"my/ships/{ship.name}/refuel")
         resp = post_and_validate(
-            url, headers=self._headers(), session=self.session, priority=self.priority
+            url,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
+            json=body,
         )
         if resp:
             self.update(resp.data)
