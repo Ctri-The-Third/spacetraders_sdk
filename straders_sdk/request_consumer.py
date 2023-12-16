@@ -68,7 +68,7 @@ class RequestConsumer:
 
                 if package.response.status_code != 429:
                     package.event.set()
-                    print(
+                    self.logger.debug(
                         f"* Completed priority {package.priority} request {package.request.url} after {datetime.now() - package.time_added}"
                     )
                 else:
