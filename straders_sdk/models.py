@@ -225,7 +225,7 @@ class ShipNav:
 
     @property
     def travel_time_remaining(self) -> int:
-        if self.status == "IN_TRANSIT":
+        if self.status == "IN_TRANSIT" or self.arrival_time > datetime.utcnow():
             return (
                 self.arrival_time - min(self.arrival_time, datetime.utcnow())
             ).seconds

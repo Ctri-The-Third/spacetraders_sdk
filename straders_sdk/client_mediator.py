@@ -970,7 +970,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.db_client.update(ship)
         return resp
 
-    def ship_refuel(self, ship: "Ship", from_cargo: bool = False):
+    def ship_refuel(self, ship: "Ship", from_cargo:bool = False ):
         """/my/ships/{shipSymbol}/refuel"""
 
         start = datetime.now()
@@ -1134,9 +1134,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         resp = self.api_client.contracts_fulfill(contract)
         if not resp and resp.error_code == 4504:
             contract.fulfilled = True
+            self.db_client.update(contract)
         self.logging_client.contracts_fulfill(
             contract, resp, (datetime.now() - start).total_seconds()
         )
+        
         if resp:
             self.update(resp)
             self.db_client.update(contract)
@@ -1147,7 +1149,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 transaction = {
                     "transaction": {
                         "waypointSymbol": deliverable.destination_symbol,
-                        "shipSymbol": "GLOBAL",
+                        "shipSymbol": self.current_agent_symbol,
                         "tradeSymbol": deliverable.symbol,
                         "type": contract.type,
                         "units": deliverable.units_fulfilled,
