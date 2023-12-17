@@ -675,7 +675,8 @@ class SpaceTradersApiClient(SpaceTradersClient):
         if not resp:
             print(f"failed to fulfill contract {resp.status_code}, {resp.error}")
             return resp
-
+        if "contract" in resp.data:
+            contract.update(resp.data["contract"])
         return contract
 
 
