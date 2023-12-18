@@ -353,6 +353,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.db_client.update(json_data)
         if isinstance(json_data, Waypoint):
             self.waypoints[json_data.symbol] = json_data
+            self.db_client.update(json_data)
         if isinstance(json_data, Agent):
             self.current_agent = json_data
             self.db_client.update(json_data)
