@@ -6,6 +6,7 @@ from logging import FileHandler, StreamHandler
 from sys import stdout
 from datetime import datetime, timedelta
 import random
+import json, base64
 import time
 from .local_response import LocalSpaceTradersRespose
 import threading
@@ -107,43 +108,19 @@ def request_and_validate(
     return RemoteSpaceTradersRespose(packaged_request.response)
 
 
-def old_request_and_validate(
-    method, url, data=None, json=None, headers=None, params=None
-):
-    if method == "GET":
-        r_method = requests.get
-    elif method == "POST":
-        r_method = requests.post
-    elif method == "PATCH":
-        r_method = requests.patch
+def get_name_from_token(token: str) -> str:
+    # Split the JWT into its three components
 
-    else:
-        return LocalSpaceTradersRespose("Method %s not supported", 0, 0, url)
+    # take the "Bearer " off the front
 
-    start = datetime.now()
-    resp = False
-    try:
-        response = r_method(
-            url, data=data, json=json, headers=headers, params=params, timeout=5
-        )
-    except (requests.exceptions.ConnectionError, TimeoutError, TypeError) as err:
-        logging.error("ConnectionError: %s, %s", url, err)
-        return LocalSpaceTradersRespose(
-            "Could not connect!! network issue?", 404, 0, url
-        )
+    header_b64, payload_b64, signature = token.split(".")
 
-    except Exception as err:
-        logging.error("Error: %s, %s", url, err)
-        return LocalSpaceTradersRespose(f"Could not connect!! {err}", 404, 0, url)
-    _log_response(response)
-    if response.status_code == 429:
-        logging.debug("Rate limited")
-        if st_log_client:
-            st_log_client.log_429(url, RemoteSpaceTradersRespose(response))
-        sleep(0.1)
-        return request_and_validate(method, url, data, json, headers, params)
-    else:
-        return RemoteSpaceTradersRespose(response)
+    # Base64 decode the header and payload
+    payload = json.loads(base64.urlsafe_b64decode(payload_b64 + "=="))
+
+    identifier = payload.get("identifier", None)
+
+    return identifier
 
 
 def get_and_validate(
