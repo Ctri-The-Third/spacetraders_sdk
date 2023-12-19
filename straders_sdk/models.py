@@ -80,14 +80,14 @@ class ShipFrame(SymbolClass):
     @classmethod
     def from_json(cls, json_data: dict):
         return cls(
-            json_data["symbol"],
-            json_data["name"],
-            json_data["description"],
-            json_data["moduleSlots"],
-            json_data["mountingPoints"],
-            json_data["fuelCapacity"],
+            json_data.get("symbol", ""),
+            json_data.get("name", ""),
+            json_data.get("description", ""),
+            json_data.get("moduleSlots", ""),
+            json_data.get("mountingPoints", ""),
+            json_data.get("fuelCapacity", ""),
             json_data.get("condition", 0),
-            ShipRequirements.from_json(json_data["requirements"]),
+            ShipRequirements.from_json(json_data.get("requirements", {})),
         )
 
 
@@ -129,12 +129,14 @@ class ShipMount:
 
     def __init__(self, json_data: dict) -> None:
         self.symbol = json_data["symbol"]
-        self.name = json_data["name"]
+        self.name = json_data.get("name", "")
         self.description = json_data.get("description", None)
         self.strength = json_data.get("strength", None)
 
         self.deposits = [Deposit(d) for d in json_data.get("deposits", [])]
-        self.requirements = ShipRequirements.from_json(json_data["requirements"])
+        self.requirements = ShipRequirements.from_json(
+            json_data.get("requirements", {})
+        )
 
     # this is our standard, even if we're using it to call the default constructor
     @classmethod
@@ -155,12 +157,12 @@ class ShipReactor(SymbolClass):
     @classmethod
     def from_json(cls, json_data: dict):
         return cls(
-            json_data["symbol"],
-            json_data["name"],
-            json_data["description"],
+            json_data.get("symbol", ""),
+            json_data.get("name", ""),
+            json_data.get("description", ""),
             json_data.get("condition", 0),
-            json_data["powerOutput"],
-            ShipRequirements.from_json(json_data["requirements"]),
+            json_data.get("powerOutput", ""),
+            ShipRequirements.from_json(json_data.get("requirements", {})),
         )
 
 
@@ -176,12 +178,12 @@ class ShipEngine(SymbolClass):
     @classmethod
     def from_json(cls, json_data: dict):
         return cls(
-            json_data["symbol"],
-            json_data["name"],
-            json_data["description"],
+            json_data.get("symbol", ""),
+            json_data.get("name", ""),
+            json_data.get("description", ""),
             json_data.get("condition", 0),
-            json_data["speed"],
-            ShipRequirements.from_json(json_data["requirements"]),
+            json_data.get("speed", ""),
+            ShipRequirements.from_json(json_data.get("requirements", {})),
         )
 
 
@@ -212,13 +214,28 @@ class ShipNav:
 
     @classmethod
     def from_json(cls, json_data: dict):
+        for format in [DATE_FORMAT, "%Y-%m-%dT%H:%M:%SZ"]:
+            try:
+                arrival_time = datetime.strptime(json_data["route"]["arrival"], format)
+                break
+            except ValueError:
+                arrival_time = None
+
+        for format in [DATE_FORMAT, "%Y-%m-%dT%H:%M:%SZ"]:
+            try:
+                departure_time = datetime.strptime(
+                    json_data["route"]["departureTime"], format
+                )
+                break
+            except ValueError:
+                departure_time = None
         return cls(
             json_data["systemSymbol"],
             json_data["waypointSymbol"],
             RouteNode.from_json(json_data["route"]["destination"]),
-            RouteNode.from_json(json_data["route"]["departure"]),
-            datetime.strptime(json_data["route"]["arrival"], DATE_FORMAT),
-            datetime.strptime(json_data["route"]["departureTime"], DATE_FORMAT),
+            RouteNode.from_json(json_data["route"]["origin"]),
+            arrival_time,
+            departure_time,
             json_data["status"],
             json_data["flightMode"],
         )

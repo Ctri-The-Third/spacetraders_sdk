@@ -818,6 +818,19 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
         return resp
 
+    def ship_scan_ships(self, ship: Ship) -> SpaceTradersResponse:
+        start = datetime.now()
+        resp = self.api_client.ship_scan_ships(ship)
+        self.logging_client.ship_scan_ships(
+            ship, resp, (datetime.now() - start).total_seconds()
+        )
+        if resp:
+            for ship in resp:
+                if self.current_agent_symbol not in ship.name:
+                    self.update(ship)
+            self.update(ship)
+        return resp
+
     def ship_move(self, ship: "Ship", dest_waypoint_symbol: str):
         """my/ships/:shipSymbol/navigate"""
         if ship.nav.waypoint_symbol == dest_waypoint_symbol:

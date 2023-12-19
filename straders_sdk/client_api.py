@@ -197,6 +197,23 @@ class SpaceTradersApiClient(SpaceTradersClient):
             self.update(resp.data)
         return resp
 
+    def ship_scan_ships(self, ship: Ship) -> SpaceTradersResponse:
+        """returns a list of ships that are in range. Triggers a cooldown.
+        /my/ships/{shipSymbol}/scan/ships"""
+
+        url = _url(f"my/ships/{ship.name}/scan/ships")
+        resp = post_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
+        if resp:
+            self.update(resp.data)
+            ship.update(resp.data)
+            ships = []
+            for ship in resp.data.get("ships"):
+                ships.append(Ship.from_json(ship))
+            return ships
+        return resp
+
     def ship_jump(self, ship: Ship, dest_system_symbol: str):
         "my/ships/:shipSymbol/jump"
         url = _url(f"my/ships/{ship.name}/jump")

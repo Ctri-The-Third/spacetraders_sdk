@@ -26,6 +26,15 @@ def test_ship_survey():
     assert resp
 
 
+def test_ship_scan():
+    client = SpaceTradersApiClient("token", BASE_URL, VERSION)
+    ship = Ship()
+    ship.name = "test"
+
+    resp = client.ship_scan_ships(ship)
+    assert resp
+
+
 def test_ship_mount():
     client = SpaceTradersApiClient("token", BASE_URL, VERSION)
     ship = Ship()

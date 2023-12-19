@@ -189,24 +189,40 @@ class Ship(SpaceTradersInteractive):
 
         # ------------------
         # ---- CREW INFO ----
-        ship.crew_capacity: int = json_data["crew"]["capacity"]
-        ship.crew_current: int = json_data["crew"]["current"]
-        ship.crew_required: int = json_data["crew"]["required"]
-        ship.crew_rotation: str = json_data["crew"]["rotation"]
-        ship.crew_morale: int = json_data["crew"]["morale"]
-        ship.crew_wages: int = json_data["crew"]["wages"]
+        if "crew" in json_data:
+            ship.crew_capacity: int = json_data["crew"]["capacity"]
+            ship.crew_current: int = json_data["crew"]["current"]
+            ship.crew_required: int = json_data["crew"]["required"]
+            ship.crew_rotation: str = json_data["crew"]["rotation"]
+            ship.crew_morale: int = json_data["crew"]["morale"]
+            ship.crew_wages: int = json_data["crew"]["wages"]
+        else:
+            ship.crew_capacity: int = 0
+            ship.crew_current: int = 0
+            ship.crew_required: int = 0
+            ship.crew_rotation: str = ""
+            ship.crew_morale: int = 0
+            ship.crew_wages: int = 0
 
-        ship.cargo_capacity: int = json_data["cargo"]["capacity"]
-        ship.cargo_units_used: int = json_data["cargo"]["units"]
-        ship.cargo_inventory: list[ShipInventory] = [
-            ShipInventory.from_json(d) for d in json_data["cargo"]["inventory"]
-        ]
-
+        if "cargo" in json_data:
+            ship.cargo_capacity: int = json_data["cargo"]["capacity"]
+            ship.cargo_units_used: int = json_data["cargo"]["units"]
+            ship.cargo_inventory: list[ShipInventory] = [
+                ShipInventory.from_json(d) for d in json_data["cargo"]["inventory"]
+            ]
+        else:
+            ship.cargo_capacity: int = 0
+            ship.cargo_units_used: int = 0
+            ship.cargo_inventory: list[ShipInventory] = []
         # ---- FUEL INFO ----
-
-        ship.fuel_capacity = json_data["fuel"]["capacity"]
-        ship.fuel_current = json_data["fuel"]["current"]
-        ship.fuel_consumed_history = json_data["fuel"]["consumed"]
+        if "fuel" in json_data:
+            ship.fuel_capacity = json_data["fuel"]["capacity"]
+            ship.fuel_current = json_data["fuel"]["current"]
+            ship.fuel_consumed_history = json_data["fuel"]["consumed"]
+        else:
+            ship.fuel_capacity = 0
+            ship.fuel_current = 0
+            ship.fuel_consumed_history = {}
         # needs expanded out into a class probably
 
         ship._cooldown_expiration: datetime = None
@@ -214,8 +230,12 @@ class Ship(SpaceTradersInteractive):
         # ----  REACTOR INFO ----
 
         # todo: modules and mounts
-        ship.modules: list[ShipModule] = [ShipModule(d) for d in json_data["modules"]]
-        ship.mounts: list[ShipMount] = [ShipMount(d) for d in json_data["mounts"]]
+        ship.modules: list[ShipModule] = [
+            ShipModule(d) for d in json_data.get("modules", [])
+        ]
+        ship.mounts: list[ShipMount] = [
+            ShipMount(d) for d in json_data.get("mounts", [])
+        ]
         return ship
 
     @property

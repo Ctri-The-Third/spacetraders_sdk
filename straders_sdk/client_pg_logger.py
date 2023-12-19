@@ -358,6 +358,15 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         )
         pass
 
+    def ship_scan_ships(
+        self, ship: "Ship", response=None, duration: float = None
+    ) -> list["Ship"] or SpaceTradersResponse:
+        url = _url(f"my/ships/:ship_name/scan-nearby-ships")
+        self.log_event(
+            "ship_scan_ships", ship.name, url, response, duration_seconds=duration
+        )
+        pass
+
     def ship_move(
         self,
         ship: "Ship",
@@ -442,12 +451,10 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         url = _url(f"my/ships/:ship_name/extract")
         extraction = response.data.get("extraction", {})
         mining_yield = extraction.get("yield", {})
-        event_params = None
+        event_params = {"extraction_waypoint": ship.nav.waypoint_symbol}
         if mining_yield.get("symbol"):
-            event_params = {
-                "trade_symbol": mining_yield.get("symbol"),
-                "units": mining_yield["units"],
-            }
+            event_params["trade_symbol"] = mining_yield.get("symbol")
+            event_params["units"] = mining_yield["units"]
             _upsert_extraction(
                 self.connection,
                 extraction,

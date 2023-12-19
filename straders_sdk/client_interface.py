@@ -142,6 +142,12 @@ class SpaceTradersClient(Protocol):
         pass
 
     @abstractmethod
+    def ship_scan_ships(self, ship: "Ship") -> list["Ship"] or SpaceTradersResponse:
+        """my/ships/:shipSymbol/scan"""
+
+        pass
+
+    @abstractmethod
     def ship_jump(self, ship, dest_symbol_string) -> SpaceTradersResponse:
         """my/ships/:shipSymbol/jump"""
 
