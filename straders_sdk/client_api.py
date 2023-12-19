@@ -56,7 +56,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
         pass
 
     def agents_view_one(self, agent_symbol: str) -> "Agent" or SpaceTradersResponse:
-        url = f"/agents/{agent_symbol}"
+        url = _url(f"/agents/{agent_symbol}")
         resp = get_and_validate(
             url, headers=self._headers(), session=self.session, priority=self.priority
         )
