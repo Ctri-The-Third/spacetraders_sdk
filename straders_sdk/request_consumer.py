@@ -51,7 +51,14 @@ class RequestConsumer:
             if not self.queue.empty():
                 next_request = datetime.now() + interval
                 tupe = self.queue.get()
-                package = tupe[1]
+                if isinstance(tupe, tuple):
+                    package = tupe[1]
+                if isinstance(tupe, PackageedRequest):
+                    package = tupe
+                if not isinstance(package, PackageedRequest):
+                    continue
+                if not package.event or not package.request:
+                    continue
                 package: PackageedRequest
                 try:
                     # print("Doing the thing")

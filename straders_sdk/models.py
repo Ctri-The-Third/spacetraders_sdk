@@ -33,7 +33,7 @@ class FuelInfo:
 class ConstructionSite:
     waypoint_symbol: str
     materials: list["ConstructionSiteMaterial"]
-    complete: bool
+    is_complete: bool
 
     @classmethod
     def from_json(cls, json_data: dict):

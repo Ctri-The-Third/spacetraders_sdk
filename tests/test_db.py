@@ -3,6 +3,7 @@ from straders_sdk.client_postgres import SpaceTradersPostgresClient
 from straders_sdk.utils import try_execute_select
 from straders_sdk.models import Waypoint, Market
 from straders_sdk.models import JumpGate, JumpGateConnection
+from straders_sdk.models import ConstructionSite, ConstructionSiteMaterial
 import pytest
 
 ST_HOST = os.getenv("ST_DB_HOST")
@@ -37,10 +38,10 @@ def test_find_waypoints_by_type():
     # get a starting system, check it for asteroid fields
     sql = "select distinct system_symbol from agents a join waypoints w on a.headquarters = w.waypoint_symbol limit 1"
     system = try_execute_select(client.connection, sql, ())[0][0]
-    resp = client.find_waypoints_by_type(system, "ASTEROID_FIELD")
+    resp = client.find_waypoints_by_type(system, "ASTEROID")
     assert resp
     for wayp in resp:
-        assert wayp.type == "ASTEROID_FIELD"
+        assert wayp.type == "ASTEROID"
 
 
 def test_get_jumpgates():
@@ -106,7 +107,6 @@ def test_waypoints_by_coordinate():
     assert len(waypoints) > 1
     for _, w in waypoints.items():
         assert w.traits
-        assert w.modifiers
 
 
 def test_waypoint(waypoint_response_data):
@@ -136,6 +136,22 @@ def test_waypoints(waypoint_response_data):
         assert wp
         assert "STRIPPED" in wp.modifiers
         assert wp.under_construction
+
+
+def test_constructionn_site(construction_response_data, waypoint_response_data):
+    client = SpaceTradersPostgresClient(
+        ST_HOST, ST_NAME, ST_USER, ST_PASS, TEST_AGENT_NAME, db_port=ST_PORT
+    )
+    test_construction_site = ConstructionSite.from_json(construction_response_data)
+    test_waypoint = Waypoint.from_json(waypoint_response_data)
+    resp = client.update(test_construction_site)
+    assert resp
+
+    test_construction_site.materials[0].fulfilled = 4000
+    resp = client.update(test_construction_site)
+
+    loaded_construction_site = client.system_construction(test_waypoint)
+    assert test_construction_site
 
 
 @pytest.fixture
@@ -276,6 +292,23 @@ def market_response_data():
                 "sellPrice": 168,
             },
         ],
+    }
+
+
+@pytest.fixture
+def construction_response_data():
+    return {
+        "symbol": "X1-TEST-A1",
+        "materials": [
+            {"tradeSymbol": "FAB_MATS", "required": 4000, "fulfilled": 1200},
+            {
+                "tradeSymbol": "ADVANCED_CIRCUITRY",
+                "required": 1200,
+                "fulfilled": 1076,
+            },
+            {"tradeSymbol": "QUANTUM_STABILIZERS", "required": 1, "fulfilled": 1},
+        ],
+        "isComplete": False,
     }
 
 

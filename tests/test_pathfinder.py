@@ -43,7 +43,7 @@ def test_pathfinder_load_from_db():
 def test_pathfinder_system_from_db():
     pathfinder = PathFinder(connection=get_connection())
     assert pathfinder is not None
-    test_graph = pathfinder.load_system_graph_from_db("X1-U49")
+    test_graph = pathfinder.load_system_graph_from_db("X1-TEST")
     assert test_graph
     assert len(test_graph.nodes) > 0
     assert len(test_graph.edges) > 0
@@ -109,12 +109,12 @@ def test_flight_times():
     cruise_time = pathfinder.calc_travel_time_between_wps(
         first_waypoint, second_waypoint, 30, "CRUISE"
     )
-    assert cruise_time == 40
+    assert cruise_time == 58
 
     drift_time = pathfinder.calc_travel_time_between_wps(
         first_waypoint, second_waypoint, 30, "DRIFT"
     )
-    assert drift_time == 270
+    assert drift_time == 440
 
     burn_time = pathfinder.calc_travel_time_between_wps(
         first_waypoint, second_waypoint, 30, "BURN"

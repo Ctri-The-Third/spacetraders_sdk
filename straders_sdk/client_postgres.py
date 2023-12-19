@@ -28,8 +28,12 @@ from .pg_pieces.select_ship import _select_ships, _select_ship_one
 from .pg_pieces.jump_gates import _upsert_jump_gate, select_jump_gate_one
 from .pg_pieces.agents import _upsert_agent, select_agent_one
 from .pg_pieces.contracts import _upsert_contract
+from .pg_pieces.construction_sites import (
+    _upsert_construction_site,
+    select_construction_site_one,
+)
 from .local_response import LocalSpaceTradersRespose
-from .models import RouteNode
+from .models import RouteNode, ConstructionSite
 from .ship import Ship, ShipInventory, ShipNav, ShipModule, ShipMount
 from .utils import try_execute_select, try_execute_upsert
 import psycopg2
@@ -104,6 +108,8 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             return _upsert_contract(
                 self.connection, self.current_agent_symbol, update_obj
             )
+        if isinstance(update_obj, ConstructionSite):
+            return _upsert_construction_site(self.connection, update_obj)
 
     def register(self, callsign, faction="COSMIC", email=None) -> SpaceTradersResponse:
         return dummy_response(__class__.__name__, "register")
@@ -561,6 +567,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
 
     def system_construction(self, wp: Waypoint) -> SpaceTradersResponse:
         """/game/systems/{symbol}/construction"""
+        return select_construction_site_one(self.connection, wp.symbol)
         pass
 
     def construction_supply(self, wp, ship, trade_symbol, quantity):

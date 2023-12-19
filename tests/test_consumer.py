@@ -18,10 +18,11 @@ def test_u_queue():
     assert not rc.RequestConsumer().queue.empty()
 
 
-@pytest.mark.execution_timeout(5)
+@pytest.mark.execution_timeout(1)
 def test_send_some_requets():
     """test that the queue is working"""
-    consumer = rc.RequestConsumer(auto_start=False)
+    consumer = rc.RequestConsumer(auto_start=True)
+
     request = requests.Request("GET", "https://api.spacetraders.io/v2/")
     prepared_request = request.prepare()
     request_1 = rc.PackageedRequest(2, prepared_request, Event())
@@ -33,7 +34,6 @@ def test_send_some_requets():
     consumer.queue.put((request_3.priority, request_3))
 
     responses = []
-    consumer.start()
     while len(responses) < 3:
         if request_1.event.is_set() and 1 not in responses:
             responses.append(1)
@@ -41,11 +41,12 @@ def test_send_some_requets():
             responses.append(2)
         if request_3.event.is_set() and 3 not in responses:
             responses.append(3)
-    consumer.stop()
-    assert responses == [3, 2, 1]
+    # whilst 3,2,1 is the correct prioirty order, the consumer might process request 1 before requests 2 and 3 are added to the queue.
+    assert responses in ([3, 2, 1], [1, 3, 2])
 
 
-@pytest.mark.execution_timeout(5)
+# this test should take about 60 seconds to run
+@pytest.mark.execution_timeout(2)
 def test_send_a_lot_of_requests():
     """test that the consumer is staggering things appropriately"""
     consumer = rc.RequestConsumer(auto_start=False)
@@ -59,7 +60,6 @@ def test_send_a_lot_of_requests():
         consumer.queue.put(tupple)
         many_requests.append(tupple)
         print(f"request {i} queued")
-    consumer.start()
     for i in range(10):
         tupple = (i + 0.5, rc.PackageedRequest(i + 0.5, prepared_request, Event()))
         consumer.queue.put(tupple)
@@ -68,7 +68,8 @@ def test_send_a_lot_of_requests():
     for tupple in many_requests:
         priority, packaged_request = tupple
         packaged_request: rc.PackageedRequest
-        packaged_request.event.wait()
+        packaged_request.event.wait(30)
+        assert packaged_request.event.is_set()
         print(f"request {priority} took {datetime.now() - start_time}")
 
 
