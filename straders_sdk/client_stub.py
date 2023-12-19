@@ -88,6 +88,11 @@ class SpaceTradersStubClient:
 
         pass
 
+    def ship_scan_ships(self, ship: "Ship") -> list["Ship"] or SpaceTradersResponse:
+        """my/ships/:shipSymbol/scan"""
+
+        pass
+
     def ship_siphon(self, ship: "Ship") -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/siphon"""
         pass
