@@ -97,6 +97,7 @@ class NavRoute(JumpGateRoute):
         self.compilation_timestamp: datetime = compilation_timestamp
         self.max_fuel: int = max_fuel
         self.needs_drifting: bool = needs_drifting
+        self.logger = logging.getLogger("NavRoute")
 
     def to_json(self):
         return {

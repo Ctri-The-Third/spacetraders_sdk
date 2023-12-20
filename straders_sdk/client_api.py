@@ -134,7 +134,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
         return resp
 
     def _headers(self) -> dict:
-        return {"Authorization": f"Bearer {self.token}"}
+        if self.token:
+            return {"Authorization": f"Bearer {self.token}"}
+        return {}
 
     def update(self, response_json: dict):
         pass
