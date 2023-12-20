@@ -18,18 +18,19 @@ def _upsert_jump_gate(connect, jump_gate: JumpGate):
         return resp
 
     connection_sql = """INSERT INTO public.jumpgate_connections(
-	s_waypoint_symbol, s_system_symbol, d_system_symbol)
-	VALUES (%s, %s, %s) on conflict do nothing;"""
+	s_waypoint_symbol, s_system_symbol, d_waypoint_symbol, d_system_symbol)
+	VALUES (%s, %s, %s, %s) on conflict do nothing;"""
 
-    for dest_system in jump_gate.connected_waypoints:
-        dest_system: str
+    for dest_waypoint in jump_gate.connected_waypoints:
+        dest_waypoint: str
         resp = try_execute_upsert(
             connect,
             connection_sql,
             (
                 jump_gate.waypoint_symbol,
                 waypoint_slicer(jump_gate.waypoint_symbol),
-                dest_system,
+                dest_waypoint,
+                waypoint_slicer(dest_waypoint),
             ),
         )
         if not resp:
