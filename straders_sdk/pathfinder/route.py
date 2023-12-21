@@ -74,6 +74,41 @@ class JumpGateRoute:
         return self.jumps
 
 
+class JumpGateSystem(System):
+    def __init__(
+        self,
+        symbol: str,
+        name: str,
+        description: str,
+        x: float,
+        y: float,
+        waypoints: list[Waypoint],
+        jump_gate_waypoint: Waypoint,
+    ) -> None:
+        super().__init__(symbol, name, description, x, y, waypoints)
+        self.jump_gate_waypoint: Waypoint = jump_gate_waypoint
+
+    def to_json(self):
+        obj = super().to_json()
+        obj["gateSymbol"] = self.jump_gate_waypoint.to_json()
+
+    @classmethod
+    def from_json(cls, json_data):
+        wayps = []
+        for wp in json_data.get("waypoints", []):
+            wp["systemSymbol"] = json_data["symbol"]
+            wayps.append(Waypoint.from_json(wp))
+        return cls(
+            json_data["symbol"],
+            json_data["sectorSymbol"],
+            json_data["type"],
+            json_data["x"],
+            json_data["y"],
+            wayps,
+            Waypoint.from_json(json_data["gateSymbol"]),
+        )
+
+
 class NavRoute(JumpGateRoute):
     def __init__(
         self,

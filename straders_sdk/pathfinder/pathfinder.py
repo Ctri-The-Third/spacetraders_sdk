@@ -138,13 +138,16 @@ select distinct * from sources
         results = try_execute_select(self.connection, sql, ())
 
         if results:
-            nodes = {
-                row[1]: JumpGateSystem(
-                    row[0], row[1], row[2], row[3], row[4], row[5], []
+            for result in results:
+                graph.add_node(
+                    result[1],
+                    symbol=result[1],
+                    sectorSymbol=result[2],
+                    type=result[3],
+                    x=result[4],
+                    y=result[5],
+                    gateSymbol=result[0],
                 )
-                for row in results
-            }
-            graph.add_nodes_from(nodes)
 
         else:
             return graph
@@ -156,13 +159,16 @@ select distinct * from sources
             return graph
         for row in results:
             try:
-                connections.append((nodes[row[0]], nodes[row[1]]))
+                # connections.append((nodes[row[0]], nodes[row[1]]))
+                connections.append((row[0], row[1]))
                 pass
             except KeyError:
                 pass
                 # this happens when the gate we're connected to is not one that we've scanned yet.
         if results:
             graph.add_edges_from(connections)
+        for neighbour in graph.neighbors("X1-PK16"):
+            print(neighbour)
         return graph
 
     def load_system_graph_from_db(self, system_s: str, fuel_capacity=400):
@@ -285,9 +291,9 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
 
         "`bypass_check` is for when we're looking for the nearest nodes to the given locations, when either the source or destination are not on the jump network."
         if not bypass_check:
-            if start not in graph.nodes:
+            if start.symbol not in graph.nodes:
                 return None
-            if goal not in graph.nodes:
+            if goal.symbol not in graph.nodes:
                 return None
         # freely admit used chatgpt to get started here.
 
@@ -301,12 +307,12 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
 
         # note to self - this dictionary is setting all g_scores to infinity- they have not been calculated yet.
         g_score = {node: float("inf") for node in graph.nodes}
-        g_score[start] = g_score[start.symbol] = 0
+        g_score[start.symbol] = 0
 
         # Data structure to store the f-score (g-score + heuristic) for each node
         f_score = {node: float("inf") for node in graph.nodes}
         f_score = {}
-        f_score[start.symbol] = f_score[start] = self.h(
+        f_score[start.symbol] = self.h(
             start, goal
         )  # heuristic function - standard straight-line X/Y distance
 
@@ -336,21 +342,24 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
                 # Reconstruct the shortest path
                 # the path will have been filled with every other step we've taken so far.
 
-            for neighbour in graph.neighbors(current):
+            for neighbour_s in graph.neighbors(current.symbol):
+                neighbour = JumpGateSystem.from_json(graph.nodes[neighbour_s])
+                if not neighbour:
+                    print(f"{current.symbol} -> neighbour {neighbour_s}  not found")
                 # yes, g_score is the total number of jumps to get to this node.
-                tentative_global_score = g_score[current] + 1
+                tentative_global_score = g_score[current.symbol] + 1
 
-                if tentative_global_score < g_score[neighbour]:
+                if tentative_global_score < g_score[neighbour_s]:
                     # what if the neighbour hasn't been g_scored yet?
                     # ah we inf'd them, so unexplored is always higher
                     # so if we're in here, neighbour is the one behind us.
 
                     came_from[neighbour] = current
-                    g_score[neighbour] = tentative_global_score
-                    f_score[neighbour] = tentative_global_score + self.h(
+                    g_score[neighbour_s] = tentative_global_score
+                    f_score[neighbour_s] = tentative_global_score + self.h(
                         neighbour, goal
                     )
-                    print(f" checked: {f_score[neighbour]}")
+                    print(f" checked: {neighbour_s}:\t{f_score[neighbour_s]}")
                     # this f_score part I don't quite get - we're storing number of jumps + remaining distance
                     # I can't quite visualise but but if we're popping the lowest f_score in the heap - then we get the one that's closest?
                     # which is good because if we had variable jump costs, that would be factored into the g_score - for example time.
@@ -358,7 +367,7 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
                     # this function isn't built with that in mind tho so I'm not gonna bother _just yet_
 
                     # add this neighbour to the priority queue - the one with the lowest remaining distance will be the next one popped.
-                    heapq.heappush(open_set, (f_score[neighbour], neighbour))
+                    heapq.heappush(open_set, (f_score[neighbour.symbol], neighbour))
         final_route = compile_route(start, goal, [])
         final_route.jumps = -1
         final_route.save_to_file(self.target_folder)

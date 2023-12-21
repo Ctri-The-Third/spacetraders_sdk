@@ -216,10 +216,10 @@ class SpaceTradersApiClient(SpaceTradersClient):
             return ships
         return resp
 
-    def ship_jump(self, ship: Ship, dest_system_symbol: str):
+    def ship_jump(self, ship: Ship, dest_waypoint_symbol: str):
         "my/ships/:shipSymbol/jump"
         url = _url(f"my/ships/{ship.name}/jump")
-        data = {"systemSymbol": dest_system_symbol}
+        data = {"waypointSymbol": dest_waypoint_symbol}
         resp = post_and_validate(
             url,
             data,
