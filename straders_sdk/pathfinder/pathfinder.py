@@ -8,7 +8,7 @@ from networkx import Graph
 from straders_sdk.models import System, Waypoint, WaypointTrait
 from networkx import Graph
 from straders_sdk.utils import try_execute_select
-from straders_sdk.pathfinder.route import JumpGateRoute
+from straders_sdk.pathfinder.route import JumpGateRoute, JumpGateSystem
 from straders_sdk.pathfinder.route import NavRoute
 
 OUTPUT_PATH = "resources/routes/"
@@ -66,7 +66,8 @@ class PathFinder:
             with open(file_path, "r") as f:
                 data = json.loads(f.read())
                 systems = {
-                    node["symbol"]: System.from_json(node) for node in data["nodes"]
+                    node["symbol"]: JumpGateSystem.from_json(node)
+                    for node in data["nodes"]
                 }
                 graph = Graph()
                 graph.add_nodes_from(systems)
@@ -112,9 +113,20 @@ class PathFinder:
     def load_jump_graph_from_db(self):
         graph = Graph()
         sql = """
-            select s_waypoint_Symbol, s_system_symbol, sector_symbol, type, x ,y 
-            from jumpgate_connections jc 
-            join systems s on jc.s_system_symbol = s.system_symbol
+with sources as ( 
+select s_waypoint_Symbol, s_system_symbol, sector_symbol, s.type, s.x ,s.y 
+from jumpgate_connections jc 
+join systems s on jc.s_system_symbol = s.system_symbol
+join waypoints w on jc.s_waypoint_Symbol = w.waypoint_Symbol
+	where (w.under_construction is null or w.under_construction is False) 
+union
+select d_waypoint_Symbol, d_system_symbol, sector_symbol, s.type, s.x ,s.y 
+from jumpgate_connections jc 
+join systems s on jc.s_system_symbol = s.system_symbol
+join waypoints w on jc.s_waypoint_Symbol = w.waypoint_Symbol
+	where (w.under_construction is null or w.under_construction is False) 
+	)
+select distinct * from sources 
             """
 
         # the graph should be populated with Systems and Connections.
@@ -127,7 +139,7 @@ class PathFinder:
 
         if results:
             nodes = {
-                row[0]: JumpGateSystem(
+                row[1]: JumpGateSystem(
                     row[0], row[1], row[2], row[3], row[4], row[5], []
                 )
                 for row in results
@@ -145,6 +157,7 @@ class PathFinder:
         for row in results:
             try:
                 connections.append((nodes[row[0]], nodes[row[1]]))
+                pass
             except KeyError:
                 pass
                 # this happens when the gate we're connected to is not one that we've scanned yet.
@@ -563,14 +576,6 @@ def compile_route(
         datetime.now(),
     )
     return route
-
-
-class JumpGateSystem(System):
-    def __init__(
-        self, gate_symbol: str, symbol, sector, type, x, y, connected_waypoints
-    ):
-        super().__init__(symbol, sector, type, x, y, connected_waypoints)
-        self.gate_symbol = gate_symbol
 
 
 def calc_distance_between(src: System, dest: System):
