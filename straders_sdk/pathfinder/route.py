@@ -32,7 +32,7 @@ class JumpGateRoute:
             "end_system": self.end_system.to_json(),
             "jumps": self.jumps,
             "distance": self.distance,
-            "route": [system.symbol for system in self.route],
+            "route": [system.to_json() for system in self.route],
             "seconds_to_destination": self.seconds_to_destination,
             "compilation_timestamp": self.compilation_timestamp.strftime(
                 "%Y-%m-%d %H:%M:%S"
@@ -56,12 +56,13 @@ class JumpGateRoute:
 
     @classmethod
     def from_json(cls, json_data):
+        route_hops = [JumpGateSystem.from_json(r) for r in json_data["route"]]
         route = cls(
             System.from_json(json_data["start_system"]),
             System.from_json(json_data["end_system"]),
             json_data["jumps"],
             json_data["distance"],
-            json_data["route"],
+            route_hops,
             json_data["seconds_to_destination"],
             datetime.fromisoformat(json_data["compilation_timestamp"]),
         )
