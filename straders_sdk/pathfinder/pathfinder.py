@@ -28,6 +28,7 @@ class PathFinder:
     def graph(self) -> Graph:
         if not self._graph:
             self._graph = self.load_jump_graph_from_file()
+
             pass
         if not self._graph:
             self._graph = self.load_jump_graph_from_db()
@@ -64,19 +65,16 @@ class PathFinder:
         "Loads the graph from file, if it exists."
         try:
             with open(file_path, "r") as f:
-                data = json.loads(f.read())
-                systems = {
-                    node["symbol"]: JumpGateSystem.from_json(node)
-                    for node in data["nodes"]
-                }
                 graph = Graph()
-                graph.add_nodes_from(systems)
+                data = json.loads(f.read())
+                for node in data["nodes"]:
+                    if not node:
+                        continue
+                    graph.add_node(node["symbol"], **node)
+
                 compiled_edges = []
                 for edge in data["edges"]:
-                    try:
-                        compiled_edges.append([systems[edge[0]], systems[edge[1]]])
-                    except KeyError:
-                        continue
+                    compiled_edges.append([edge[0], edge[1]])
                 graph.add_edges_from(compiled_edges)
                 return graph
         except (FileNotFoundError, json.JSONDecodeError):
@@ -113,8 +111,9 @@ class PathFinder:
     def load_jump_graph_from_db(self):
         graph = Graph()
         sql = """
+
 with sources as ( 
-select s_waypoint_Symbol, s_system_symbol, sector_symbol, s.type, s.x ,s.y 
+select s_waypoint_Symbol, s_system_symbol, sector_symbol, s.type, s.x ,s.y
 from jumpgate_connections jc 
 join systems s on jc.s_system_symbol = s.system_symbol
 join waypoints w on jc.s_waypoint_Symbol = w.waypoint_Symbol
@@ -122,8 +121,8 @@ join waypoints w on jc.s_waypoint_Symbol = w.waypoint_Symbol
 union
 select d_waypoint_Symbol, d_system_symbol, sector_symbol, s.type, s.x ,s.y 
 from jumpgate_connections jc 
-join systems s on jc.s_system_symbol = s.system_symbol
-join waypoints w on jc.s_waypoint_Symbol = w.waypoint_Symbol
+join systems s on jc.d_system_symbol = s.system_symbol
+join waypoints w on jc.d_waypoint_Symbol = w.waypoint_Symbol
 	where (w.under_construction is null or w.under_construction is False) 
 	)
 select distinct * from sources 
@@ -167,8 +166,7 @@ select distinct * from sources
                 # this happens when the gate we're connected to is not one that we've scanned yet.
         if results:
             graph.add_edges_from(connections)
-        for neighbour in graph.neighbors("X1-PK16"):
-            print(neighbour)
+
         return graph
 
     def load_system_graph_from_db(self, system_s: str, fuel_capacity=400):
@@ -235,13 +233,10 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
         "Save a given graph. by default it'll be the jump network, not a given system one"
         output = {"nodes": [], "edges": [], "saved": datetime.now().isoformat()}
         graph = graph or self._graph
-        nodes = {}
-        System
-        for edge in graph.edges:
-            nodes[edge[0].symbol] = edge[0].to_json()
-            nodes[edge[1].symbol] = edge[1].to_json()
-            output["edges"].append([edge[0].symbol, edge[1].symbol])
+        nodes = {node_key: graph.nodes[node_key] for node_key in graph.nodes}
+        edges = [(edge[0], edge[1]) for edge in graph.edges]
         output["nodes"] = list(nodes.values())
+        output["edges"] = edges
         with open(file_path, "w+") as f:
             f.write(json.dumps(output, indent=4))
         pass
@@ -343,9 +338,11 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
                 # the path will have been filled with every other step we've taken so far.
 
             for neighbour_s in graph.neighbors(current.symbol):
-                neighbour = JumpGateSystem.from_json(graph.nodes[neighbour_s])
+                neighbour = graph.nodes[neighbour_s]
                 if not neighbour:
-                    print(f"{current.symbol} -> neighbour {neighbour_s}  not found")
+                    # print(f"{current.symbol} -> neighbour {neighbour_s}  not found - maybe under construction still?")
+                    continue
+                neighbour = JumpGateSystem.from_json(neighbour)
                 # yes, g_score is the total number of jumps to get to this node.
                 tentative_global_score = g_score[current.symbol] + 1
 
@@ -359,7 +356,7 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
                     f_score[neighbour_s] = tentative_global_score + self.h(
                         neighbour, goal
                     )
-                    print(f" checked: {neighbour_s}:\t{f_score[neighbour_s]}")
+                    # print(f" checked: {neighbour_s}:\t{f_score[neighbour_s]}")
                     # this f_score part I don't quite get - we're storing number of jumps + remaining distance
                     # I can't quite visualise but but if we're popping the lowest f_score in the heap - then we get the one that's closest?
                     # which is good because if we had variable jump costs, that would be factored into the g_score - for example time.
@@ -532,7 +529,8 @@ def calc_travel_time_between_wps(
         multiplier = {"CRUISE": 25, "DRIFT": 250, "BURN": 7.5, "STEALTH": 30}
 
     return round(
-        math.floor(round(max(1, distance))) * (multiplier[flight_mode] / speed) + 15
+        math.floor(round(max(1, distance))) * (multiplier[flight_mode] / max(speed, 1))
+        + 15
     )
 
 
@@ -572,7 +570,7 @@ def compile_route(
     cooldown = 0
     last_system = start_system
     for system in route[:-1]:
-        print(f"last system: {last_system.symbol} to {system.symbol}")
+        # print(f"last system: {last_system.symbol} to {system.symbol}")
         cooldown += calc_distance_between(last_system, system) / 10
         last_system = system
     route = JumpGateRoute(

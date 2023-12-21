@@ -105,7 +105,7 @@ class JumpGateSystem(System):
             json_data["x"],
             json_data["y"],
             wayps,
-            Waypoint.from_json(json_data["gateSymbol"]),
+            json_data["gateSymbol"],
         )
 
 

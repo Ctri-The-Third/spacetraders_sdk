@@ -199,13 +199,35 @@ class SpaceTradersApiClient(SpaceTradersClient):
             self.update(resp.data)
         return resp
 
+    def ship_scan_waypoints(self, ship: Ship) -> SpaceTradersResponse:
+        """returns a list of waypoints that are in range. Triggers a cooldown.
+        /my/ships/{shipSymbol}/scan/waypoints"""
+        url = _url(f"my/ships/{ship.name}/scan/waypoints")
+        resp = post_and_validate(
+            url,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority - COOLDOWN_OFFSET,
+        )
+        if resp:
+            self.update(resp.data)
+            ship.update(resp.data)
+            waypoints = []
+            for waypoint in resp.data.get("waypoints"):
+                waypoints.append(Waypoint.from_json(waypoint))
+            return waypoints
+        return resp
+
     def ship_scan_ships(self, ship: Ship) -> SpaceTradersResponse:
         """returns a list of ships that are in range. Triggers a cooldown.
         /my/ships/{shipSymbol}/scan/ships"""
 
         url = _url(f"my/ships/{ship.name}/scan/ships")
         resp = post_and_validate(
-            url, headers=self._headers(), session=self.session, priority=self.priority
+            url,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority - COOLDOWN_OFFSET,
         )
         if resp:
             self.update(resp.data)
@@ -225,7 +247,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
             data,
             headers=self._headers(),
             session=self.session,
-            priority=self.priority + COOLDOWN_OFFSET,
+            priority=self.priority - COOLDOWN_OFFSET,
         )
         if resp:
             self.update(resp.data)

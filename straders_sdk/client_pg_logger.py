@@ -358,6 +358,12 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         )
         pass
 
+    def ship_scan_waypoints(self, ship: "Ship", response=None, duration: float = None):
+        url = _url(f"my/ships/:ship_name/scan/waypoints")
+        self.log_event(
+            "ship_scan_waypoints", ship.name, url, response, duration_seconds=duration
+        )
+
     def ship_scan_ships(
         self, ship: "Ship", response=None, duration: float = None
     ) -> list["Ship"] or SpaceTradersResponse:
