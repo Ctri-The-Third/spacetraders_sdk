@@ -112,7 +112,7 @@ class PathFinder:
     def load_jump_graph_from_db(self):
         graph = Graph()
         sql = """
-            select s_system_symbol, sector_symbol, type, x ,y 
+            select s_waypoint_Symbol, s_system_symbol, sector_symbol, type, x ,y 
             from jumpgate_connections jc 
             join systems s on jc.s_system_symbol = s.system_symbol
             """
@@ -127,7 +127,9 @@ class PathFinder:
 
         if results:
             nodes = {
-                row[0]: System(row[0], row[1], row[2], row[3], row[4], [])
+                row[0]: JumpGateSystem(
+                    row[0], row[1], row[2], row[3], row[4], row[5], []
+                )
                 for row in results
             }
             graph.add_nodes_from(nodes)
@@ -561,6 +563,14 @@ def compile_route(
         datetime.now(),
     )
     return route
+
+
+class JumpGateSystem(System):
+    def __init__(
+        self, gate_symbol: str, symbol, sector, type, x, y, connected_waypoints
+    ):
+        super().__init__(symbol, sector, type, x, y, connected_waypoints)
+        self.gate_symbol = gate_symbol
 
 
 def calc_distance_between(src: System, dest: System):
