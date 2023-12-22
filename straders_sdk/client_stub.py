@@ -83,6 +83,14 @@ class SpaceTradersStubClient:
         """my/ships/:shipSymbol/course"""
         pass
 
+    def ship_warp(self, ship: "Ship", dest_waypoint_symbol: str):
+        """my/ships/:shipSymbol/warp"""
+        pass
+
+    def ship_jump(self, ship: "Ship", dest_waypoint_symbol: str):
+        """my/ships/:shipSymbol/jump"""
+        pass
+
     def ship_move(self, ship: "Ship", dest_waypoint_symbol: str):
         """my/ships/:shipSymbol/navigate"""
 

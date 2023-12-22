@@ -91,3 +91,23 @@ def test_supply_construction_site():
     resp = client.construction_supply(wp, ship, "CONSTRUCTION_MATERIALS", 1)
 
     assert resp
+
+
+def test_move():
+    client = SpaceTradersApiClient("token", BASE_URL, VERSION)
+    ship = Ship()
+    ship.name = "test"
+    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    resp = client.ship_move(ship, wp)
+
+    assert resp
+
+
+def test_warp():
+    client = SpaceTradersApiClient("token", BASE_URL, VERSION)
+    ship = Ship()
+    ship.name = "test"
+    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    resp = client.ship_warp(ship, wp)
+
+    assert resp

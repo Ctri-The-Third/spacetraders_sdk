@@ -238,6 +238,21 @@ class SpaceTradersApiClient(SpaceTradersClient):
             return ships
         return resp
 
+    def ship_warp(self, ship: Ship, dest_waypoint_symbol: str):
+        "my/ships/:shipSymbol/warp"
+        url = _url(f"my/ships/{ship.name}/warp")
+        data = {"waypointSymbol": dest_waypoint_symbol}
+        resp = post_and_validate(
+            url,
+            data,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority - COOLDOWN_OFFSET,
+        )
+        if resp:
+            self.update(resp.data)
+        return resp
+
     def ship_jump(self, ship: Ship, dest_waypoint_symbol: str):
         "my/ships/:shipSymbol/jump"
         url = _url(f"my/ships/{ship.name}/jump")

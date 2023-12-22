@@ -6,7 +6,7 @@ import straders_sdk.utils as utils
 from .responses import SpaceTradersResponse
 from .pg_pieces.transactions import _upsert_transaction
 from .pg_pieces.extractions import _upsert_extraction
-from straders_sdk.utils import try_execute_select, try_execute_upsert
+from straders_sdk.utils import try_execute_select, try_execute_upsert, waypoint_slicer
 import psycopg2
 import uuid
 import json
@@ -393,6 +393,28 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         )
 
         pass
+
+    def ship_warp(
+        self,
+        ship: "Ship",
+        dest_waypoint_symbol: str,
+        response=None,
+        duration: float = None,
+    ) -> SpaceTradersResponse:
+        """my/ships/:shipSymbol/warp"""
+        url = _url(f"my/ships/:ship_name/warp")
+        event_params = {
+            "destination_waypoint": dest_waypoint_symbol,
+            "destination_system": waypoint_slicer(dest_waypoint_symbol),
+        }
+        self.log_event(
+            "ship_warp",
+            ship.name,
+            url,
+            response,
+            event_params,
+            duration_seconds=duration,
+        )
 
     def ship_jump(
         self,

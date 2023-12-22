@@ -485,6 +485,14 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
 
         return dummy_response(__class__.__name__, "ship_scan_ships")
 
+    def ship_warp(
+        self, ship: "Ship", dest_waypoint_symbol: str
+    ) -> SpaceTradersResponse:
+        """my/ships/:shipSymbol/warp"""
+
+        return dummy_response(__class__.__name__, "ship_warp")
+        pass
+
     def ship_jump(
         self, ship: "Ship", dest_waypoint_symbol: str
     ) -> SpaceTradersResponse:

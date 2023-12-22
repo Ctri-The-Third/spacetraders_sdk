@@ -864,6 +864,20 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.ships[ship.name] = ship
         return resp
 
+    def ship_warp(self, ship: "Ship", dest_waypoint_symbol: str):
+        """my/ships/:shipSymbol/warp"""
+
+        start = datetime.now()
+        resp = self.api_client.ship_warp(ship, dest_waypoint_symbol)
+        self.logging_client.ship_warp(
+            ship, dest_waypoint_symbol, resp, (datetime.now() - start).total_seconds()
+        )
+        if resp:
+            ship.update(resp.data)
+            self.db_client.update(ship)
+            self.ships[ship.name] = ship
+        return resp
+
     def ship_jump(self, ship: "Ship", dest_system_symbol: str):
         """my/ships/:shipSymbol/jump"""
         start = datetime.now()

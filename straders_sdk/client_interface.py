@@ -148,6 +148,14 @@ class SpaceTradersClient(Protocol):
         pass
 
     @abstractmethod
+    def ship_warp(
+        self, ship: "Ship", dest_waypoint_symbol: str
+    ) -> SpaceTradersResponse:
+        """my/ships/:shipSymbol/warp"""
+
+        pass
+
+    @abstractmethod
     def ship_jump(self, ship, dest_symbol_string) -> SpaceTradersResponse:
         """my/ships/:shipSymbol/jump"""
 
