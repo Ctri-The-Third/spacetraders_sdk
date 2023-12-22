@@ -49,7 +49,7 @@ class JumpGateRoute:
                 f.write(json.dumps(self.to_json(), indent=2))
         except Exception as e:
             self.logger.warning(
-                "Failed to save route to file, does the folder %s exist? %s",
+                "Failed to save intrasolar route to file, does the folder %s exist? %s",
                 destination_folder,
                 e,
             )
@@ -160,7 +160,7 @@ class NavRoute(JumpGateRoute):
                 f.write(json.dumps(self.to_json(), indent=2))
         except Exception as e:
             self.logger.warning(
-                "Failed to save route to file, does the folder %s exist? %s",
+                "Failed to save Jump Gate route to file, does the folder %s exist? %s",
                 destination_folder,
                 e,
             )
