@@ -54,7 +54,7 @@ def test_ship_unmount():
 def test_ship_jumpgate():
     client = SpaceTradersApiClient("token", BASE_URL, VERSION)
 
-    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    wp = client.waypoints_view_one("OE-PM")
     resp = client.system_jumpgate(wp)
     assert resp
 
@@ -62,7 +62,7 @@ def test_ship_jumpgate():
 def test_market():
     client = SpaceTradersApiClient("token", BASE_URL, VERSION)
 
-    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    wp = client.waypoints_view_one("OE-PM")
     resp = client.system_market(wp)
     assert resp
 
@@ -70,7 +70,9 @@ def test_market():
 def test_waypoint():
     client = SpaceTradersApiClient("token", BASE_URL, VERSION)
 
-    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    wp = client.waypoints_view_one(
+        "OE-PM",
+    )
 
     assert wp
 
@@ -78,7 +80,9 @@ def test_waypoint():
 def test_construction():
     client = SpaceTradersApiClient("token", BASE_URL, VERSION)
 
-    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    wp = client.waypoints_view_one(
+        "OE-PM",
+    )
     resp = client.system_construction(wp)
     assert resp
 
@@ -87,7 +91,7 @@ def test_supply_construction_site():
     client = SpaceTradersApiClient("token", BASE_URL, VERSION)
     ship = Ship()
     ship.name = "test"
-    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    wp = client.waypoints_view_one("OE-PM")
     resp = client.construction_supply(wp, ship, "CONSTRUCTION_MATERIALS", 1)
 
     assert resp
@@ -97,7 +101,7 @@ def test_move():
     client = SpaceTradersApiClient("token", BASE_URL, VERSION)
     ship = Ship()
     ship.name = "test"
-    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    wp = client.waypoints_view_one("OE-PM")
     resp = client.ship_move(ship, wp)
 
     assert resp
@@ -107,7 +111,7 @@ def test_warp():
     client = SpaceTradersApiClient("token", BASE_URL, VERSION)
     ship = Ship()
     ship.name = "test"
-    wp = client.waypoints_view_one("OE-PM", "OE-PM-TR")
+    wp = client.waypoints_view_one("OE-PM")
     resp = client.ship_warp(ship, wp)
 
     assert resp
