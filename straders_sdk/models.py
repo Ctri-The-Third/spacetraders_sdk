@@ -340,6 +340,9 @@ class WaypointTrait(SymbolClass):
             "description": self.description,
         }
 
+    def __dict__(self):
+        return self.to_json()
+
 
 @dataclass
 class Waypoint:
@@ -401,6 +404,9 @@ class Waypoint:
             "chart": {},
             "faction": {},
         }
+
+    def __dict__(self):
+        return self.to_json()
 
     @property
     def is_charted(self) -> bool:
@@ -541,6 +547,9 @@ class System(SymbolClass):
         if isinstance(o, System):
             return self.symbol != o.symbol
         return False
+
+    def __dict__(self) -> dict:
+        return self.to_json()
 
 
 @dataclass
