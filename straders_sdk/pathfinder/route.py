@@ -91,7 +91,7 @@ class JumpGateSystem(System):
 
     def to_json(self):
         obj = super().to_json()
-        obj["gateSymbol"] = self.jump_gate_waypoint.to_json()
+        obj["gateSymbol"] = self.jump_gate_waypoint
 
     @classmethod
     def from_json(cls, json_data):
