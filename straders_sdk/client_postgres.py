@@ -221,7 +221,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         return waypoints
 
     def waypoints_view_one(
-        self, system_symbol, waypoint_symbol, force=False
+        self, waypoint_symbol, force=False
     ) -> Waypoint or SpaceTradersResponse:
         """view a single waypoint in a system.
 
@@ -636,6 +636,9 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             return rows
         for row in rows:
             syst = System(row[0], row[1], row[2], row[3], row[4], [])
+
+            waypoints = self.waypoints_view(system_symbol)
+            syst.waypoints = [w for w in waypoints.values()]
             return syst
 
     def system_shipyard(self, wp: Waypoint) -> Shipyard or SpaceTradersResponse:

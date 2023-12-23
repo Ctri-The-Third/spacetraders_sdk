@@ -342,7 +342,7 @@ class WaypointTrait(SymbolClass):
 
 
 @dataclass
-class Waypoint(SymbolClass):
+class Waypoint:
     system_symbol: str
     symbol: str
     type: str
@@ -500,14 +500,13 @@ class System(SymbolClass):
         )
 
     def to_json(self) -> dict:
-        "does not include waypoints"
         return {
             "symbol": self.symbol,
             "sectorSymbol": self.sector_symbol,
             "type": self.system_type,
             "x": self.x,
             "y": self.y,
-            "waypoints": [],
+            "waypoints": [w.to_json() for w in self.waypoints],
         }
 
     def __hash__(self) -> int:
