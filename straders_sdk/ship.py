@@ -145,6 +145,15 @@ class Ship(SpaceTradersInteractive):
         return False
 
     @property
+    def can_warp(self) -> bool:
+        warp_drives = ["MODULE_WARP_DRIVE_I", "MODULE_WARP_DRIVE_II"]
+        modules = [d for d in self.modules]
+        for warp_drive in warp_drives:
+            if warp_drive in modules:
+                return True
+        return False
+
+    @property
     def cargo_space_remaining(self) -> int:
         return self.cargo_capacity - self.cargo_units_used
 
