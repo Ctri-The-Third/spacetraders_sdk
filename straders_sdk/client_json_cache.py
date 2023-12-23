@@ -351,6 +351,10 @@ def try_load_json_file(*args) -> dict or None:
     try:
         with open(os.path.join(*args), "r") as f:
             return json.load(f)
+    except FileNotFoundError:
+        return LocalSpaceTradersRespose(
+            f"File not found {args}", 0, 0, "client_json_cache.try_load_json_file"
+        )
     except Exception as err:
         logging.getLogger(__name__).error(
             f"Exception {err} while loading json file {args}"
