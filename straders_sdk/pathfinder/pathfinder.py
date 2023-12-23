@@ -22,7 +22,10 @@ class PathFinder:
         self.connection = connection
         self._graph: Graph = None
         self._system_graph: Graph = None
-        pass
+        folders = ["resources", "resources/routes"]
+        for folder in folders:
+            if not os.path.exists(folder):
+                os.makedirs(folder)
 
     @property
     def graph(self) -> Graph:
