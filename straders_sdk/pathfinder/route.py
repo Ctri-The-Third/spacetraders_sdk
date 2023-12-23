@@ -141,7 +141,7 @@ class NavRoute(JumpGateRoute):
             "end_waypoint": self.end_waypoint.to_json(),
             "hops": self.hops,
             "total_distance": self.total_distance,
-            "route": [waypoint.symbol for waypoint in self.route],
+            "route": [waypoint for waypoint in self.route],
             "seconds_to_destination": self.seconds_to_destination,
             "compilation_timestamp": self.compilation_timestamp.strftime(
                 "%Y-%m-%d %H:%M:%S"
