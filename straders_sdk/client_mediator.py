@@ -512,6 +512,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         if not force:
             resp = self.db_client.systems_view_one(system_symbol)
             if resp:
+                self.json_cache_client.update(resp)
                 return resp
         start = datetime.now()
         resp = self.api_client.systems_view_one(system_symbol)
