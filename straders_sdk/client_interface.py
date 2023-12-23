@@ -65,7 +65,7 @@ class SpaceTradersClient(Protocol):
 
     @abstractmethod
     def waypoints_view_one(
-        self, system_symbol, waypoint_symbol, force=False
+        self, waypoint_symbol, force=False
     ) -> Waypoint or SpaceTradersResponse:
         """view a single waypoint in a system. Uses cached values by default.
 
@@ -80,9 +80,18 @@ class SpaceTradersClient(Protocol):
 
     @abstractmethod
     def find_waypoints_by_coords(
-        self, system_symbol: str, x: int, y: int
-    ) -> Waypoint or SpaceTradersResponse:
-        pass
+        self, system: str, x: int, y: int
+    ) -> list[Waypoint] or SpaceTradersResponse:
+        """find a waypoint by its coordinates. Only searches cached values.
+
+        Args:
+            `system` (str): The symbol of the system to search in.
+            `x` (int): The x coordinate of the waypoint.
+            `y` (int): The y coordinate of the waypoint.
+
+        Returns:
+            Either a Waypoint object or None if no matching waypoint is found.
+        """
 
     @abstractmethod
     def find_waypoints_by_trait(

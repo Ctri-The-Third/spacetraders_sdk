@@ -1,5 +1,5 @@
 from .utils import get_and_validate, get_and_validate_paginated, post_and_validate, _url
-from .utils import ApiConfig, _log_response
+from .utils import ApiConfig, _log_response, waypoint_slicer
 from .client_interface import SpaceTradersInteractive, SpaceTradersClient
 
 from .responses import SpaceTradersResponse
@@ -22,6 +22,7 @@ from .client_api import SpaceTradersApiClient
 from .client_stub import SpaceTradersStubClient
 from .client_postgres import SpaceTradersPostgresClient
 from .client_pg_logger import SpaceTradersPostgresLoggerClient
+from .client_json_cache import SpaceTradersCacheClient
 from threading import Lock
 import logging
 
@@ -34,6 +35,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
     api_client: SpaceTradersClient
     db_client: SpaceTradersClient
+    json_cache_client: SpaceTradersClient
     current_agent: Agent
     ships: dict[str, Ship]
     waypoints: dict[str, Waypoint]
@@ -107,6 +109,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 db_user,
                 db_pass,
             )
+        self.json_cache_client = SpaceTradersCacheClient()
         self.api_client = SpaceTradersApiClient(
             token=token,
             base_url=base_url,
@@ -345,6 +348,9 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 pass  # this belongs to a ship, can't exist by itself. Call ship.update(json_data) instead
             # if "transaction" in json_data:
             #    self.logging_client.update(json_data)
+        if isinstance(json_data, System):
+            self.json_cache_client.update(json_data)
+            self.db_client.update(json_data)
         if isinstance(json_data, Survey):
             self.surveys[json_data.signature] = json_data
             self.db_client.update(json_data)
@@ -353,6 +359,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.db_client.update(json_data)
         if isinstance(json_data, Waypoint):
             self.waypoints[json_data.symbol] = json_data
+            self.json_cache_client.update(json_data)
             self.db_client.update(json_data)
         if isinstance(json_data, Agent):
             self.current_agent = json_data
@@ -365,12 +372,16 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.db_client.update(json_data)
 
     def waypoints_view_one(
-        self, system_symbol, waypoint_symbol, force=False
+        self, waypoint_symbol, force=False
     ) -> Waypoint or SpaceTradersResponse:
         # check self
+        system_symbol = waypoint_slicer(waypoint_symbol)
         if waypoint_symbol in self.waypoints and not force:
             return self.waypoints[waypoint_symbol]
-
+        if not force:
+            wayp = self.json_cache_client.waypoints_view_one(waypoint_symbol)
+            if wayp:
+                return wayp
         # check db
         if not force:
             wayp = self.db_client.waypoints_view_one(system_symbol, waypoint_symbol)
@@ -406,6 +417,10 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         # check cache
         if not force and system_symbol in self.system_waypoints:
             return self.system_waypoints[system_symbol]
+        if not force:
+            resp = self.json_cache_client.waypoints_view(system_symbol)
+            if resp:
+                return resp
 
         if not force:
             new_wayps = self.db_client.waypoints_view(system_symbol)
@@ -489,6 +504,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         Returns:
             Either a System object or a SpaceTradersResponse object on failure.
         """
+        if not force:
+            resp = self.json_cache_client.systems_view_one(system_symbol)
+            if resp:
+                return resp
+
         if not force:
             resp = self.db_client.systems_view_one(system_symbol)
             if resp:
@@ -650,7 +670,9 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         survey = self.db_client.find_survey_best(waypoint_symbol)
         return survey
 
-    def find_waypoints_by_coords(self, system: str, x: int, y: int) -> Waypoint or None:
+    def find_waypoints_by_coords(
+        self, system: str, x: int, y: int
+    ) -> list[Waypoint] or None:
         """find a waypoint by its coordinates. Only searches cached values.
 
         Args:
@@ -661,6 +683,9 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         Returns:
             Either a Waypoint object or None if no matching waypoint is found.
         """
+        resp = self.json_cache_client.find_waypoints_by_coords(system, x, y)
+        if resp:
+            return resp
         resp = self.db_client.find_waypoints_by_coords(system, x, y)
         return resp
 
@@ -676,6 +701,9 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         returns:
             Either a Waypoint object or a SpaceTradersResponse object on API failure.
             If no matching waypoint is found and no errors occur, None is returned."""
+        resp = self.json_cache_client.find_waypoints_by_type(system_wp, waypoint_type)
+        if resp:
+            return resp
 
         resp = []
         for wayp in self.waypoints_view(system_wp).values():
@@ -720,6 +748,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             Either a Waypoint object or a SpaceTradersResponse object on API failure.
             If no matching waypoint is found and no errors occur, None is returned.
         """
+        resp = self.json_cache_client.find_waypoints_by_type_one(
+            system_wp, waypoint_type
+        )
+        if resp:
+            return resp
+
         for waypoint in self.waypoints.values():
             if waypoint.system_symbol == system_wp and waypoint.type == waypoint_type:
                 return waypoint
@@ -733,6 +767,10 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
     def find_waypoints_by_trait(
         self, system_symbol: str, trait: str
     ) -> list[Waypoint] or SpaceTradersResponse:
+        resp = self.json_cache_client.find_waypoints_by_trait(system_symbol, trait)
+        if resp:
+            return resp
+
         resp = []
         for wayp in self.waypoints_view(system_symbol).values():
             wayp: Waypoint
@@ -776,6 +814,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
         Returns:
             Either a Waypoint object or None if no matching waypoint is found."""
+        resp = self.json_cache_client.find_waypoints_by_trait_one(
+            system_wp, trait_symbol
+        )
+        if resp:
+            return resp
+
         for waypoint in self.waypoints.values():
             for trait in waypoint.traits:
                 if waypoint.system_symbol == system_wp and trait.symbol == trait_symbol:

@@ -42,7 +42,7 @@ class SpaceTradersStubClient:
         pass
 
     def waypoints_view_one(
-        self, system_symbol, waypoint_symbol, force=False
+        self, waypoint_symbol, force=False
     ) -> Waypoint or SpaceTradersResponse:
         """view a single waypoint in a system. Uses cached values by default.
 

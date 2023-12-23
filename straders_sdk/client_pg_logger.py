@@ -268,7 +268,6 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
 
     def waypoints_view_one(
         self,
-        system_symbol,
         waypoint_symbol,
         force=False,
         response=None,

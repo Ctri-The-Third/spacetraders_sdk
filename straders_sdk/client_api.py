@@ -10,6 +10,7 @@ from .utils import (
     post_and_validate,
     get_and_validate_paginated,
     get_and_validate_page,
+    waypoint_slicer,
 )
 from .local_response import LocalSpaceTradersRespose  #
 from .models import (
@@ -91,8 +92,9 @@ class SpaceTradersApiClient(SpaceTradersClient):
         return resp
 
     def waypoints_view_one(
-        self, system_symbol, waypoint_symbol, force=False
+        self, waypoint_symbol, force=False
     ) -> Waypoint or SpaceTradersResponse:
+        system_symbol = waypoint_slicer(waypoint_symbol)
         if waypoint_symbol == "":
             raise ValueError("waypoint_symbol cannot be empty")
         url = _url(f"systems/{system_symbol}/waypoints/{waypoint_symbol}")
