@@ -20,8 +20,9 @@ class PathFinder:
         self.target_folder = OUTPUT_PATH
         self.expiration_window = timedelta(days=1)
         self.connection = connection
-        self._graph: Graph = None
+        self._jump_graph: Graph = None
         self._system_graph: Graph = None
+        self._warp_graphs: dict = {}
         folders = ["resources", "resources/routes"]
         for folder in folders:
             if not os.path.exists(folder):
@@ -29,15 +30,30 @@ class PathFinder:
 
     @property
     def graph(self) -> Graph:
-        if not self._graph:
-            self._graph = self.load_jump_graph_from_file()
+        if not self._jump_graph:
+            self._jump_graph = self.load_graph_from_file()
 
             pass
-        if not self._graph:
-            self._graph = self.load_jump_graph_from_db()
+        if not self._jump_graph:
+            self._jump_graph = self.load_jump_graph_from_db()
             self.save_graph()
 
-        return self._graph
+        return self._jump_graph
+
+    def get_warp_graph(self, fuel_capacity) -> Graph:
+        if not fuel_capacity in self._warp_graphs:
+            self._warp_graphs[fuel_capacity] = self.load_graph_from_file(
+                f"resources/warp_graph{fuel_capacity}.json"
+            )
+        if not self._warp_graphs[fuel_capacity]:
+            self._warp_graphs[fuel_capacity] = self.load_warp_graph_from_db(
+                fuel_capacity
+            )
+            self.save_graph(
+                file_path=f"resources/warp_graph{fuel_capacity}.json",
+                graph=self._warp_graphs[fuel_capacity],
+            )
+        return self._warp_graphs[fuel_capacity]
 
     def add_jump_gate_connection(self, system1: System, system2: System) -> None:
         self.graph.add_node(system1.symbol)
@@ -52,7 +68,7 @@ class PathFinder:
         """the heuristic function for A*. note that the value given from the heuristic should be muuuch higher than the calculated cost.
         For each unit of distance (heuristic) converted into time should strongly reinforce that decision.
         """
-        return (((current.x - goal.x) ** 2 + (current.y - goal.y) ** 2) ** 0.5) / 100
+        return (current.x - goal.x) ** 2 + (current.y - goal.y) ** 2
 
     def load_astar(self, start: System, end: System):
         try:
@@ -64,20 +80,29 @@ class PathFinder:
         except (FileNotFoundError, json.JSONDecodeError):
             return None
 
-    def load_jump_graph_from_file(self, file_path="resources/graph.json") -> Graph:
+    def load_system_nav(self, start: Waypoint, end: Waypoint, fuel_capacity: int):
+        try:
+            with open(
+                f"{self.target_folder}{start.symbol}-{end.symbol}[{fuel_capacity}].json",
+                "r",
+            ) as f:
+                data = json.loads(f.read())
+                return NavRoute.from_json(data)
+        except (FileNotFoundError, json.JSONDecodeError) as err:
+            return None
+
+    def load_graph_from_file(self, file_path="resources/graph.json") -> Graph:
         "Loads the graph from file, if it exists."
         try:
             with open(file_path, "r") as f:
                 graph = Graph()
-                data = json.loads(f.read())
-                for node in data["nodes"]:
-                    if not node:
-                        continue
-                    graph.add_node(node["symbol"], **node)
+                all_data = json.loads(f.read())
+                for node, data in all_data["nodes"].items():
+                    graph.add_node(node, **data)
 
                 compiled_edges = []
-                for edge in data["edges"]:
-                    compiled_edges.append([edge[0], edge[1]])
+                for edge in all_data["edges"]:
+                    compiled_edges.append([*edge])
                 graph.add_edges_from(compiled_edges)
                 return graph
         except (FileNotFoundError, json.JSONDecodeError):
@@ -172,6 +197,54 @@ select distinct * from sources
 
         return graph
 
+    def load_warp_graph_from_db(self, fuel_capacity=400):
+        "Creates a graph for a given system's refuel points, based on the waypoints in the database."
+        self.logger.warning("Loading warp graph from DB - this will take a while")
+        graph = Graph()
+        sql = """SELECT system_symbol, sector_symbol, type, x, y,  waypoint_symbol
+	FROM public.mat_intergalactic_nodes;;"""
+        wayps = {}
+        results = try_execute_select(self.connection, sql, ())
+        if not results:
+            return None
+        for r in results:
+            wayps[r[0]] = JumpGateSystem(r[0], r[1], r[2], r[3], r[4], [], r[5])
+            graph.add_node(
+                r[0],
+                symbol=r[0],
+                sectorSymbol=r[1],
+                type=r[2],
+                x=r[3],
+                y=r[4],
+                gateSymbol=r[5],
+            )
+
+        edge_sql = """SELECT origin_system, distance, target_waypoint, target_system
+	FROM public.mat_intergalactic_edges;"""
+
+        results = try_execute_select(self.connection, edge_sql, ())
+        if not results:
+            return None
+
+        edges = []
+        for r in results:
+            try:
+                edges.append(
+                    (
+                        r[0],
+                        r[3],
+                        {
+                            "weight": _calc_travel_time_between_wps(
+                                wayps[r[0]], wayps[r[3]], fuel_capacity=fuel_capacity
+                            )
+                        },
+                    )
+                )
+            except KeyError:
+                pass
+        graph.add_edges_from(edges)
+        return graph
+
     def load_system_graph_from_db(self, system_s: str, fuel_capacity=400):
         "Creates a graph for a given system's refuel points, based on the waypoints in the database."
         graph = Graph()
@@ -183,24 +256,30 @@ left join waypoint_Traits wt on wt.waypoint_symbol = w.waypoint_symbol and wt.tr
         t = [WaypointTrait("MARKETPLACE", "Marketplace", "")]
         if not results:
             return None
-        nodes = {
-            r[0]: Waypoint(
+        wayps = {}
+        for result in results:
+            wayp = Waypoint(
+                system_s,
+                result[0],
                 "",
-                r[0],
-                "",
-                r[1],
-                r[2],
+                result[1],
+                result[2],
+                result[4],
+                t if result[3] else [],
+                {},
+                {},
                 [],
-                t if r[3] else [],
-                {},
-                {},
-                modifiers=r[4],
-                under_construction=r[5],
+                result[5],
             )
-            for r in results
-        }
+            wayps[result[0]] = wayp
 
-        graph.add_nodes_from(nodes)
+            graph.add_node(
+                result[0],
+                symbol=result[0],
+                x=result[1],
+                y=result[2],
+                has_jump_gate=result[3],
+            )
         edge_sql = """select w1.waypoint_symbol, w2.waypoint_symbol,    SQRT(POW((w2.x - w1.x), 2) + POW((w2.y - w2.y), 2)) AS distance
  from waypoints w1 
  join waypoints w2 on w1.waypoint_symbol != w2.waypoint_symbol 
@@ -218,34 +297,38 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
             try:
                 edges.append(
                     (
-                        nodes[r[0]],
-                        nodes[r[1]],
+                        r[0],
+                        r[1],
                         {
                             "weight": _calc_travel_time_between_wps(
-                                nodes[r[0]], nodes[r[1]], fuel_capacity=fuel_capacity
+                                wayps[r[0]], wayps[r[1]], fuel_capacity=fuel_capacity
                             )
                         },
                     )
                 )
             except KeyError:
-                pass
+                pass  # connected to a node that's not in the graph? shouldn't happen, but not a huge deal.
         graph.add_edges_from(edges)
         return graph
 
     def save_graph(self, file_path="resources/graph.json", graph=None):
         "Save a given graph. by default it'll be the jump network, not a given system one"
         output = {"nodes": [], "edges": [], "saved": datetime.now().isoformat()}
-        graph = graph or self._graph
-        nodes = {node_key: graph.nodes[node_key] for node_key in graph.nodes}
-        edges = [(edge[0], edge[1]) for edge in graph.edges]
-        output["nodes"] = list(nodes.values())
+        graph = graph or self._jump_graph
+        nodes = {}
+        for node in graph.nodes(data=True):
+            nodes[node[0]] = node[1]
+        edges = []
+        for edge in graph.edges(data=True):
+            edges.append([edge[0], edge[1], edge[2]])
+        output["nodes"] = nodes
         output["edges"] = edges
         with open(file_path, "w+") as f:
-            f.write(json.dumps(output, indent=4))
+            f.write(json.dumps(output))
         pass
 
     def clear_jump_graph(self, file_path="resources/graph.json", age=timedelta(days=1)):
-        self._graph = None
+        self._jump_graph = None
         try:
             graph_file = json.loads(open(file_path, "r").read())
         except FileNotFoundError:
@@ -272,7 +355,6 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
         force_recalc: bool = False,
     ) -> JumpGateRoute:
         "Return the shortest route through the jump gate network between two systems."
-        graph = self.graph
         if not force_recalc:
             route = self.load_astar(start, goal)
             if route is not None:
@@ -281,6 +363,8 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
                     < datetime.now() + self.expiration_window
                 ):
                     return route
+        graph = self.graph
+
         # check if there's a graph yet. There won't be if this is very early in the restart.
         if start == goal:
             return compile_route(start, goal, [goal.symbol])
@@ -376,6 +460,26 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
         reversed_final_route.save_to_file(self.target_folder)
         return None
 
+    def plot_warp_nav(
+        self,
+        start: System,
+        goal: System,
+        fuel_capacity: int,
+        force_recalc: bool = False,
+    ) -> NavRoute:
+        graph = self.get_warp_graph(fuel_capacity)
+        waypoint_start = Waypoint("", start.symbol, "", start.x, start.y)
+        waypoint_goal = Waypoint("", goal.symbol, "", goal.x, goal.y)
+        return_route = self.plot_system_nav(
+            None,
+            waypoint_start,
+            waypoint_goal,
+            fuel_capacity,
+            force_recalc,
+            graph=graph,
+        )
+        return return_route
+
     def plot_system_nav(
         self,
         system: str,
@@ -383,19 +487,28 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
         goal: Waypoint,
         fuel_capacity: int,
         force_recalc: bool = False,
+        graph=None,
     ) -> NavRoute:
         "Return the shortest route through the jump gate network between two systems."
-        graph = self.load_system_graph_from_db(system)
-        graph: Graph
+
         # load from cache
         if not force_recalc:
-            pass
-
+            cached_route = self.load_system_nav(start, goal, fuel_capacity)
+            if cached_route:
+                return cached_route
+        if not graph:
+            graph = self.load_graph_from_file(f"resources/systemgraph-{system}.json")
+        if not graph:
+            graph = self.load_system_graph_from_db(system, fuel_capacity)
+            self.save_graph(f"resources/systemgraph-{system}.json", graph)
+        graph: Graph
         # check if there's a graph yet. There won't be if this is very early in the restart.
         if start == goal:
             return compile_route(start, goal, [goal])
         if not graph:
             return None
+
+        # f"{destination_folder}{self.start_waypoint.symbol}-{self.end_waypoint.symbol}[{self.max_fuel}].json",
 
         # f-score is the time of the route so far
         # g-score is the total time of the route so far
@@ -411,17 +524,18 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
         #
         if self.determine_fuel_cost(start, goal) < fuel_capacity:
             route = [start, goal]
-            return compile_system_route(start, goal, route, fuel_capacity)
-        #
+            route = compile_system_route(start, goal, route, fuel_capacity)
+            route.save_to_file(self.target_folder)
+            return route
 
         # this is how we reconstruct our route back.Z came from Y. Y came from X. X came from start.
         came_from = {}
         while open_set:
             # Get the node with the lowest estimated total cost from the priority queue
             current = heapq.heappop(open_set)[1]
-            # print(
-            #    f"NEW NODE: {current.symbol} - time to here {g_score[current.symbol]}, distance remaining { round(self.h(current, goal),2)} km"
-            # )
+            print(
+                f"NEW NODE: {current.symbol} - time to here {g_score[current.symbol]}, distance() remaining { round(self.h(current, goal),2)} km"
+            )
             # logging.debug(f"NEW NODE: {f_score[current.symbol]}")
             if current == goal:
                 # first list item = destination
@@ -447,7 +561,19 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
                 # Reconstruct the shortest path
                 # the path will have been filled with every other step we've taken so far.
 
-            for neighbour, cost_d in graph[current].items():
+            for neighbour_s, cost_d in graph[current.symbol].items():
+                neighbour = graph.nodes[neighbour_s]
+                if not neighbour:
+                    continue
+                #
+                # this part needs to become flexible somehow - for system mode it needs to return waypoints
+                # but when we use it to warp it'll need to return JumpGateSystems
+                #
+
+                neighbour = Waypoint(
+                    "", neighbour_s, "", neighbour["x"], neighbour["y"]
+                )
+
                 # yes, g_score is the total time taken to get to this node.
                 cost = cost_d["weight"]
                 tentative_global_score = g_score[current.symbol] + cost
@@ -457,11 +583,11 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
                     # ah we inf'd them, so unexplored is always higher
                     # so if we're in here, neighbour is the one behind us.
 
-                    came_from[neighbour] = current
+                    came_from[neighbour.symbol] = current.symbol
                     g_score[neighbour.symbol] = tentative_global_score
                     f_score = tentative_global_score + self.h(neighbour, goal)
 
-                    # print(f" checked: {neighbour.symbol} - {f_score}")
+                    print(f" checked: {neighbour.symbol} - {f_score}")
                     # logging.debug(f" checked: {f_score}")
                     # the f_score is the total time to get here, + remaining distance.
                     # the next node we'll get is the quickest node with the shortest distance remaining.
@@ -505,8 +631,11 @@ def _calc_travel_time_between_wps(
 
     Note - if either of the waypoints are not marketplaces (fuel stops), then it will assume a drift.
     """
-    if not (start.has_market and end.has_market):
-        return calc_travel_time_between_wps(start, end, speed, "DRIFT", warp)
+
+    # since we use this for systems and at this scale can't reliably have a market expectation without charting the galaxy we need to skip the drift assumption.
+    if hasattr(start, "has_market") and hasattr(end, "has_market"):
+        if not (start.has_market and end.has_market):
+            return calc_travel_time_between_wps(start, end, speed, "DRIFT", warp)
 
     distance = calc_distance_between(start, end)
     if distance >= fuel_capacity:
