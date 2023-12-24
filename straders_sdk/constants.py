@@ -62,3 +62,10 @@ SUPPLY_LEVELS = {
     "HIGH": 4,
     "ABUNDANT": 5,
 }
+
+ACTIVITY_LEVELS = {
+    "RESTRICTED": 0.5,
+    "WEAK": 1,
+    "GROWING": 2,
+    "STRONG": 3,
+}
