@@ -11,7 +11,7 @@ class JumpGateRoute:
         end_system: System,
         jumps: int,
         distance: float,
-        route: list[System],
+        route: list[str],
         seconds_to_destination: int,
         compilation_timestamp: datetime,
     ) -> None:
@@ -40,13 +40,19 @@ class JumpGateRoute:
         }
 
     def save_to_file(self, destination_folder: str):
+        # trim waypoints out of system
+        self.start_system.waypoints = []
+        self.end_system.waypoints = []
+        for system in self.route:
+            system.waypoints = []
         try:
             with open(
                 f"{destination_folder}{self.start_system.symbol}-{self.end_system.symbol}.json",
                 "w",
                 encoding="utf-8",
             ) as f:
-                f.write(json.dumps(self.to_json(), indent=2))
+                out = json.dumps(self.to_json(), indent=2)
+                f.write(out)
         except Exception as e:
             self.logger.warning(
                 "Failed to save intrasolar route to file, does the folder %s exist? %s",
@@ -79,19 +85,20 @@ class JumpGateSystem(System):
     def __init__(
         self,
         symbol: str,
-        name: str,
-        description: str,
+        sector: str,
+        type: str,
         x: float,
         y: float,
         waypoints: list[Waypoint],
         jump_gate_waypoint: Waypoint,
     ) -> None:
-        super().__init__(symbol, name, description, x, y, waypoints)
+        super().__init__(symbol, sector, type, x, y, waypoints)
         self.jump_gate_waypoint: Waypoint = jump_gate_waypoint
 
     def to_json(self):
         obj = super().to_json()
         obj["gateSymbol"] = self.jump_gate_waypoint
+        return obj
 
     @classmethod
     def from_json(cls, json_data):
@@ -106,7 +113,7 @@ class JumpGateSystem(System):
             json_data["x"],
             json_data["y"],
             wayps,
-            json_data["gateSymbol"],
+            json_data.get("gateSymbol", "gate_symbol_not_in_json_file"),
         )
 
 
@@ -141,7 +148,7 @@ class NavRoute(JumpGateRoute):
             "end_waypoint": self.end_waypoint.to_json(),
             "hops": self.hops,
             "total_distance": self.total_distance,
-            "route": [waypoint for waypoint in self.route],
+            "route": [waypoint.to_json() for waypoint in self.route],
             "seconds_to_destination": self.seconds_to_destination,
             "compilation_timestamp": self.compilation_timestamp.strftime(
                 "%Y-%m-%d %H:%M:%S"
@@ -157,7 +164,9 @@ class NavRoute(JumpGateRoute):
                 "w",
                 encoding="utf-8",
             ) as f:
-                f.write(json.dumps(self.to_json(), indent=2))
+                out = json.dumps(self.to_json(), indent=2)
+                f.write(out)
+                print(out)
         except Exception as e:
             self.logger.warning(
                 "Failed to save Jump Gate route to file, does the folder %s exist? %s",
@@ -178,6 +187,7 @@ class NavRoute(JumpGateRoute):
             json_data["max_fuel"],
             json_data["needs_drifting"],
         )
+        route.route = [Waypoint.from_json(r) for r in json_data["route"]]
         return route
 
     @classmethod
