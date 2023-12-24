@@ -384,15 +384,14 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 return wayp
         # check db
         if not force:
-            wayp = self.db_client.waypoints_view_one(system_symbol, waypoint_symbol)
+            wayp = self.db_client.waypoints_view_one(waypoint_symbol)
             if wayp:
                 self.update(wayp)
                 return wayp
         # check api
         start = datetime.now()
-        wayp = self.api_client.waypoints_view_one(system_symbol, waypoint_symbol)
+        wayp = self.api_client.waypoints_view_one(waypoint_symbol)
         self.logging_client.waypoints_view_one(
-            system_symbol,
             waypoint_symbol,
             wayp,
             (datetime.now() - start).total_seconds(),

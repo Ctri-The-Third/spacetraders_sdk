@@ -131,3 +131,5 @@ dmypy.json
 resources/graph.json
 resources/routes/*
 scripts/PRD-build_and_run_postgres_container.bat
+pg_build_bits/PostgresDBsetup.sql
+pg_build_bits/postgresql.conf
