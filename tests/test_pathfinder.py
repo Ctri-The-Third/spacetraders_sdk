@@ -64,21 +64,21 @@ def test_plot_system_nav():
 
 def test_pathfinder_save_graph():
     pathfinder = PathFinder(connection=get_connection())
-    pathfinder._graph = pathfinder.load_jump_graph_from_db()
+    pathfinder._jump_graph = pathfinder.load_jump_graph_from_db()
     pathfinder.save_graph()
 
 
 def test_pathfinder_load_graph_from_file():
     pathfinder = PathFinder()
     assert pathfinder is not None
-    graph = pathfinder.load_jump_graph_from_file(file_path=TEST_FILE)
+    graph = pathfinder.load_graph_from_file(file_path=TEST_FILE)
     assert len(graph.nodes) == 3788
     assert len(graph.edges) == 44593
 
 
 def test_create_new_route():
     pathfinder = PathFinder(connection=get_connection())
-    pathfinder._graph = pathfinder.load_jump_graph_from_file(file_path=TEST_FILE)
+    pathfinder._jump_graph = pathfinder.load_graph_from_file(file_path=TEST_FILE)
     destination = System("X1-Y13", "X1", "ORANGE_STAR", -655, 14707, [])
     origin = System("X1-BG39", "X1", "ORANGE_STAR", -4299, -1102, [])
     route = pathfinder.astar(origin, destination, force_recalc=True)
@@ -97,6 +97,10 @@ def test_distance_calc():
     distance = pathfinder.calc_distance_between(first_waypoint, second_waypoint)
     assert distance == 7.0710678118654755
 
+    pass
+
+
+def test_load_warp_graph():
     pass
 
 
