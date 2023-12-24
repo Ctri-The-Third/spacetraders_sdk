@@ -344,7 +344,6 @@ class WaypointTrait(SymbolClass):
         return self.to_json()
 
 
-@dataclass
 class Waypoint:
     system_symbol: str
     symbol: str
@@ -357,6 +356,32 @@ class Waypoint:
     faction: dict
     modifiers: list
     under_construction: bool
+
+    def __init__(
+        self,
+        system_symbol,
+        symbol,
+        type,
+        x,
+        y,
+        orbitals=None,
+        traits=None,
+        chart=None,
+        faction=None,
+        modifiers=None,
+        under_construction=False,
+    ):
+        self.system_symbol = system_symbol
+        self.symbol = symbol
+        self.type = type
+        self.x = x
+        self.y = y
+        self.oribtals = orbitals or []
+        self.traits = traits or []
+        self.chart = chart or {}
+        self.faction = faction or {}
+        self.modifiers = modifiers or []
+        self.under_construction = under_construction or False
 
     @classmethod
     def from_json(cls, json_data: dict):
@@ -407,6 +432,9 @@ class Waypoint:
 
     def __dict__(self):
         return self.to_json()
+
+    def __repr__(self) -> str:
+        return f"Waypoint({self.symbol}, X={self.x}, Y={self.y})"
 
     @property
     def is_charted(self) -> bool:
@@ -550,6 +578,9 @@ class System(SymbolClass):
 
     def __dict__(self) -> dict:
         return self.to_json()
+
+    def __repr__(self) -> str:
+        return f"System({self.symbol}, X={self.x}, Y={self.y})"
 
 
 @dataclass
