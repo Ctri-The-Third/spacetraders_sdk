@@ -166,7 +166,7 @@ class NavRoute(JumpGateRoute):
             ) as f:
                 out = json.dumps(self.to_json(), indent=2)
                 f.write(out)
-                print(out)
+
         except Exception as e:
             self.logger.warning(
                 "Failed to save Jump Gate route to file, does the folder %s exist? %s",
