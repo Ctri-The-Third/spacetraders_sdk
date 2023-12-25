@@ -147,11 +147,16 @@ def test_waypoints(waypoint_response_data):
 
     wayps = client.waypoints_view("X1-TEST")
     assert wayps
+    found_waypoint = False
     for symbol, wp in wayps.items():
         assert isinstance(wp, Waypoint)
         assert wp
-        assert "STRIPPED" in wp.modifiers
-        assert wp.under_construction
+        if wp.symbol == test_waypoint.symbol:
+            found_waypoint = True
+            assert "STRIPPED" in wp.modifiers
+            assert wp.under_construction
+
+    assert found_waypoint
 
 
 def test_constructionn_site(construction_response_data, waypoint_response_data):

@@ -1,5 +1,5 @@
 from straders_sdk.pathfinder import PathFinder
-from straders_sdk.models import System, Waypoint
+from straders_sdk.models import System, Waypoint, WaypointTrait
 from straders_sdk.ship import Ship
 import os
 import psycopg2
@@ -52,14 +52,32 @@ def test_pathfinder_system_from_db():
 def test_plot_system_nav():
     pathfinder = PathFinder(connection=get_connection())
     assert pathfinder is not None
+    system_graph = pathfinder.load_graph_from_file("test_system_graph-PK16.json")
+
     source = Waypoint(
-        "X1-U49", "X1-U49-B6", "ORANGE_STAR", -57, 342, [], [], None, None, [], False
+        "X1-PK16",
+        "X1-PK16-B6",
+        "ORANGE_STAR",
+        58,
+        180,
+        traits=[WaypointTrait("MARKETPLACE", "", "")],
     )
+
     destination = Waypoint(
-        "X1-U49", "X1-U49-FA4A", "ORANGE_STAR", -25, -7, [], [], None, None, [], False
+        "X1-PK16",
+        "X1-PK16-J64",
+        "ORANGE_STAR",
+        385,
+        -609,
+        traits=[WaypointTrait("MARKETPLACE", "", "")],
     )
-    return_route = pathfinder.plot_system_nav("X1-U49", source, destination, 400)
+    return_route = pathfinder.plot_system_nav(
+        "X1-PK16", source, destination, 600, graph=system_graph, force_recalc=True
+    )
     assert return_route is not None
+    assert len(return_route.route) == return_route.hops
+    assert return_route.hops > 2
+    assert not return_route.needs_drifting
 
 
 def test_pathfinder_save_graph():
@@ -72,15 +90,17 @@ def test_pathfinder_load_graph_from_file():
     pathfinder = PathFinder()
     assert pathfinder is not None
     graph = pathfinder.load_graph_from_file(file_path=TEST_FILE)
-    assert len(graph.nodes) == 3788
-    assert len(graph.edges) == 44593
+    assert len(graph.nodes) == 1398
+    assert len(graph.edges) == 4942
 
 
-def test_create_new_route():
+def test_astar():
     pathfinder = PathFinder(connection=get_connection())
     pathfinder._jump_graph = pathfinder.load_graph_from_file(file_path=TEST_FILE)
-    destination = System("X1-Y13", "X1", "ORANGE_STAR", -655, 14707, [])
-    origin = System("X1-BG39", "X1", "ORANGE_STAR", -4299, -1102, [])
+
+    destination = System("X1-SR25", "X1", "BLUE_STAR", -2692, 11194, [])
+    origin = System("X1-PK16", "X1", "RED_STAR", 16883, 4221, [])
+
     route = pathfinder.astar(origin, destination, force_recalc=True)
     assert route is not None
     cached_route = pathfinder.astar(origin, destination, force_recalc=False)
