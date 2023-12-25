@@ -319,6 +319,8 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
         "Save a given graph. by default it'll be the jump network, not a given system one"
         output = {"nodes": [], "edges": [], "saved": datetime.now().isoformat()}
         graph = graph or self._jump_graph
+        if not graph:
+            return 
         nodes = {}
         for node in graph.nodes(data=True):
             nodes[node[0]] = node[1]

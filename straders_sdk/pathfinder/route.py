@@ -192,7 +192,6 @@ class NavRoute(JumpGateRoute):
             json_data["max_fuel"],
             json_data["needs_drifting"],
         )
-        #  route.route = [Waypoint.from_json(r) for r in json_data["route"]]
         return route
 
     @classmethod
