@@ -64,10 +64,14 @@ class PathFinder:
     def calc_distance_between(self, system1: System, system2: System) -> int:
         return calc_distance_between(system1, system2)
 
-    def h(self, current: System, goal: System):
+    def h(self, current: System, goal: System, fuel_capacity=None):
         """the heuristic function for A*. note that the value given from the heuristic should be muuuch higher than the calculated cost.
         For each unit of distance (heuristic) converted into time should strongly reinforce that decision.
         """
+        if fuel_capacity:
+            return self.calc_travel_time_between_wps_with_fuel(
+                current, goal, fuel_capacity
+            )
         return (current.x - goal.x) ** 2 + (current.y - goal.y) ** 2
 
     def load_astar(self, start: System, end: System):
@@ -523,8 +527,8 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
 
         #
         if self.determine_fuel_cost(start, goal) < fuel_capacity:
-            route = [start, goal]
-            route = compile_system_route(start, goal, route, fuel_capacity)
+            route = [start.symbol, goal.symbol]
+            route = compile_system_route(start, goal, route, fuel_capacity, graph)
             route.save_to_file(self.target_folder)
             return route
 
@@ -539,21 +543,22 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
             # logging.debug(f"NEW NODE: {f_score[current.symbol]}")
             if current == goal:
                 # first list item = destination
-                total_path = [current]
-                while current in came_from:
+                total_path = [current.symbol]
+                current_symbol = current.symbol
+                while current_symbol in came_from:
                     # +1 list item = -1 from destination
-                    current = came_from[current]
-                    total_path.append(current)
+                    current_symbol = came_from[current_symbol]
+                    total_path.append(current_symbol)
                 # reverse so frist list_item = source.
                 logging.debug("Completed A* - total jumps = %s", len(total_path))
                 total_path.reverse()
                 final_route = compile_system_route(
-                    start, goal, total_path, fuel_capacity
+                    start, goal, total_path, fuel_capacity, graph
                 )
                 final_route.save_to_file(self.target_folder)
                 total_path.reverse()
                 inverted_route = compile_system_route(
-                    goal, start, total_path, fuel_capacity
+                    goal, start, total_path, fuel_capacity, graph
                 )
                 inverted_route.save_to_file(self.target_folder)
                 total_path.reverse()
@@ -585,7 +590,9 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
 
                     came_from[neighbour.symbol] = current.symbol
                     g_score[neighbour.symbol] = tentative_global_score
-                    f_score = tentative_global_score + self.h(neighbour, goal)
+                    f_score = tentative_global_score + self.h(
+                        neighbour, goal, fuel_capacity
+                    )  # total weight + weight
 
                     print(f" checked: {neighbour.symbol} - {f_score}")
                     # logging.debug(f" checked: {f_score}")
@@ -594,10 +601,12 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
 
                     # add this neighbour to the priority queue - the one with the lowest remaining distance will be the next one popped.
                     heapq.heappush(open_set, (f_score, neighbour))
-        final_route = compile_route(start, goal, [])
+        final_route = compile_system_route(start, goal, [], fuel_capacity, self.graph)
         final_route.jumps = -1
         final_route.save_to_file(self.target_folder)
-        reversed_final_route = compile_route(goal, start, [])
+        reversed_final_route = compile_system_route(
+            goal, start, [], fuel_capacity, self.graph
+        )
         reversed_final_route.jumps = -1
         reversed_final_route.save_to_file(self.target_folder)
         return None
@@ -667,20 +676,31 @@ def calc_travel_time_between_wps(
 
 
 def compile_system_route(
-    start_wp: System, end_wp: System, route: list[System], fuel_capacity: int
+    start_wp: System,
+    end_wp: System,
+    route: list[System],
+    fuel_capacity: int,
+    graph: Graph,
 ) -> NavRoute:
     distance = calc_distance_between(start_wp, end_wp)
     travel_time = 0
     last_wp = start_wp
     needs_drifting = False
     for wp in route[1:]:
-        travel_time += _calc_travel_time_between_wps(
-            last_wp, wp, fuel_capacity=fuel_capacity
+        wp = graph.nodes[wp]
+        new_wp = Waypoint("", wp["symbol"], "", wp["x"], wp["y"])
+        new_wp.traits = (
+            [WaypointTrait("MARKETPLACE", "Marketplace", "")]
+            if wp["has_jump_gate"]
+            else []
         )
-        distance = calc_distance_between(last_wp, wp)
+        travel_time += _calc_travel_time_between_wps(
+            last_wp, new_wp, fuel_capacity=fuel_capacity
+        )
+        distance = calc_distance_between(last_wp, new_wp)
         if distance > fuel_capacity:
             needs_drifting = True
-        last_wp = wp
+        last_wp = new_wp
     route = NavRoute(
         start_wp,
         end_wp,
@@ -744,15 +764,27 @@ if __name__ == "__main__":
     )
     set_logging(logging.DEBUG)
     pathfinder = PathFinder(connection=connection)
-    source = st.waypoints_view_one("X1-YG29", "X1-YG29-I55")
-    destination = st.waypoints_view_one("X1-YG29", "X1-YG29-K86")
-    # "X1-YG29-B13"	"X1-YG29-D42"
+    source = st.waypoints_view_one("X1-PK16-G56")
+    destination = st.waypoints_view_one("X1-PK16-J64")
 
-    fuel = 400
+    fuel = 600
     time_taken = _calc_travel_time_between_wps(source, destination, fuel_capacity=fuel)
-    route = pathfinder.plot_system_nav("X1-YG29", source, destination, fuel)
+    route = pathfinder.plot_system_nav(
+        "X1-PK16", source, destination, fuel, force_recalc=True
+    )
 
     print(route.hops)
     print(route.total_distance)
     print(time_taken)
+    print(route.seconds_to_destination)
+
+    print("=== STARTING JUMP TEST ===")
+
+    source = st.systems_view_one("X1-PK16")
+    destination = st.systems_view_one("X1-SR25")
+    distance = calc_distance_between(source, destination)
+    route = pathfinder.astar(source, destination, force_recalc=True)
+
+    print(route.jumps)
+    print(route.total_distance)
     print(route.seconds_to_destination)

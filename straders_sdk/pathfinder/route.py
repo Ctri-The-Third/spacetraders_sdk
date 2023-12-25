@@ -20,7 +20,7 @@ class JumpGateRoute:
         self.start_system: System = start_system
         self.end_system: System = end_system
         self.jumps: int = jumps
-        self.distance: float = distance
+        self.total_distance: float = distance
         self.route: list[System] = route
         self.seconds_to_destination: int = seconds_to_destination
         self.compilation_timestamp: datetime = compilation_timestamp
@@ -31,7 +31,7 @@ class JumpGateRoute:
             "start_system": self.start_system.to_json(),
             "end_system": self.end_system.to_json(),
             "jumps": self.jumps,
-            "distance": self.distance,
+            "distance": self.total_distance,
             "route": [system.to_json() for system in self.route],
             "seconds_to_destination": self.seconds_to_destination,
             "compilation_timestamp": self.compilation_timestamp.strftime(
@@ -148,7 +148,7 @@ class NavRoute(JumpGateRoute):
             "end_waypoint": self.end_waypoint.to_json(),
             "hops": self.hops,
             "total_distance": self.total_distance,
-            "route": [waypoint.to_json() for waypoint in self.route],
+            "route": [waypoint for waypoint in self.route],
             "seconds_to_destination": self.seconds_to_destination,
             "compilation_timestamp": self.compilation_timestamp.strftime(
                 "%Y-%m-%d %H:%M:%S"
@@ -187,7 +187,7 @@ class NavRoute(JumpGateRoute):
             json_data["max_fuel"],
             json_data["needs_drifting"],
         )
-        route.route = [Waypoint.from_json(r) for r in json_data["route"]]
+        #  route.route = [Waypoint.from_json(r) for r in json_data["route"]]
         return route
 
     @classmethod
