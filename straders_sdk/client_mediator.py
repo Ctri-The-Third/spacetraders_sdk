@@ -95,7 +95,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 token=token,
                 connection=connection,
             )
-            self.connection = self.db_client.connection
+            self._connection = self.db_client.connection
         else:
             self.db_client = SpaceTradersStubClient()
             self.logging_client = SpaceTradersStubClient()
@@ -128,6 +128,12 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         self.current_agent_symbol = current_agent_symbol
         self.surveys: dict[str:Survey] = {}
         self._lock = Lock()
+
+    @property
+    def connection(self):
+        if self._connection.closed > 0:
+            self._connection = self.db_client.connection
+        return self._connection
 
     def game_status(self) -> GameStatus:
         """Get the status of the SpaceTraders game server.
