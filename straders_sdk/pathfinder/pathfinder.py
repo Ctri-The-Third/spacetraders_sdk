@@ -537,9 +537,9 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
         while open_set:
             # Get the node with the lowest estimated total cost from the priority queue
             current = heapq.heappop(open_set)[1]
-            print(
-                f"NEW NODE: {current.symbol} - time to here {g_score[current.symbol]}, distance() remaining { round(self.h(current, goal),2)} km"
-            )
+            # print(
+            #    f"NEW NODE: {current.symbol} - time to here {g_score[current.symbol]}, distance() remaining { round(self.h(current, goal),2)} km"
+            # )
             # logging.debug(f"NEW NODE: {f_score[current.symbol]}")
             if current == goal:
                 # first list item = destination

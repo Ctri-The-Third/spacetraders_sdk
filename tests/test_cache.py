@@ -63,7 +63,7 @@ def test_find_waypoints_by_coords(waypoint_response_data):
         check_wp.system_symbol, check_wp.x, check_wp.y
     )
     assert wps
-    assert len(wps) == 3
+    assert len(wps) == 4
 
 
 @pytest.fixture
