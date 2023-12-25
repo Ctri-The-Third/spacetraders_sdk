@@ -26,6 +26,11 @@ class JumpGateRoute:
         self.compilation_timestamp: datetime = compilation_timestamp
         self.logger = logging.getLogger(__name__)
 
+    @property
+    def distance(self):
+        self.logger.warning(f"distance is deprecated, use total_distance instead")
+        return self.total_distance
+
     def to_json(self):
         return {
             "start_system": self.start_system.to_json(),
