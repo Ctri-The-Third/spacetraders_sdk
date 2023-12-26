@@ -320,7 +320,7 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
         output = {"nodes": [], "edges": [], "saved": datetime.now().isoformat()}
         graph = graph or self._jump_graph
         if not graph:
-            return 
+            return
         nodes = {}
         for node in graph.nodes(data=True):
             nodes[node[0]] = node[1]
@@ -693,7 +693,8 @@ def compile_system_route(
         new_wp = Waypoint("", wp["symbol"], "", wp["x"], wp["y"])
         new_wp.traits = (
             [WaypointTrait("MARKETPLACE", "Marketplace", "")]
-            if wp["has_jump_gate"]
+            if ("has_jump_gate" in wp and wp["has_jump_gate"])
+            or ("gateSymbol" in wp and wp["gateSymbol"])
             else []
         )
         travel_time += _calc_travel_time_between_wps(
