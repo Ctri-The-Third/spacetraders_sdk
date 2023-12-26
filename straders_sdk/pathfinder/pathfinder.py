@@ -284,7 +284,8 @@ left join waypoint_Traits wt on wt.waypoint_symbol = w.waypoint_symbol and wt.tr
                 y=result[2],
                 has_jump_gate=result[3],
             )
-        edge_sql = """select w1.waypoint_symbol, w2.waypoint_symbol,   w2.x as x2, w1.x as x1, w2.y as y2, w1.y as y1  
+        edge_sql = """select w1.waypoint_symbol, w2.waypoint_symbol,   SQRT(POW((w2.x - w1.x), 2) + POW((w2.y - w2.y), 2)) AS distance
+
  from waypoints w1 
  join waypoints w2 on w1.waypoint_symbol != w2.waypoint_symbol 
  and w1.system_symbol = %s and w2.system_Symbol = %s
