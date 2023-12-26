@@ -284,14 +284,16 @@ left join waypoint_Traits wt on wt.waypoint_symbol = w.waypoint_symbol and wt.tr
                 y=result[2],
                 has_jump_gate=result[3],
             )
-        edge_sql = """select w1.waypoint_symbol, w2.waypoint_symbol,    SQRT(POW((w2.x - w1.x), 2) + POW((w2.y - w2.y), 2)) AS distance
+        edge_sql = """select w1.waypoint_symbol, w2.waypoint_symbol,   w2.x as x2, w1.x as x1, w2.y as y2, w1.y as y1  
  from waypoints w1 
  join waypoints w2 on w1.waypoint_symbol != w2.waypoint_symbol 
- and w1.system_symbol = w2.system_symbol
- join market_tradegood mt on mt.market_waypoint = w2.waypoint_symbol
-where w1.system_symbol = %s and mt.symbol = 'FUEL'
+ and w1.system_symbol = %s and w2.system_Symbol = %s
+ left join market_tradegood mt on mt.market_waypoint = w2.waypoint_symbol
+ left join waypoint_traits wt on wt.waypoint_Symbol = w2.waypoint_symbol
+where  (mt.symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
+
 """
-        results = try_execute_select(self.connection, edge_sql, (system_s,))
+        results = try_execute_select(self.connection, edge_sql, (system_s, system_s))
         if not results:
             return None
 
@@ -506,6 +508,7 @@ where w1.system_symbol = %s and mt.symbol = 'FUEL'
             graph = self.load_graph_from_file(f"resources/systemgraph-{system}.json")
         if not graph:
             graph = self.load_system_graph_from_db(system, fuel_capacity)
+
             self.save_graph(f"resources/systemgraph-{system}.json", graph)
         graph: Graph
         # check if there's a graph yet. There won't be if this is very early in the restart.
