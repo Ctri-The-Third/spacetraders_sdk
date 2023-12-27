@@ -202,3 +202,48 @@ class NavRoute(JumpGateRoute):
 
     def __bool__(self):
         return self.hops > 0
+
+    def __add__(self, other):
+        if not isinstance(other, NavRoute):
+            raise TypeError(
+                f"unsupported operand type(s) for +: 'NavRoute' and '{type(other)}'"
+            )
+
+        if self.end_waypoint != other.start_waypoint:
+            raise ValueError(
+                f"Cannot add routes together, {self.end_waypoint} != {other.start_waypoint}"
+            )
+
+        new_start = self.start_waypoint
+        new_end = other.end_waypoint
+        new_hops = self.hops + other.hops
+        new_route = self.route + other.route
+        new_distance = self.total_distance + other.total_distance
+        new_seconds_to_destination = (
+            self.seconds_to_destination + other.seconds_to_destination
+        )
+        new_compilation_timestamp = datetime.now()
+        new_max_fuel = max(self.max_fuel, other.max_fuel)
+        new_needs_drifting = self.needs_drifting or other.needs_drifting
+
+        return NavRoute(
+            new_start,
+            new_end,
+            new_hops,
+            new_distance,
+            new_route,
+            new_seconds_to_destination,
+            new_compilation_timestamp,
+            new_max_fuel,
+            new_needs_drifting,
+        )
+        # self.start_waypoint: Waypoint = start_waypoint
+        # self.end_waypoint: Waypoint = end_waypoint
+        # self.hops: int = hops
+        # self.route: list[Waypoint] = route
+        # self.total_distance: float = total_distance
+        # self.seconds_to_destination: int = seconds_to_destination
+        # self.compilation_timestamp: datetime = compilation_timestamp
+        # self.max_fuel: int = max_fuel
+        # self.needs_drifting: bool = needs_drifting
+        # self.logger = logging.getLogger("NavRoute")
