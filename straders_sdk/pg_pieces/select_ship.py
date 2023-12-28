@@ -28,6 +28,8 @@ def _select_ships(connection, agent_name, db_client: SpaceTradersClient):
                 order by s.ship_symbol
                 """
     ships = _select_some_ships(db_client, sql, (agent_name,))
+    if not ships:
+        return {}
     ships = _expand_ships_with_inventory(db_client, ships, agent_name)
     return ships
 
@@ -54,6 +56,8 @@ def _select_ship_one(ship_symbol: str, db_client: SpaceTradersClient):
                 where s.ship_symbol = %s
                 """
     ships = _select_some_ships(db_client, sql, (ship_symbol,))
+    if not ships:
+        return {}
     for ship_symbol, ship in ships.items():
         ship = _expand_ship_with_inventory(db_client, ship)
     return ships
