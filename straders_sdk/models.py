@@ -788,3 +788,22 @@ class Market:
                 return listing
 
         return None
+
+
+@dataclass
+class Faction:
+    symbol: str
+    name: str
+    description: str
+    headquarters: str
+    is_recruiting: bool
+
+    @classmethod
+    def from_json(cls, json_data: dict):
+        return cls(
+            json_data["symbol"],
+            json_data["name"],
+            json_data["description"],
+            json_data["headquarters"],
+            json_data["isRecruiting"],
+        )

@@ -66,7 +66,7 @@ def get_and_validate_paginated(
     params = params or {}
     params["limit"] = per_page
     data = []
-    for i in range(1, page_limit or 1):
+    for i in range(1, page_limit or 2):
         params["page"] = i
         response = get_and_validate(
             url, params=params, headers=headers, session=session, priority=priority
@@ -78,7 +78,8 @@ def get_and_validate_paginated(
             return response
         else:
             return response
-
+    if not data:
+        return None
     response.data = data
     return response
 

@@ -24,6 +24,7 @@ from .models import (
     System,
     JumpGate,
     Agent,
+    Faction,
 )
 from .contracts import Contract
 from .ship import Ship
@@ -142,6 +143,13 @@ class SpaceTradersApiClient(SpaceTradersClient):
 
     def update(self, response_json: dict):
         pass
+
+    def list_factions(self) -> list[Faction] or SpaceTradersResponse:
+        url = _url("/factions")
+        resp = get_and_validate_paginated(url, 20, 2)
+        if resp:
+            return [Faction.from_json(d) for d in resp.data]
+        return resp
 
     def register(self, callsign, faction="COSMIC", email=None) -> SpaceTradersResponse:
         url = _url("register")

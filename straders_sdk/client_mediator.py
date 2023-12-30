@@ -146,6 +146,15 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
 
         return GameStatus(resp.response_json)
 
+    def list_factions(self) -> list[str]:
+        """Get the list of factions in the game.
+
+        Args:
+            None"""
+
+        resp = self.api_client.list_factions()
+        return resp
+
     def register(self, callsign, faction="COSMIC", email=None) -> SpaceTradersResponse:
         """Register a new agent.
 
