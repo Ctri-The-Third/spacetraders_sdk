@@ -692,6 +692,7 @@ def compile_system_route(
     graph: Graph,
 ) -> NavRoute:
     distance = calc_distance_between(start_wp, end_wp)
+    total_distance = 0
     travel_time = 0
     last_wp = start_wp
     needs_drifting = False
@@ -708,6 +709,7 @@ def compile_system_route(
             last_wp, new_wp, fuel_capacity=fuel_capacity
         )
         distance = calc_distance_between(last_wp, new_wp)
+        total_distance += distance
         if distance > fuel_capacity:
             needs_drifting = True
         last_wp = new_wp
@@ -715,7 +717,7 @@ def compile_system_route(
         start_wp,
         end_wp,
         len(route),
-        distance,
+        total_distance,
         route,
         travel_time,
         datetime.now(),

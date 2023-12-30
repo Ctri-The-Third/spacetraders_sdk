@@ -76,6 +76,7 @@ def test_plot_system_nav():
     )
     assert return_route is not None
     assert len(return_route.route) == return_route.hops
+    assert return_route.total_distance == 874.8320215364918
     assert return_route.hops > 2
     assert not return_route.needs_drifting
 
