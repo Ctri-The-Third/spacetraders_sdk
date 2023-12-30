@@ -437,7 +437,7 @@ and (mt.symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
                 # the path will have been filled with every other step we've taken so far.
 
             for neighbour_s in graph.neighbors(current.symbol):
-                neighbour = graph.nodes[neighbour_s]
+                neighbour = graph.nodes.get(neighbour_s, None)
                 if not neighbour:
                     # print(f"{current.symbol} -> neighbour {neighbour_s}  not found - maybe under construction still?")
                     continue
