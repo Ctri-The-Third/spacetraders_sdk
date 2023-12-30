@@ -23,7 +23,6 @@ SET row_security = off;
 -- Name: public; Type: SCHEMA; Schema: -; Owner: spacetraders
 --
 
-CREATE SCHEMA public;
 
 
 ALTER SCHEMA public OWNER TO spacetraders;
@@ -1538,23 +1537,6 @@ CREATE VIEW public.pg_lock_monitor AS
 
 
 ALTER VIEW public.pg_lock_monitor OWNER TO spacetraders;
-
---
--- TOC entry 246 (class 1259 OID 56201)
--- Name: pg_stat_overview; Type: VIEW; Schema: public; Owner: spacetraders
---
-
-CREATE VIEW public.pg_stat_overview AS
- SELECT pg_stat_statements.calls,
-    (pg_stat_statements.total_exec_time / (1000)::double precision) AS total_exec_time,
-    (pg_stat_statements.min_exec_time / (1000)::double precision) AS min_exec_time,
-    (pg_stat_statements.mean_exec_time / (1000)::double precision) AS mean_exec_time,
-    pg_stat_statements.query
-   FROM public.pg_stat_statements
-  ORDER BY (pg_stat_statements.total_exec_time / (1000)::double precision) DESC;
-
-
-ALTER VIEW public.pg_stat_overview OWNER TO spacetraders;
 
 --
 -- TOC entry 243 (class 1259 OID 54151)
