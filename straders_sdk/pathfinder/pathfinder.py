@@ -435,7 +435,6 @@ and (mt.symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
                 return final_route
                 # Reconstruct the shortest path
                 # the path will have been filled with every other step we've taken so far.
-
             for neighbour_s in graph.neighbors(current.symbol):
                 neighbour = graph.nodes.get(neighbour_s, None)
                 if not neighbour:
