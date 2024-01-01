@@ -9,6 +9,7 @@ from .utils import parse_timestamp
 from .constants import SURVEYOR_SYMBOLS, MINING_SYMBOLS, SIPHON_SYMBOLS
 import re
 
+import pytz
 
 ### the question arises - if the Ship class is to have methods that interact with the server, which pattern do we use to implement that.
 # choice - pass in a REFERENCE to the SpaceTraders class (which is kinda like a "session") -
@@ -324,6 +325,9 @@ class Ship(SpaceTradersInteractive):
     def seconds_until_cooldown(self) -> timedelta:
         if not self._cooldown_expiration:
             return 0
+        if self._cooldown_expiration.tzinfo is not None:
+            self._cooldown_expiration = self._cooldown_expiration.astimezone(pytz.utc)
+            self._cooldown_expiration = self._cooldown_expiration.replace(tzinfo=None)
         time_to_wait = self._cooldown_expiration - datetime.utcnow()
         seconds = max(time_to_wait.seconds + (time_to_wait.days * 86400), 0)
         if seconds > 6000:
