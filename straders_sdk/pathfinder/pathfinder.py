@@ -68,11 +68,10 @@ class PathFinder:
         """the heuristic function for A*. note that the value given from the heuristic should be muuuch higher than the calculated cost.
         For each unit of distance (heuristic) converted into time should strongly reinforce that decision.
         """
-        if fuel_capacity:
-            return self.calc_travel_time_between_wps_with_fuel(
-                current, goal, fuel_capacity
-            )
-        return (current.x - goal.x) ** 2 + (current.y - goal.y) ** 2
+        fuel_capacity = fuel_capacity or 0
+
+        return self.calc_travel_time_between_wps_with_fuel(current, goal, fuel_capacity)
+        # return the drift time between the two waypoints if no fuel provided.
 
     def load_astar(self, start: System, end: System):
         try:
@@ -415,7 +414,6 @@ and (mt.symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
         while open_set:
             # Get the node with the lowest estimated total cost from the priority queue
             current = heapq.heappop(open_set)[1]
-            # print(f"NEW NODE: {f_score[current]}")
             if current == goal:
                 # first list item = destination
                 total_path = [current]
@@ -508,11 +506,15 @@ and (mt.symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
             if cached_route:
                 return cached_route
         if not graph:
-            graph = self.load_graph_from_file(f"resources/systemgraph-{system}.json")
-        if not graph:
+            graph = self.load_graph_from_file(
+                f"resources/systemgraph-{system}({fuel_capacity}).json"
+            )
+        if not graph or force_recalc == True:
             graph = self.load_system_graph_from_db(system, fuel_capacity)
 
-            self.save_graph(f"resources/systemgraph-{system}.json", graph)
+            self.save_graph(
+                f"resources/systemgraph-{system}({fuel_capacity}).json", graph
+            )
         graph: Graph
         # check if there's a graph yet. There won't be if this is very early in the restart.
         if start == goal:
@@ -602,7 +604,7 @@ and (mt.symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
                         neighbour, goal, fuel_capacity
                     )  # total weight + weight
 
-                    print(f" checked: {neighbour.symbol} - {f_score}")
+                    # print(f" checked: {current.symbol} -> {neighbour.symbol}: total travel time to here  {f_score}s")
                     # logging.debug(f" checked: {f_score}")
                     # the f_score is the total time to get here, + remaining distance.
                     # the next node we'll get is the quickest node with the shortest distance remaining.
