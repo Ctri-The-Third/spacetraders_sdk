@@ -109,6 +109,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 db_user,
                 db_pass,
             )
+            self._connection = None
         self.json_cache_client = SpaceTradersCacheClient()
         self.api_client = SpaceTradersApiClient(
             token=token,

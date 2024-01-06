@@ -3,7 +3,7 @@ FROM postgres:latest
 ENV POSTGRES_USER=spacetraders
 run mkdir -p /docker-entrypoint-initdb.d 
 
-copy ./postgresql.conf /postgresql.conf 
+copy ./postgresql.conf /usr/share/postgresql/postgresql.conf 
 copy ./PostgresSchema.SQL /docker-entrypoint-initdb.d/postgresschema.sql
 
 
