@@ -1672,7 +1672,7 @@ CREATE TABLE public.ship_frames (
 ALTER TABLE public.ship_frames OWNER TO spacetraders;
 
 
-CREATE MATERIALIZED VIEW static_data AS
+CREATE MATERIALIZED VIEW ship_mounts AS
 SELECT * FROM (VALUES
     ('MOUNT_GAS_SIPHON_I', 'Gas Siphon I', 'A basic gas siphon that can extract gas from gas giants and other gas-rich bodies.', -1, -1, -1),
     ('MOUNT_GAS_SIPHON_II', 'Gas Siphon II', 'An advanced gas siphon that can extract gas from gas giants and other gas-rich bodies more efficiently and at a higher rate.', -1, -1, -1),
