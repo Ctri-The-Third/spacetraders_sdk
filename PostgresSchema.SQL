@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.11 (Debian 13.11-0+deb11u1)
+-- Dumped from database version 16.1 (Debian 16.1-1.pgdg120+1)
 -- Dumped by pg_dump version 16.0
 
--- Started on 2023-12-30 17:04:21
+-- Started on 2024-01-09 15:37:35
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,29 +19,21 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 6 (class 2615 OID 2200)
+-- TOC entry 5 (class 2615 OID 2200)
 -- Name: public; Type: SCHEMA; Schema: -; Owner: spacetraders
 --
 
+-- *not* creating schema, since initdb creates it
 
 
 ALTER SCHEMA public OWNER TO spacetraders;
-
---
--- TOC entry 3512 (class 0 OID 0)
--- Dependencies: 6
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: spacetraders
---
-
-COMMENT ON SCHEMA public IS 'standard public schema';
-
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- TOC entry 201 (class 1259 OID 40386)
+-- TOC entry 215 (class 1259 OID 16385)
 -- Name: agents; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -58,7 +50,7 @@ CREATE TABLE public.agents (
 ALTER TABLE public.agents OWNER TO spacetraders;
 
 --
--- TOC entry 205 (class 1259 OID 40414)
+-- TOC entry 216 (class 1259 OID 16390)
 -- Name: logging; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -80,7 +72,7 @@ CREATE TABLE public.logging (
 ALTER TABLE public.logging OWNER TO spacetraders;
 
 --
--- TOC entry 203 (class 1259 OID 40398)
+-- TOC entry 217 (class 1259 OID 16395)
 -- Name: transactions; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -100,7 +92,7 @@ CREATE TABLE public.transactions (
 ALTER TABLE public.transactions OWNER TO spacetraders;
 
 --
--- TOC entry 238 (class 1259 OID 40974)
+-- TOC entry 218 (class 1259 OID 16400)
 -- Name: mat_session_stats; Type: MATERIALIZED VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -162,7 +154,7 @@ CREATE MATERIALIZED VIEW public.mat_session_stats AS
 ALTER MATERIALIZED VIEW public.mat_session_stats OWNER TO spacetraders;
 
 --
--- TOC entry 202 (class 1259 OID 40392)
+-- TOC entry 219 (class 1259 OID 16407)
 -- Name: ships; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -184,7 +176,7 @@ CREATE TABLE public.ships (
 ALTER TABLE public.ships OWNER TO spacetraders;
 
 --
--- TOC entry 255 (class 1259 OID 77508)
+-- TOC entry 220 (class 1259 OID 16412)
 -- Name: agent_credits_per_hour; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -225,7 +217,7 @@ CREATE VIEW public.agent_credits_per_hour AS
 ALTER VIEW public.agent_credits_per_hour OWNER TO spacetraders;
 
 --
--- TOC entry 204 (class 1259 OID 40409)
+-- TOC entry 221 (class 1259 OID 16417)
 -- Name: agent_overview; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -244,7 +236,7 @@ CREATE VIEW public.agent_overview AS
 ALTER VIEW public.agent_overview OWNER TO spacetraders;
 
 --
--- TOC entry 278 (class 1259 OID 101804)
+-- TOC entry 222 (class 1259 OID 16422)
 -- Name: construction_site_materials; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -259,7 +251,7 @@ CREATE TABLE public.construction_site_materials (
 ALTER TABLE public.construction_site_materials OWNER TO spacetraders;
 
 --
--- TOC entry 277 (class 1259 OID 101796)
+-- TOC entry 223 (class 1259 OID 16427)
 -- Name: construction_sites; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -272,7 +264,7 @@ CREATE TABLE public.construction_sites (
 ALTER TABLE public.construction_sites OWNER TO spacetraders;
 
 --
--- TOC entry 207 (class 1259 OID 40439)
+-- TOC entry 224 (class 1259 OID 16432)
 -- Name: contract_tradegoods; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -288,7 +280,7 @@ CREATE TABLE public.contract_tradegoods (
 ALTER TABLE public.contract_tradegoods OWNER TO spacetraders;
 
 --
--- TOC entry 208 (class 1259 OID 40445)
+-- TOC entry 225 (class 1259 OID 16437)
 -- Name: contracts; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -310,7 +302,7 @@ CREATE TABLE public.contracts (
 ALTER TABLE public.contracts OWNER TO spacetraders;
 
 --
--- TOC entry 209 (class 1259 OID 40451)
+-- TOC entry 226 (class 1259 OID 16442)
 -- Name: contracts_overview; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -331,7 +323,7 @@ CREATE VIEW public.contracts_overview AS
 ALTER VIEW public.contracts_overview OWNER TO spacetraders;
 
 --
--- TOC entry 269 (class 1259 OID 101214)
+-- TOC entry 227 (class 1259 OID 16447)
 -- Name: export_overview; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -352,7 +344,7 @@ SELECT
 ALTER VIEW public.export_overview OWNER TO spacetraders;
 
 --
--- TOC entry 248 (class 1259 OID 64900)
+-- TOC entry 228 (class 1259 OID 16451)
 -- Name: extractions; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -370,7 +362,7 @@ CREATE TABLE public.extractions (
 ALTER TABLE public.extractions OWNER TO spacetraders;
 
 --
--- TOC entry 217 (class 1259 OID 40503)
+-- TOC entry 229 (class 1259 OID 16456)
 -- Name: market_tradegood_listings; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -390,7 +382,7 @@ CREATE TABLE public.market_tradegood_listings (
 ALTER TABLE public.market_tradegood_listings OWNER TO spacetraders;
 
 --
--- TOC entry 213 (class 1259 OID 40480)
+-- TOC entry 230 (class 1259 OID 16461)
 -- Name: waypoints; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -409,7 +401,7 @@ CREATE TABLE public.waypoints (
 ALTER TABLE public.waypoints OWNER TO spacetraders;
 
 --
--- TOC entry 290 (class 1259 OID 102902)
+-- TOC entry 231 (class 1259 OID 16468)
 -- Name: hourly_utilisation_of_exports; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -442,7 +434,7 @@ CREATE VIEW public.hourly_utilisation_of_exports AS
 ALTER VIEW public.hourly_utilisation_of_exports OWNER TO spacetraders;
 
 --
--- TOC entry 268 (class 1259 OID 101209)
+-- TOC entry 232 (class 1259 OID 16473)
 -- Name: import_overview; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -462,7 +454,7 @@ SELECT
 ALTER VIEW public.import_overview OWNER TO spacetraders;
 
 --
--- TOC entry 210 (class 1259 OID 40456)
+-- TOC entry 233 (class 1259 OID 16477)
 -- Name: jump_gates; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -476,7 +468,7 @@ CREATE TABLE public.jump_gates (
 ALTER TABLE public.jump_gates OWNER TO spacetraders;
 
 --
--- TOC entry 284 (class 1259 OID 101995)
+-- TOC entry 234 (class 1259 OID 16482)
 -- Name: jumpgate_connections; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -491,7 +483,7 @@ CREATE TABLE public.jumpgate_connections (
 ALTER TABLE public.jumpgate_connections OWNER TO spacetraders;
 
 --
--- TOC entry 211 (class 1259 OID 40468)
+-- TOC entry 235 (class 1259 OID 16487)
 -- Name: waypoint_charts; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -505,7 +497,7 @@ CREATE TABLE public.waypoint_charts (
 ALTER TABLE public.waypoint_charts OWNER TO spacetraders;
 
 --
--- TOC entry 212 (class 1259 OID 40474)
+-- TOC entry 236 (class 1259 OID 16492)
 -- Name: waypoint_traits; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -520,7 +512,7 @@ CREATE TABLE public.waypoint_traits (
 ALTER TABLE public.waypoint_traits OWNER TO spacetraders;
 
 --
--- TOC entry 214 (class 1259 OID 40487)
+-- TOC entry 237 (class 1259 OID 16497)
 -- Name: jumpgates_scanned; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -552,7 +544,7 @@ CREATE VIEW public.jumpgates_scanned AS
 ALTER VIEW public.jumpgates_scanned OWNER TO spacetraders;
 
 --
--- TOC entry 215 (class 1259 OID 40492)
+-- TOC entry 238 (class 1259 OID 16502)
 -- Name: jumpgates_scanned_progress; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -572,10 +564,10 @@ CREATE VIEW public.jumpgates_scanned_progress AS
            FROM public.jumpgates_scanned js
         )
  SELECT 'charted jumpgates scanned'::text AS title,
-    data.scanned_gates,
-    data.charted_gates,
+    scanned_gates,
+    charted_gates,
         CASE
-            WHEN (data.scanned_gates > 0) THEN round((((data.charted_gates)::numeric / (data.scanned_gates)::numeric) * (100)::numeric), 2)
+            WHEN (scanned_gates > 0) THEN round((((charted_gates)::numeric / (scanned_gates)::numeric) * (100)::numeric), 2)
             ELSE NULL::numeric
         END AS progress
    FROM data;
@@ -584,7 +576,7 @@ CREATE VIEW public.jumpgates_scanned_progress AS
 ALTER VIEW public.jumpgates_scanned_progress OWNER TO spacetraders;
 
 --
--- TOC entry 261 (class 1259 OID 79516)
+-- TOC entry 239 (class 1259 OID 16507)
 -- Name: manufacture_relationships; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -597,7 +589,7 @@ CREATE TABLE public.manufacture_relationships (
 ALTER TABLE public.manufacture_relationships OWNER TO spacetraders;
 
 --
--- TOC entry 216 (class 1259 OID 40497)
+-- TOC entry 240 (class 1259 OID 16512)
 -- Name: market; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -610,7 +602,7 @@ CREATE TABLE public.market (
 ALTER TABLE public.market OWNER TO spacetraders;
 
 --
--- TOC entry 267 (class 1259 OID 84842)
+-- TOC entry 241 (class 1259 OID 16517)
 -- Name: market_changes; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -649,24 +641,24 @@ CREATE VIEW public.market_changes AS
 ALTER VIEW public.market_changes OWNER TO spacetraders;
 
 --
--- TOC entry 263 (class 1259 OID 79847)
+-- TOC entry 242 (class 1259 OID 16522)
 -- Name: market_prices; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
 CREATE VIEW public.market_prices AS
- SELECT mtl.trade_symbol,
-    round(avg(mtl.purchase_price) FILTER (WHERE (mtl.type = 'EXPORT'::text)), 2) AS export_price,
-    round(avg(mtl.sell_price) FILTER (WHERE (mtl.type = 'IMPORT'::text)), 2) AS import_price,
-    round(avg(((mtl.purchase_price + mtl.sell_price) / 2)), 2) AS galactic_average
+ SELECT trade_symbol,
+    round(avg(purchase_price) FILTER (WHERE (type = 'EXPORT'::text)), 2) AS export_price,
+    round(avg(sell_price) FILTER (WHERE (type = 'IMPORT'::text)), 2) AS import_price,
+    round(avg(((purchase_price + sell_price) / 2)), 2) AS galactic_average
    FROM public.market_tradegood_listings mtl
-  GROUP BY mtl.trade_symbol
-  ORDER BY mtl.trade_symbol;
+  GROUP BY trade_symbol
+  ORDER BY trade_symbol;
 
 
 ALTER VIEW public.market_prices OWNER TO spacetraders;
 
 --
--- TOC entry 218 (class 1259 OID 40513)
+-- TOC entry 243 (class 1259 OID 16526)
 -- Name: market_tradegood; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -685,7 +677,7 @@ CREATE TABLE public.market_tradegood (
 ALTER TABLE public.market_tradegood OWNER TO spacetraders;
 
 --
--- TOC entry 281 (class 1259 OID 101942)
+-- TOC entry 244 (class 1259 OID 16531)
 -- Name: market_tradegoods; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -701,18 +693,18 @@ CREATE VIEW public.market_tradegoods AS
            FROM (public.market_tradegood mt
              JOIN buy_or_sell_vs bs ON ((mt.buy_or_sell = bs.buy_or_sell)))
         )
- SELECT market_tradegoods.market_symbol,
-    market_tradegoods.trade_symbol,
-    market_tradegoods.type,
-    market_tradegoods.name,
-    market_tradegoods.description
+ SELECT market_symbol,
+    trade_symbol,
+    type,
+    name,
+    description
    FROM market_tradegoods;
 
 
 ALTER VIEW public.market_tradegoods OWNER TO spacetraders;
 
 --
--- TOC entry 221 (class 1259 OID 40532)
+-- TOC entry 245 (class 1259 OID 16536)
 -- Name: systems; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -728,7 +720,7 @@ CREATE TABLE public.systems (
 ALTER TABLE public.systems OWNER TO spacetraders;
 
 --
--- TOC entry 286 (class 1259 OID 102301)
+-- TOC entry 246 (class 1259 OID 16541)
 -- Name: mat_intergalactic_nodes; Type: MATERIALIZED VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -752,7 +744,7 @@ CREATE MATERIALIZED VIEW public.mat_intergalactic_nodes AS
 ALTER MATERIALIZED VIEW public.mat_intergalactic_nodes OWNER TO spacetraders;
 
 --
--- TOC entry 287 (class 1259 OID 102309)
+-- TOC entry 247 (class 1259 OID 16548)
 -- Name: mat_intergalactic_edges; Type: MATERIALIZED VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -770,7 +762,7 @@ CREATE MATERIALIZED VIEW public.mat_intergalactic_edges AS
 ALTER MATERIALIZED VIEW public.mat_intergalactic_edges OWNER TO spacetraders;
 
 --
--- TOC entry 282 (class 1259 OID 101948)
+-- TOC entry 248 (class 1259 OID 16555)
 -- Name: mat_market_connections; Type: MATERIALIZED VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -799,7 +791,7 @@ CREATE MATERIALIZED VIEW public.mat_market_connections AS
 ALTER MATERIALIZED VIEW public.mat_market_connections OWNER TO spacetraders;
 
 --
--- TOC entry 249 (class 1259 OID 65641)
+-- TOC entry 249 (class 1259 OID 16562)
 -- Name: mat_session_behaviour_types; Type: MATERIALIZED VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -818,7 +810,7 @@ CREATE MATERIALIZED VIEW public.mat_session_behaviour_types AS
 ALTER MATERIALIZED VIEW public.mat_session_behaviour_types OWNER TO spacetraders;
 
 --
--- TOC entry 256 (class 1259 OID 79002)
+-- TOC entry 250 (class 1259 OID 16569)
 -- Name: mat_session_stats_2; Type: MATERIALIZED VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -896,7 +888,7 @@ CREATE MATERIALIZED VIEW public.mat_session_stats_2 AS
 ALTER MATERIALIZED VIEW public.mat_session_stats_2 OWNER TO spacetraders;
 
 --
--- TOC entry 206 (class 1259 OID 40428)
+-- TOC entry 251 (class 1259 OID 16576)
 -- Name: ship_behaviours; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -912,23 +904,23 @@ CREATE TABLE public.ship_behaviours (
 ALTER TABLE public.ship_behaviours OWNER TO spacetraders;
 
 --
--- TOC entry 275 (class 1259 OID 101735)
+-- TOC entry 252 (class 1259 OID 16581)
 -- Name: warnings_activity; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
 CREATE VIEW public.warnings_activity AS
- SELECT l.ship_symbol,
-    (max(l.event_timestamp) < (now() - '01:00:00'::interval)) AS warning_active,
-    max(l.event_timestamp) AS max
+ SELECT ship_symbol,
+    (max(event_timestamp) < (now() - '01:00:00'::interval)) AS warning_active,
+    max(event_timestamp) AS max
    FROM public.logging l
-  WHERE ((l.event_name = 'END_BEHAVIOUR_SCRIPT'::text) AND (l.event_timestamp > (now() - '1 day'::interval)))
-  GROUP BY l.ship_symbol;
+  WHERE ((event_name = 'END_BEHAVIOUR_SCRIPT'::text) AND (event_timestamp > (now() - '1 day'::interval)))
+  GROUP BY ship_symbol;
 
 
 ALTER VIEW public.warnings_activity OWNER TO spacetraders;
 
 --
--- TOC entry 273 (class 1259 OID 101725)
+-- TOC entry 253 (class 1259 OID 16585)
 -- Name: warnings_extraction; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -946,7 +938,7 @@ CREATE VIEW public.warnings_extraction AS
 ALTER VIEW public.warnings_extraction OWNER TO spacetraders;
 
 --
--- TOC entry 279 (class 1259 OID 101836)
+-- TOC entry 254 (class 1259 OID 16590)
 -- Name: warnings_movement; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -964,7 +956,7 @@ CREATE VIEW public.warnings_movement AS
 ALTER VIEW public.warnings_movement OWNER TO spacetraders;
 
 --
--- TOC entry 274 (class 1259 OID 101730)
+-- TOC entry 255 (class 1259 OID 16595)
 -- Name: warnings_profits; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -997,7 +989,7 @@ CREATE VIEW public.warnings_profits AS
 ALTER VIEW public.warnings_profits OWNER TO spacetraders;
 
 --
--- TOC entry 280 (class 1259 OID 101869)
+-- TOC entry 256 (class 1259 OID 16600)
 -- Name: mat_ship_warnings; Type: MATERIALIZED VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1020,7 +1012,7 @@ CREATE MATERIALIZED VIEW public.mat_ship_warnings AS
 ALTER MATERIALIZED VIEW public.mat_ship_warnings OWNER TO spacetraders;
 
 --
--- TOC entry 219 (class 1259 OID 40519)
+-- TOC entry 257 (class 1259 OID 16607)
 -- Name: mat_shipyardtypes_to_ship; Type: MATERIALIZED VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1033,7 +1025,7 @@ CREATE MATERIALIZED VIEW public.mat_shipyardtypes_to_ship AS
 ALTER MATERIALIZED VIEW public.mat_shipyardtypes_to_ship OWNER TO spacetraders;
 
 --
--- TOC entry 230 (class 1259 OID 40599)
+-- TOC entry 258 (class 1259 OID 16613)
 -- Name: ship_nav; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -1053,7 +1045,7 @@ CREATE TABLE public.ship_nav (
 ALTER TABLE public.ship_nav OWNER TO spacetraders;
 
 --
--- TOC entry 288 (class 1259 OID 102359)
+-- TOC entry 259 (class 1259 OID 16618)
 -- Name: system_fuel_overview; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1100,7 +1092,7 @@ CREATE VIEW public.system_fuel_overview AS
 ALTER VIEW public.system_fuel_overview OWNER TO spacetraders;
 
 --
--- TOC entry 289 (class 1259 OID 102391)
+-- TOC entry 260 (class 1259 OID 16623)
 -- Name: transaction_overview; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1156,7 +1148,7 @@ CREATE VIEW public.transaction_overview AS
 ALTER VIEW public.transaction_overview OWNER TO spacetraders;
 
 --
--- TOC entry 291 (class 1259 OID 102917)
+-- TOC entry 261 (class 1259 OID 16628)
 -- Name: mat_system_summary; Type: MATERIALIZED VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1264,7 +1256,7 @@ CREATE MATERIALIZED VIEW public.mat_system_summary AS
 ALTER MATERIALIZED VIEW public.mat_system_summary OWNER TO spacetraders;
 
 --
--- TOC entry 271 (class 1259 OID 101525)
+-- TOC entry 262 (class 1259 OID 16635)
 -- Name: mining_sites_and_exchanges; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1288,24 +1280,24 @@ CREATE VIEW public.mining_sites_and_exchanges AS
              JOIN public.waypoints w2 ON (((wt.waypoint_symbol = w2.waypoint_symbol) AND (w2.system_symbol = w1.system_symbol))))
           WHERE ((mtl.type = ANY (ARRAY['EXCHANGE'::text, 'IMPORT'::text])) AND (w2.type = ANY (ARRAY['ASTEROID'::text, 'ENGINEERED_ASTEROID'::text, 'ASTEROID_BASE'::text])))
         )
- SELECT routes.system_symbol,
-    array_agg(DISTINCT routes.trade_symbol) AS array_agg,
-    routes.extraction_waypoint,
-    routes.extract_x,
-    routes.extract_y,
-    routes.exchange_waypoint,
-    routes.import_x,
-    routes.import_y,
-    routes.distance
+ SELECT system_symbol,
+    array_agg(DISTINCT trade_symbol) AS array_agg,
+    extraction_waypoint,
+    extract_x,
+    extract_y,
+    exchange_waypoint,
+    import_x,
+    import_y,
+    distance
    FROM routes
-  GROUP BY routes.system_symbol, routes.extraction_waypoint, routes.extract_x, routes.extract_y, routes.exchange_waypoint, routes.import_x, routes.import_y, routes.distance
-  ORDER BY routes.distance;
+  GROUP BY system_symbol, extraction_waypoint, extract_x, extract_y, exchange_waypoint, import_x, import_y, distance
+  ORDER BY distance;
 
 
 ALTER VIEW public.mining_sites_and_exchanges OWNER TO spacetraders;
 
 --
--- TOC entry 262 (class 1259 OID 79610)
+-- TOC entry 263 (class 1259 OID 16640)
 -- Name: mkt_export_and_imports; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1342,7 +1334,7 @@ CREATE VIEW public.mkt_export_and_imports AS
 ALTER VIEW public.mkt_export_and_imports OWNER TO spacetraders;
 
 --
--- TOC entry 220 (class 1259 OID 40526)
+-- TOC entry 264 (class 1259 OID 16645)
 -- Name: shipyard_types; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -1357,7 +1349,7 @@ CREATE TABLE public.shipyard_types (
 ALTER TABLE public.shipyard_types OWNER TO spacetraders;
 
 --
--- TOC entry 222 (class 1259 OID 40538)
+-- TOC entry 265 (class 1259 OID 16650)
 -- Name: mkt_shpyrds_systems_last_updated; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1378,7 +1370,7 @@ CREATE VIEW public.mkt_shpyrds_systems_last_updated AS
 ALTER VIEW public.mkt_shpyrds_systems_last_updated OWNER TO spacetraders;
 
 --
--- TOC entry 223 (class 1259 OID 40543)
+-- TOC entry 266 (class 1259 OID 16655)
 -- Name: mkt_shpyrds_systems_last_updated_jumpgates; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1398,7 +1390,7 @@ CREATE VIEW public.mkt_shpyrds_systems_last_updated_jumpgates AS
 ALTER VIEW public.mkt_shpyrds_systems_last_updated_jumpgates OWNER TO spacetraders;
 
 --
--- TOC entry 285 (class 1259 OID 102003)
+-- TOC entry 267 (class 1259 OID 16660)
 -- Name: mkt_shpyrds_systems_to_visit_first; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1435,7 +1427,7 @@ UNION
 ALTER VIEW public.mkt_shpyrds_systems_to_visit_first OWNER TO spacetraders;
 
 --
--- TOC entry 224 (class 1259 OID 40548)
+-- TOC entry 268 (class 1259 OID 16665)
 -- Name: mkt_shpyrds_systems_visit_progress; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1450,10 +1442,10 @@ CREATE VIEW public.mkt_shpyrds_systems_visit_progress AS
            FROM public.mkt_shpyrds_systems_last_updated_jumpgates
         )
  SELECT 'Markets/Shipyards on gate network visited'::text AS "?column?",
-    info.visited,
-    info.total,
+    visited,
+    total,
         CASE
-            WHEN (info.total > 0) THEN round((((info.visited)::numeric / (info.total)::numeric) * (100)::numeric), 2)
+            WHEN (total > 0) THEN round((((visited)::numeric / (total)::numeric) * (100)::numeric), 2)
             ELSE (0)::numeric
         END AS progress
    FROM info;
@@ -1462,7 +1454,7 @@ CREATE VIEW public.mkt_shpyrds_systems_visit_progress AS
 ALTER VIEW public.mkt_shpyrds_systems_visit_progress OWNER TO spacetraders;
 
 --
--- TOC entry 225 (class 1259 OID 40553)
+-- TOC entry 269 (class 1259 OID 16670)
 -- Name: mkt_shpyrds_waypoints_scanned; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1481,15 +1473,15 @@ CREATE VIEW public.mkt_shpyrds_waypoints_scanned AS
           WHERE (wt.trait_symbol = ANY (ARRAY['MARKETPLACE'::text, 'SHIPYARD'::text]))
           GROUP BY wt.waypoint_symbol, wt.trait_symbol
         )
- SELECT data.waypoint_symbol,
-    ((data.ships_available > 0) OR (data.goods_available > 0)) AS scanned
+ SELECT waypoint_symbol,
+    ((ships_available > 0) OR (goods_available > 0)) AS scanned
    FROM data;
 
 
 ALTER VIEW public.mkt_shpyrds_waypoints_scanned OWNER TO spacetraders;
 
 --
--- TOC entry 226 (class 1259 OID 40558)
+-- TOC entry 270 (class 1259 OID 16675)
 -- Name: mkt_shpyrds_waypoints_scanned_progress; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1497,13 +1489,13 @@ CREATE VIEW public.mkt_shpyrds_waypoints_scanned_progress AS
  SELECT 'Markets/ shipyards on gate network scanned'::text AS "?column?",
     count(
         CASE
-            WHEN mkt_shpyrds_waypoints_scanned.scanned THEN 1
+            WHEN scanned THEN 1
             ELSE NULL::integer
         END) AS scanned,
     count(*) AS total,
     round(((count(
         CASE
-            WHEN mkt_shpyrds_waypoints_scanned.scanned THEN 1
+            WHEN scanned THEN 1
             ELSE NULL::integer
         END))::numeric / ((
         CASE
@@ -1516,7 +1508,7 @@ CREATE VIEW public.mkt_shpyrds_waypoints_scanned_progress AS
 ALTER VIEW public.mkt_shpyrds_waypoints_scanned_progress OWNER TO spacetraders;
 
 --
--- TOC entry 247 (class 1259 OID 56229)
+-- TOC entry 271 (class 1259 OID 16679)
 -- Name: pg_lock_monitor; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1539,7 +1531,7 @@ CREATE VIEW public.pg_lock_monitor AS
 ALTER VIEW public.pg_lock_monitor OWNER TO spacetraders;
 
 --
--- TOC entry 243 (class 1259 OID 54151)
+-- TOC entry 272 (class 1259 OID 16684)
 -- Name: request_saturation_delays; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1557,7 +1549,7 @@ CREATE VIEW public.request_saturation_delays AS
 ALTER VIEW public.request_saturation_delays OWNER TO spacetraders;
 
 --
--- TOC entry 240 (class 1259 OID 41012)
+-- TOC entry 273 (class 1259 OID 16689)
 -- Name: session_stats_per_hour; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1581,7 +1573,7 @@ CREATE VIEW public.session_stats_per_hour AS
 ALTER VIEW public.session_stats_per_hour OWNER TO spacetraders;
 
 --
--- TOC entry 258 (class 1259 OID 79128)
+-- TOC entry 274 (class 1259 OID 16694)
 -- Name: ship_cargo; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -1595,7 +1587,7 @@ CREATE TABLE public.ship_cargo (
 ALTER TABLE public.ship_cargo OWNER TO spacetraders;
 
 --
--- TOC entry 227 (class 1259 OID 40567)
+-- TOC entry 275 (class 1259 OID 16699)
 -- Name: ship_cooldowns; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -1609,7 +1601,7 @@ CREATE TABLE public.ship_cooldowns (
 ALTER TABLE public.ship_cooldowns OWNER TO spacetraders;
 
 --
--- TOC entry 253 (class 1259 OID 77318)
+-- TOC entry 276 (class 1259 OID 16704)
 -- Name: ship_cooldown; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1638,7 +1630,7 @@ CREATE VIEW public.ship_cooldown AS
 ALTER VIEW public.ship_cooldown OWNER TO spacetraders;
 
 --
--- TOC entry 228 (class 1259 OID 40578)
+-- TOC entry 277 (class 1259 OID 16709)
 -- Name: ship_frame_links; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -1652,7 +1644,7 @@ CREATE TABLE public.ship_frame_links (
 ALTER TABLE public.ship_frame_links OWNER TO spacetraders;
 
 --
--- TOC entry 229 (class 1259 OID 40584)
+-- TOC entry 278 (class 1259 OID 16714)
 -- Name: ship_frames; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -1671,29 +1663,26 @@ CREATE TABLE public.ship_frames (
 
 ALTER TABLE public.ship_frames OWNER TO spacetraders;
 
+--
+-- TOC entry 304 (class 1259 OID 16923)
+-- Name: ship_mounts; Type: MATERIALIZED VIEW; Schema: public; Owner: spacetraders
+--
 
-CREATE MATERIALIZED VIEW ship_mounts AS
-SELECT * FROM (VALUES
-    ('MOUNT_GAS_SIPHON_I', 'Gas Siphon I', 'A basic gas siphon that can extract gas from gas giants and other gas-rich bodies.', -1, -1, -1),
-    ('MOUNT_GAS_SIPHON_II', 'Gas Siphon II', 'An advanced gas siphon that can extract gas from gas giants and other gas-rich bodies more efficiently and at a higher rate.', -1, -1, -1),
-    ('MOUNT_GAS_SIPHON_III', 'Gas Siphon III', 'An advanced gas siphon that can extract gas from gas giants and other gas-rich bodies with even greater efficiency and at a higher rate.', -1, -1, -1),
-    ('MOUNT_SURVEYOR_I', 'Surveyor I', 'A basic survey probe that can be used to gather information about a mineral deposit. Surveys QUARTZ_SAND, SILICON_CRYSTALS, PRECIOUS_STONES, ICE_WATER, AMMONIA_ICE, IRON_ORE, COPPER_ORE, SILVER_ORE, ALUMINUM_ORE, GOLD_ORE, PLATINUM_ORE', 1, 2, 1),
-    ('MOUNT_SURVEYOR_II', 'Surveyor II', 'An advanced survey probe that can be used to gather information about a mineral deposit with greater accuracy.', 2, -1, -1),
-    ('MOUNT_SURVEYOR_III', 'Surveyor III', 'An advanced survey probe that can be used to gather information about a mineral deposit with even greater accuracy.', 3, -1, -1),
-    ('MOUNT_SENSOR_ARRAY_I', 'Sensor Array I', 'A basic sensor array that improves a ship''s ability to detect and track other objects in space.', 1, 0, 1),
-    ('MOUNT_SENSOR_ARRAY_II', 'Sensor Array II', 'An advanced sensor array that improves a ship''s ability to detect and track other objects in space with greater accuracy and range.', 4, 2, 2),
-    ('MOUNT_SENSOR_ARRAY_III', 'Sensor Array III', 'A powerful sensor array that can be used to scan for nearby objects and resources.', -1, -1, -1),
-    ('MOUNT_MINING_LASER_I', 'Mining Laser I', 'A basic mining laser that can be used to extract valuable minerals from asteroids and other space objects.', 3, 0, 1),
-    ('MOUNT_MINING_LASER_II', 'Mining Laser II', 'An advanced mining laser that is more efficient and effective at extracting valuable minerals from asteroids and other space objects.', 5, 2, 2),
-    ('MOUNT_MINING_LASER_III', 'Mining Laser III', 'An advanced mining laser that is even more efficient and effective at extracting valuable minerals from asteroids and other space objects.', -1, -1, -1),
-    ('MOUNT_LASER_CANNON_I', 'Laser Cannon', 'A basic laser weapon that fires concentrated beams of energy at high speed and accuracy.', -1, 1, 2),
-    ('MOUNT_MISSILE_LAUNCHER_I', 'Missile Launcher', 'A basic missile launcher that fires guided missiles with a variety of warheads for different targets.', -1, 2, 1),
-    ('MOUNT_TURRET_I', 'Rotary Cannon', 'A rotary cannon is a type of mounted turret that is designed to fire a high volume of rounds in rapid succession.', -1, 1, 2)
-) AS t(mount_symbol, mount_name, mount_desc, strength, required_crew, required_power);
-ALTER MATERIALIZED VIEW public.mat_session_stats OWNER TO spacetraders;
+CREATE MATERIALIZED VIEW public.ship_mounts AS
+ SELECT mount_symbol,
+    mount_name,
+    mount_desc,
+    strength,
+    required_crew,
+    required_power
+   FROM ( VALUES ('MOUNT_GAS_SIPHON_I'::text,'Gas Siphon I'::text,'A basic gas siphon that can extract gas from gas giants and other gas-rich bodies.'::text,'-1'::integer,'-1'::integer,'-1'::integer), ('MOUNT_GAS_SIPHON_II'::text,'Gas Siphon II'::text,'An advanced gas siphon that can extract gas from gas giants and other gas-rich bodies more efficiently and at a higher rate.'::text,'-1'::integer,'-1'::integer,'-1'::integer), ('MOUNT_GAS_SIPHON_III'::text,'Gas Siphon III'::text,'An advanced gas siphon that can extract gas from gas giants and other gas-rich bodies with even greater efficiency and at a higher rate.'::text,'-1'::integer,'-1'::integer,'-1'::integer), ('MOUNT_SURVEYOR_I'::text,'Surveyor I'::text,'A basic survey probe that can be used to gather information about a mineral deposit. Surveys QUARTZ_SAND, SILICON_CRYSTALS, PRECIOUS_STONES, ICE_WATER, AMMONIA_ICE, IRON_ORE, COPPER_ORE, SILVER_ORE, ALUMINUM_ORE, GOLD_ORE, PLATINUM_ORE'::text,1,2,1), ('MOUNT_SURVEYOR_II'::text,'Surveyor II'::text,'An advanced survey probe that can be used to gather information about a mineral deposit with greater accuracy.'::text,2,'-1'::integer,'-1'::integer), ('MOUNT_SURVEYOR_III'::text,'Surveyor III'::text,'An advanced survey probe that can be used to gather information about a mineral deposit with even greater accuracy.'::text,3,'-1'::integer,'-1'::integer), ('MOUNT_SENSOR_ARRAY_I'::text,'Sensor Array I'::text,'A basic sensor array that improves a ship''s ability to detect and track other objects in space.'::text,1,0,1), ('MOUNT_SENSOR_ARRAY_II'::text,'Sensor Array II'::text,'An advanced sensor array that improves a ship''s ability to detect and track other objects in space with greater accuracy and range.'::text,4,2,2), ('MOUNT_SENSOR_ARRAY_III'::text,'Sensor Array III'::text,'A powerful sensor array that can be used to scan for nearby objects and resources.'::text,'-1'::integer,'-1'::integer,'-1'::integer), ('MOUNT_MINING_LASER_I'::text,'Mining Laser I'::text,'A basic mining laser that can be used to extract valuable minerals from asteroids and other space objects.'::text,3,0,1), ('MOUNT_MINING_LASER_II'::text,'Mining Laser II'::text,'An advanced mining laser that is more efficient and effective at extracting valuable minerals from asteroids and other space objects.'::text,5,2,2), ('MOUNT_MINING_LASER_III'::text,'Mining Laser III'::text,'An advanced mining laser that is even more efficient and effective at extracting valuable minerals from asteroids and other space objects.'::text,'-1'::integer,'-1'::integer,'-1'::integer), ('MOUNT_LASER_CANNON_I'::text,'Laser Cannon'::text,'A basic laser weapon that fires concentrated beams of energy at high speed and accuracy.'::text,'-1'::integer,1,2), ('MOUNT_MISSILE_LAUNCHER_I'::text,'Missile Launcher'::text,'A basic missile launcher that fires guided missiles with a variety of warheads for different targets.'::text,'-1'::integer,2,1), ('MOUNT_TURRET_I'::text,'Rotary Cannon'::text,'A rotary cannon is a type of mounted turret that is designed to fire a high volume of rounds in rapid succession.'::text,'-1'::integer,1,2)) t(mount_symbol, mount_name, mount_desc, strength, required_crew, required_power)
+  WITH NO DATA;
+
+
+ALTER MATERIALIZED VIEW public.ship_mounts OWNER TO spacetraders;
 
 --
--- TOC entry 252 (class 1259 OID 77314)
+-- TOC entry 279 (class 1259 OID 16724)
 -- Name: ship_nav_time; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1703,13 +1692,13 @@ CREATE VIEW public.ship_nav_time AS
             (ship_nav.arrival_time - timezone('utc'::text, now())) AS timetoarrive
            FROM public.ship_nav
         )
- SELECT nt.ship_symbol,
+ SELECT ship_symbol,
         CASE
-            WHEN (nt.timetoarrive < '00:00:00'::interval) THEN '00:00:00'::interval
-            ELSE nt.timetoarrive
+            WHEN (timetoarrive < '00:00:00'::interval) THEN '00:00:00'::interval
+            ELSE timetoarrive
         END AS remaining_time,
         CASE
-            WHEN (nt.timetoarrive < '00:00:00'::interval) THEN false
+            WHEN (timetoarrive < '00:00:00'::interval) THEN false
             ELSE true
         END AS flight_active
    FROM nav_time nt;
@@ -1718,7 +1707,7 @@ CREATE VIEW public.ship_nav_time AS
 ALTER VIEW public.ship_nav_time OWNER TO spacetraders;
 
 --
--- TOC entry 254 (class 1259 OID 77323)
+-- TOC entry 280 (class 1259 OID 16728)
 -- Name: ship_overview; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1746,27 +1735,27 @@ CREATE VIEW public.ship_overview AS
 ALTER VIEW public.ship_overview OWNER TO spacetraders;
 
 --
--- TOC entry 241 (class 1259 OID 52482)
+-- TOC entry 281 (class 1259 OID 16733)
 -- Name: ship_performance; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
 CREATE VIEW public.ship_performance AS
- SELECT mat_session_stats.ship_symbol,
-    date_trunc('hour'::text, mat_session_stats.session_start) AS hour,
-    mat_session_stats.behaviour_id,
-    sum(mat_session_stats.earnings) AS cph,
-    sum(mat_session_stats.requests) AS requests,
-    COALESCE((sum(mat_session_stats.earnings) / NULLIF(sum(mat_session_stats.requests), (0)::numeric)), (0)::numeric) AS cpr
+ SELECT ship_symbol,
+    date_trunc('hour'::text, session_start) AS hour,
+    behaviour_id,
+    sum(earnings) AS cph,
+    sum(requests) AS requests,
+    COALESCE((sum(earnings) / NULLIF(sum(requests), (0)::numeric)), (0)::numeric) AS cpr
    FROM public.mat_session_stats
-  WHERE (mat_session_stats.session_start >= (date_trunc('hour'::text, now()) - '06:00:00'::interval))
-  GROUP BY mat_session_stats.ship_symbol, (date_trunc('hour'::text, mat_session_stats.session_start)), mat_session_stats.behaviour_id
-  ORDER BY mat_session_stats.ship_symbol, (date_trunc('hour'::text, mat_session_stats.session_start)), mat_session_stats.behaviour_id;
+  WHERE (session_start >= (date_trunc('hour'::text, now()) - '06:00:00'::interval))
+  GROUP BY ship_symbol, (date_trunc('hour'::text, session_start)), behaviour_id
+  ORDER BY ship_symbol, (date_trunc('hour'::text, session_start)), behaviour_id;
 
 
 ALTER VIEW public.ship_performance OWNER TO spacetraders;
 
 --
--- TOC entry 242 (class 1259 OID 52685)
+-- TOC entry 282 (class 1259 OID 16738)
 -- Name: ship_tasks; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -1787,7 +1776,7 @@ CREATE TABLE public.ship_tasks (
 ALTER TABLE public.ship_tasks OWNER TO spacetraders;
 
 --
--- TOC entry 231 (class 1259 OID 40610)
+-- TOC entry 283 (class 1259 OID 16743)
 -- Name: shipyard_prices; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1818,7 +1807,7 @@ CREATE VIEW public.shipyard_prices AS
 ALTER VIEW public.shipyard_prices OWNER TO spacetraders;
 
 --
--- TOC entry 239 (class 1259 OID 41005)
+-- TOC entry 284 (class 1259 OID 16748)
 -- Name: shipyard_type_performance; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1856,7 +1845,25 @@ CREATE VIEW public.shipyard_type_performance AS
 ALTER VIEW public.shipyard_type_performance OWNER TO spacetraders;
 
 --
--- TOC entry 283 (class 1259 OID 101963)
+-- TOC entry 303 (class 1259 OID 16916)
+-- Name: static_data; Type: MATERIALIZED VIEW; Schema: public; Owner: spacetraders
+--
+
+CREATE MATERIALIZED VIEW public.static_data AS
+ SELECT mount_symbol,
+    mount_name,
+    mount_desc,
+    strength,
+    required_crew,
+    required_power
+   FROM ( VALUES ('MOUNT_GAS_SIPHON_I'::text,'Gas Siphon I'::text,'A basic gas siphon that can extract gas from gas giants and other gas-rich bodies.'::text,'-1'::integer,'-1'::integer,'-1'::integer), ('MOUNT_GAS_SIPHON_II'::text,'Gas Siphon II'::text,'An advanced gas siphon that can extract gas from gas giants and other gas-rich bodies more efficiently and at a higher rate.'::text,'-1'::integer,'-1'::integer,'-1'::integer), ('MOUNT_GAS_SIPHON_III'::text,'Gas Siphon III'::text,'An advanced gas siphon that can extract gas from gas giants and other gas-rich bodies with even greater efficiency and at a higher rate.'::text,'-1'::integer,'-1'::integer,'-1'::integer), ('MOUNT_SURVEYOR_I'::text,'Surveyor I'::text,'A basic survey probe that can be used to gather information about a mineral deposit. Surveys QUARTZ_SAND, SILICON_CRYSTALS, PRECIOUS_STONES, ICE_WATER, AMMONIA_ICE, IRON_ORE, COPPER_ORE, SILVER_ORE, ALUMINUM_ORE, GOLD_ORE, PLATINUM_ORE'::text,1,2,1), ('MOUNT_SURVEYOR_II'::text,'Surveyor II'::text,'An advanced survey probe that can be used to gather information about a mineral deposit with greater accuracy.'::text,2,'-1'::integer,'-1'::integer), ('MOUNT_SURVEYOR_III'::text,'Surveyor III'::text,'An advanced survey probe that can be used to gather information about a mineral deposit with even greater accuracy.'::text,3,'-1'::integer,'-1'::integer), ('MOUNT_SENSOR_ARRAY_I'::text,'Sensor Array I'::text,'A basic sensor array that improves a ship''s ability to detect and track other objects in space.'::text,1,0,1), ('MOUNT_SENSOR_ARRAY_II'::text,'Sensor Array II'::text,'An advanced sensor array that improves a ship''s ability to detect and track other objects in space with greater accuracy and range.'::text,4,2,2), ('MOUNT_SENSOR_ARRAY_III'::text,'Sensor Array III'::text,'A powerful sensor array that can be used to scan for nearby objects and resources.'::text,'-1'::integer,'-1'::integer,'-1'::integer), ('MOUNT_MINING_LASER_I'::text,'Mining Laser I'::text,'A basic mining laser that can be used to extract valuable minerals from asteroids and other space objects.'::text,3,0,1), ('MOUNT_MINING_LASER_II'::text,'Mining Laser II'::text,'An advanced mining laser that is more efficient and effective at extracting valuable minerals from asteroids and other space objects.'::text,5,2,2), ('MOUNT_MINING_LASER_III'::text,'Mining Laser III'::text,'An advanced mining laser that is even more efficient and effective at extracting valuable minerals from asteroids and other space objects.'::text,'-1'::integer,'-1'::integer,'-1'::integer), ('MOUNT_LASER_CANNON_I'::text,'Laser Cannon'::text,'A basic laser weapon that fires concentrated beams of energy at high speed and accuracy.'::text,'-1'::integer,1,2), ('MOUNT_MISSILE_LAUNCHER_I'::text,'Missile Launcher'::text,'A basic missile launcher that fires guided missiles with a variety of warheads for different targets.'::text,'-1'::integer,2,1), ('MOUNT_TURRET_I'::text,'Rotary Cannon'::text,'A rotary cannon is a type of mounted turret that is designed to fire a high volume of rounds in rapid succession.'::text,'-1'::integer,1,2)) t(mount_symbol, mount_name, mount_desc, strength, required_crew, required_power)
+  WITH NO DATA;
+
+
+ALTER MATERIALIZED VIEW public.static_data OWNER TO spacetraders;
+
+--
+-- TOC entry 285 (class 1259 OID 16753)
 -- Name: supply; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1866,15 +1873,15 @@ CREATE VIEW public.supply AS
             staticvaluescte.val
            FROM ( VALUES ('ABUNDANT'::text,5), ('SCARCE'::text,4), ('MODERATE'::text,3), ('LIMITED'::text,2), ('SCARCE'::text,1)) staticvaluescte(supply, val)
         )
- SELECT supply_values.supply,
-    supply_values.val
+ SELECT supply,
+    val
    FROM supply_values;
 
 
 ALTER VIEW public.supply OWNER TO spacetraders;
 
 --
--- TOC entry 264 (class 1259 OID 79851)
+-- TOC entry 286 (class 1259 OID 16757)
 -- Name: survey_average_values; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1890,7 +1897,7 @@ SELECT
 ALTER VIEW public.survey_average_values OWNER TO spacetraders;
 
 --
--- TOC entry 232 (class 1259 OID 40624)
+-- TOC entry 287 (class 1259 OID 16761)
 -- Name: survey_deposits; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -1904,7 +1911,7 @@ CREATE TABLE public.survey_deposits (
 ALTER TABLE public.survey_deposits OWNER TO spacetraders;
 
 --
--- TOC entry 233 (class 1259 OID 40630)
+-- TOC entry 288 (class 1259 OID 16766)
 -- Name: surveys; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
@@ -1920,7 +1927,7 @@ CREATE TABLE public.surveys (
 ALTER TABLE public.surveys OWNER TO spacetraders;
 
 --
--- TOC entry 265 (class 1259 OID 79856)
+-- TOC entry 289 (class 1259 OID 16772)
 -- Name: survey_chance_and_values; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1948,24 +1955,24 @@ CREATE VIEW public.survey_chance_and_values AS
 ALTER VIEW public.survey_chance_and_values OWNER TO spacetraders;
 
 --
--- TOC entry 250 (class 1259 OID 66196)
+-- TOC entry 290 (class 1259 OID 16777)
 -- Name: survey_throughput; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
 CREATE VIEW public.survey_throughput AS
- SELECT date_trunc('hour'::text, logging.event_timestamp) AS date_trunc,
-    count(*) FILTER (WHERE (logging.event_name = 'ship_survey'::text)) AS new_surveys,
-    count(DISTINCT (logging.event_params ->> 'survey_id'::text)) FILTER (WHERE (logging.event_name = 'survey_exhausted'::text)) AS exhausted_surveys
+ SELECT date_trunc('hour'::text, event_timestamp) AS date_trunc,
+    count(*) FILTER (WHERE (event_name = 'ship_survey'::text)) AS new_surveys,
+    count(DISTINCT (event_params ->> 'survey_id'::text)) FILTER (WHERE (event_name = 'survey_exhausted'::text)) AS exhausted_surveys
    FROM public.logging
-  WHERE ((logging.event_name = ANY (ARRAY['ship_survey'::text, 'survey_exhausted'::text])) AND (logging.event_timestamp >= (now() - '1 day'::interval)))
-  GROUP BY (date_trunc('hour'::text, logging.event_timestamp))
-  ORDER BY (date_trunc('hour'::text, logging.event_timestamp)) DESC, (count(*) FILTER (WHERE (logging.event_name = 'ship_survey'::text)));
+  WHERE ((event_name = ANY (ARRAY['ship_survey'::text, 'survey_exhausted'::text])) AND (event_timestamp >= (now() - '1 day'::interval)))
+  GROUP BY (date_trunc('hour'::text, event_timestamp))
+  ORDER BY (date_trunc('hour'::text, event_timestamp)) DESC, (count(*) FILTER (WHERE (event_name = 'ship_survey'::text)));
 
 
 ALTER VIEW public.survey_throughput OWNER TO spacetraders;
 
 --
--- TOC entry 237 (class 1259 OID 40836)
+-- TOC entry 291 (class 1259 OID 16782)
 -- Name: systems_on_network_but_uncharted; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1980,7 +1987,7 @@ CREATE VIEW public.systems_on_network_but_uncharted AS
 ALTER VIEW public.systems_on_network_but_uncharted OWNER TO spacetraders;
 
 --
--- TOC entry 251 (class 1259 OID 67586)
+-- TOC entry 292 (class 1259 OID 16787)
 -- Name: systems_with_jumpgates; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -1993,32 +2000,32 @@ CREATE VIEW public.systems_with_jumpgates AS
 ALTER VIEW public.systems_with_jumpgates OWNER TO spacetraders;
 
 --
--- TOC entry 260 (class 1259 OID 79358)
+-- TOC entry 293 (class 1259 OID 16791)
 -- Name: task_overview; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
 CREATE VIEW public.task_overview AS
- SELECT ship_tasks.expiry,
+ SELECT expiry,
         CASE
-            WHEN (ship_tasks.completed = true) THEN NULL::numeric
-            ELSE ship_tasks.priority
+            WHEN (completed = true) THEN NULL::numeric
+            ELSE priority
         END AS pending_priority,
-    COALESCE(ship_tasks.claimed_by, ship_tasks.agent_symbol) AS assignee,
-    ship_tasks.behaviour_id,
-    ship_tasks.behaviour_params
+    COALESCE(claimed_by, agent_symbol) AS assignee,
+    behaviour_id,
+    behaviour_params
    FROM public.ship_tasks
-  WHERE ((ship_tasks.claimed_by IS NOT NULL) OR (ship_tasks.expiry > now()))
-  ORDER BY (ship_tasks.expiry IS NULL), ship_tasks.expiry DESC,
+  WHERE ((claimed_by IS NOT NULL) OR (expiry > now()))
+  ORDER BY (expiry IS NULL), expiry DESC,
         CASE
-            WHEN (ship_tasks.completed = true) THEN NULL::numeric
-            ELSE ship_tasks.priority
+            WHEN (completed = true) THEN NULL::numeric
+            ELSE priority
         END;
 
 
 ALTER VIEW public.task_overview OWNER TO spacetraders;
 
 --
--- TOC entry 259 (class 1259 OID 79149)
+-- TOC entry 294 (class 1259 OID 16795)
 -- Name: trade_extraction_packages; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -2058,20 +2065,20 @@ CREATE VIEW public.trade_extraction_packages AS
           GROUP BY package_values.source_waypoint, package_values.market_symbol, package_values.distance
           ORDER BY package_values.source_waypoint, (sum(package_values.line_item_value)) DESC
         )
- SELECT compiled_data.source_waypoint,
-    compiled_data.market_symbol,
-    compiled_data.trade_symbols,
-    compiled_data.package_value,
-    compiled_data.package_size,
-    compiled_data.distance
+ SELECT source_waypoint,
+    market_symbol,
+    trade_symbols,
+    package_value,
+    package_size,
+    distance
    FROM compiled_data
-  ORDER BY compiled_data.package_size DESC, compiled_data.source_waypoint, ((compiled_data.package_value)::double precision / GREATEST(compiled_data.distance, (1)::double precision)) DESC;
+  ORDER BY package_size DESC, source_waypoint, ((package_value)::double precision / GREATEST(distance, (1)::double precision)) DESC;
 
 
 ALTER VIEW public.trade_extraction_packages OWNER TO spacetraders;
 
 --
--- TOC entry 270 (class 1259 OID 101476)
+-- TOC entry 295 (class 1259 OID 16800)
 -- Name: trade_routes_contracts; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -2104,33 +2111,33 @@ CREATE VIEW public.trade_routes_contracts AS
              JOIN public.contracts c ON ((c.id = ct.contract_id)))
           WHERE ((c.fulfilled = false) AND (c.expiration > timezone('utc'::text, now())) AND (c.agent_symbol = 'CTRI-U-'::text))
         )
- SELECT ((((routes.profit_per_unit * LEAST(routes.market_depth, 100)) * routes.supply_value))::double precision / (routes.distance + (15)::double precision)) AS route_value,
-    routes.system_symbol,
-    routes.trade_symbol,
-    routes.profit_per_unit,
-    routes.export_market,
-    routes.export_x,
-    routes.export_y,
-    routes.purchase_price,
-    routes.fulfill_value_per_unit,
-    routes.fulfill_market,
-    routes.supply_text,
-    routes.supply_value,
-    routes.market_depth,
-    routes.waypoint_symbol,
-    routes.fulfil_x,
-    routes.fulfil_y,
-    routes.distance,
-    routes.agent_symbol
+ SELECT ((((profit_per_unit * LEAST(market_depth, 100)) * supply_value))::double precision / (distance + (15)::double precision)) AS route_value,
+    system_symbol,
+    trade_symbol,
+    profit_per_unit,
+    export_market,
+    export_x,
+    export_y,
+    purchase_price,
+    fulfill_value_per_unit,
+    fulfill_market,
+    supply_text,
+    supply_value,
+    market_depth,
+    waypoint_symbol,
+    fulfil_x,
+    fulfil_y,
+    distance,
+    agent_symbol
    FROM routes
-  WHERE (routes.profit_per_unit > 0)
-  ORDER BY ((((routes.profit_per_unit * LEAST(routes.market_depth, 100)) * routes.supply_value))::double precision / (routes.distance + (15)::double precision)) DESC;
+  WHERE (profit_per_unit > 0)
+  ORDER BY ((((profit_per_unit * LEAST(market_depth, 100)) * supply_value))::double precision / (distance + (15)::double precision)) DESC;
 
 
 ALTER VIEW public.trade_routes_contracts OWNER TO spacetraders;
 
 --
--- TOC entry 257 (class 1259 OID 79019)
+-- TOC entry 296 (class 1259 OID 16805)
 -- Name: trade_routes_extraction_intrasystem; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -2177,30 +2184,30 @@ CREATE VIEW public.trade_routes_extraction_intrasystem AS
           WHERE ((routes.profit_per_unit > 0) AND (routes.extraction_waypoint <> routes.import_market))
           ORDER BY ((((routes.profit_per_unit * routes.market_depth) * 5))::double precision / (routes.distance + (15)::double precision)) DESC
         )
- SELECT final_results.route_value,
-    final_results.system_symbol,
-    final_results.trade_symbol,
-    final_results.profit_per_unit,
-    final_results.extraction_waypoint,
-    final_results.extract_x,
-    final_results.extract_y,
-    final_results.buy_price,
-    final_results.sell_price,
-    final_results.export_supply,
-    final_results.import_supply,
-    final_results.market_depth,
-    final_results.import_market,
-    final_results.import_x,
-    final_results.import_y,
-    final_results.distance
+ SELECT route_value,
+    system_symbol,
+    trade_symbol,
+    profit_per_unit,
+    extraction_waypoint,
+    extract_x,
+    extract_y,
+    buy_price,
+    sell_price,
+    export_supply,
+    import_supply,
+    market_depth,
+    import_market,
+    import_x,
+    import_y,
+    distance
    FROM final_results
-  ORDER BY final_results.route_value DESC;
+  ORDER BY route_value DESC;
 
 
 ALTER VIEW public.trade_routes_extraction_intrasystem OWNER TO spacetraders;
 
 --
--- TOC entry 272 (class 1259 OID 101678)
+-- TOC entry 297 (class 1259 OID 16810)
 -- Name: trade_routes_intrasystem; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -2293,37 +2300,37 @@ CREATE VIEW public.trade_routes_intrasystem AS
            FROM (exports e
              JOIN imports i ON (((e.trade_symbol = i.trade_symbol) AND (e.system_symbol = i.system_symbol) AND (e.market_symbol <> i.market_symbol))))
         )
- SELECT ((((routes.profit_per_unit * LEAST(routes.market_depth, 100)) * routes.supply_value))::double precision / (routes.distance + (15)::double precision)) AS route_value,
-    routes.system_symbol,
-    routes.trade_symbol,
-    routes.profit_per_unit,
-    routes.export_market,
-    routes.export_x,
-    routes.export_y,
-    routes.purchase_price,
-    routes.sell_price,
-    routes.export_activity,
-    routes.supply_value,
-    routes.supply_text,
-    routes.import_supply,
-    routes.market_depth,
-    routes.import_market,
-    routes.import_x,
-    routes.import_y,
-    routes.distance
+ SELECT ((((profit_per_unit * LEAST(market_depth, 100)) * supply_value))::double precision / (distance + (15)::double precision)) AS route_value,
+    system_symbol,
+    trade_symbol,
+    profit_per_unit,
+    export_market,
+    export_x,
+    export_y,
+    purchase_price,
+    sell_price,
+    export_activity,
+    supply_value,
+    supply_text,
+    import_supply,
+    market_depth,
+    import_market,
+    import_x,
+    import_y,
+    distance
    FROM routes
-  WHERE ((routes.profit_per_unit > 0) AND (((routes.sell_price)::double precision / (routes.purchase_price)::double precision) > (
+  WHERE ((profit_per_unit > 0) AND (((sell_price)::double precision / (purchase_price)::double precision) > (
         CASE
-            WHEN (routes.market_depth = 10) THEN 1.15
+            WHEN (market_depth = 10) THEN 1.15
             ELSE (1)::numeric
         END)::double precision))
-  ORDER BY ((((routes.profit_per_unit * routes.market_depth) * routes.supply_value))::double precision / (routes.distance + (15)::double precision)) DESC;
+  ORDER BY ((((profit_per_unit * market_depth) * supply_value))::double precision / (distance + (15)::double precision)) DESC;
 
 
 ALTER VIEW public.trade_routes_intrasystem OWNER TO spacetraders;
 
 --
--- TOC entry 266 (class 1259 OID 84831)
+-- TOC entry 298 (class 1259 OID 16815)
 -- Name: trade_routes_max_potentials; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -2344,34 +2351,34 @@ CREATE VIEW public.trade_routes_max_potentials AS
           WHERE (mc.type <> 'EXCHANGE'::text)
           GROUP BY mc.trade_symbol
         )
- SELECT extremes.trade_symbol,
-    extremes.max_import_price,
-    extremes.min_export_price,
-    round(((extremes.max_import_price / extremes.min_export_price) * (100)::numeric), 2) AS profit_pct
+ SELECT trade_symbol,
+    max_import_price,
+    min_export_price,
+    round(((max_import_price / min_export_price) * (100)::numeric), 2) AS profit_pct
    FROM extremes;
 
 
 ALTER VIEW public.trade_routes_max_potentials OWNER TO spacetraders;
 
 --
--- TOC entry 276 (class 1259 OID 101739)
+-- TOC entry 299 (class 1259 OID 16820)
 -- Name: warnings_mining_unstable_asteroids; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
 CREATE VIEW public.warnings_mining_unstable_asteroids AS
- SELECT l.ship_symbol,
-    (max(l.event_timestamp) > (now() - '01:00:00'::interval)) AS warning_active,
-    max(l.event_timestamp) AS max,
-    (l.event_params ->> 'asteroid_wp'::text) AS asteroid_wp
+ SELECT ship_symbol,
+    (max(event_timestamp) > (now() - '01:00:00'::interval)) AS warning_active,
+    max(event_timestamp) AS max,
+    (event_params ->> 'asteroid_wp'::text) AS asteroid_wp
    FROM public.logging l
-  WHERE ((l.event_name = 'ship_extract'::text) AND (l.error_code = 4253))
-  GROUP BY l.ship_symbol, (l.event_params ->> 'asteroid_wp'::text);
+  WHERE ((event_name = 'ship_extract'::text) AND (error_code = 4253))
+  GROUP BY ship_symbol, (event_params ->> 'asteroid_wp'::text);
 
 
 ALTER VIEW public.warnings_mining_unstable_asteroids OWNER TO spacetraders;
 
 --
--- TOC entry 234 (class 1259 OID 40641)
+-- TOC entry 300 (class 1259 OID 16825)
 -- Name: waypoint_types_not_scanned_by_system; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -2387,24 +2394,24 @@ CREATE VIEW public.waypoint_types_not_scanned_by_system AS
 ALTER VIEW public.waypoint_types_not_scanned_by_system OWNER TO spacetraders;
 
 --
--- TOC entry 235 (class 1259 OID 40645)
+-- TOC entry 301 (class 1259 OID 16829)
 -- Name: waypoints_not_scanned; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
 CREATE VIEW public.waypoints_not_scanned AS
- SELECT w.waypoint_symbol,
-    w.type,
-    w.system_symbol,
-    w.x,
-    w.y
+ SELECT waypoint_symbol,
+    type,
+    system_symbol,
+    x,
+    y
    FROM public.waypoints w
-  WHERE (NOT w.checked);
+  WHERE (NOT checked);
 
 
 ALTER VIEW public.waypoints_not_scanned OWNER TO spacetraders;
 
 --
--- TOC entry 236 (class 1259 OID 40649)
+-- TOC entry 302 (class 1259 OID 16833)
 -- Name: waypoints_not_scanned_progress; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
@@ -2420,16 +2427,16 @@ CREATE VIEW public.waypoints_not_scanned_progress AS
           WHERE (w.type = ANY (ARRAY['ORBITAL_STATION'::text, 'ASTEROID_FIELD'::text, 'JUMP_GATE'::text]))
         )
  SELECT 'Waypoint scanning progress'::text AS "?column?",
-    (waypoint_scan_progress.total - waypoint_scan_progress.remaining) AS scanned,
-    waypoint_scan_progress.total,
-    round(((((waypoint_scan_progress.total - waypoint_scan_progress.remaining))::numeric / (waypoint_scan_progress.total)::numeric) * (100)::numeric), 2) AS progress
+    (total - remaining) AS scanned,
+    total,
+    round(((((total - remaining))::numeric / (total)::numeric) * (100)::numeric), 2) AS progress
    FROM waypoint_scan_progress;
 
 
 ALTER VIEW public.waypoints_not_scanned_progress OWNER TO spacetraders;
 
 --
--- TOC entry 3257 (class 2606 OID 40655)
+-- TOC entry 3562 (class 2606 OID 16839)
 -- Name: agents agents_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2438,7 +2445,7 @@ ALTER TABLE ONLY public.agents
 
 
 --
--- TOC entry 3313 (class 2606 OID 101811)
+-- TOC entry 3570 (class 2606 OID 16841)
 -- Name: construction_site_materials construction_site_materials_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2447,7 +2454,7 @@ ALTER TABLE ONLY public.construction_site_materials
 
 
 --
--- TOC entry 3311 (class 2606 OID 101803)
+-- TOC entry 3572 (class 2606 OID 16843)
 -- Name: construction_sites construction_sites_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2456,7 +2463,7 @@ ALTER TABLE ONLY public.construction_sites
 
 
 --
--- TOC entry 3267 (class 2606 OID 40657)
+-- TOC entry 3574 (class 2606 OID 16845)
 -- Name: contract_tradegoods contract_tradegoods_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2465,7 +2472,7 @@ ALTER TABLE ONLY public.contract_tradegoods
 
 
 --
--- TOC entry 3269 (class 2606 OID 40659)
+-- TOC entry 3576 (class 2606 OID 16847)
 -- Name: contracts contracts_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2474,7 +2481,7 @@ ALTER TABLE ONLY public.contracts
 
 
 --
--- TOC entry 3305 (class 2606 OID 64907)
+-- TOC entry 3578 (class 2606 OID 16849)
 -- Name: extractions extractions_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2483,7 +2490,7 @@ ALTER TABLE ONLY public.extractions
 
 
 --
--- TOC entry 3271 (class 2606 OID 40661)
+-- TOC entry 3584 (class 2606 OID 16851)
 -- Name: jump_gates jump_gates_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2492,7 +2499,7 @@ ALTER TABLE ONLY public.jump_gates
 
 
 --
--- TOC entry 3315 (class 2606 OID 102002)
+-- TOC entry 3586 (class 2606 OID 16853)
 -- Name: jumpgate_connections jumpgate_connections2_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2501,7 +2508,7 @@ ALTER TABLE ONLY public.jumpgate_connections
 
 
 --
--- TOC entry 3263 (class 2606 OID 40665)
+-- TOC entry 3564 (class 2606 OID 16855)
 -- Name: logging logging_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2510,7 +2517,7 @@ ALTER TABLE ONLY public.logging
 
 
 --
--- TOC entry 3309 (class 2606 OID 79523)
+-- TOC entry 3592 (class 2606 OID 16857)
 -- Name: manufacture_relationships manufacture_relationships_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2519,7 +2526,7 @@ ALTER TABLE ONLY public.manufacture_relationships
 
 
 --
--- TOC entry 3279 (class 2606 OID 40667)
+-- TOC entry 3594 (class 2606 OID 16859)
 -- Name: market market_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2528,7 +2535,7 @@ ALTER TABLE ONLY public.market
 
 
 --
--- TOC entry 3283 (class 2606 OID 40669)
+-- TOC entry 3596 (class 2606 OID 16861)
 -- Name: market_tradegood market_tradegood_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2537,7 +2544,7 @@ ALTER TABLE ONLY public.market_tradegood
 
 
 --
--- TOC entry 3265 (class 2606 OID 40671)
+-- TOC entry 3600 (class 2606 OID 16863)
 -- Name: ship_behaviours ship_behaviours_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2546,7 +2553,7 @@ ALTER TABLE ONLY public.ship_behaviours
 
 
 --
--- TOC entry 3289 (class 2606 OID 40673)
+-- TOC entry 3608 (class 2606 OID 16865)
 -- Name: ship_cooldowns ship_cooldown_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2555,7 +2562,7 @@ ALTER TABLE ONLY public.ship_cooldowns
 
 
 --
--- TOC entry 3291 (class 2606 OID 40675)
+-- TOC entry 3610 (class 2606 OID 16867)
 -- Name: ship_frame_links ship_frame_links_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2564,7 +2571,7 @@ ALTER TABLE ONLY public.ship_frame_links
 
 
 --
--- TOC entry 3293 (class 2606 OID 40677)
+-- TOC entry 3612 (class 2606 OID 16869)
 -- Name: ship_frames ship_frames_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2573,7 +2580,7 @@ ALTER TABLE ONLY public.ship_frames
 
 
 --
--- TOC entry 3307 (class 2606 OID 79135)
+-- TOC entry 3606 (class 2606 OID 16871)
 -- Name: ship_cargo ship_inventories_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2582,16 +2589,7 @@ ALTER TABLE ONLY public.ship_cargo
 
 
 --
--- TOC entry 3303 (class 2606 OID 55943)
--- Name: ship_mounts ship_mounts_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
---
-
-ALTER TABLE ONLY public.ship_mounts
-    ADD CONSTRAINT ship_mounts_pkey PRIMARY KEY (mount_symbol);
-
-
---
--- TOC entry 3295 (class 2606 OID 40681)
+-- TOC entry 3602 (class 2606 OID 16875)
 -- Name: ship_nav ship_nav_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2600,7 +2598,7 @@ ALTER TABLE ONLY public.ship_nav
 
 
 --
--- TOC entry 3259 (class 2606 OID 40683)
+-- TOC entry 3568 (class 2606 OID 16877)
 -- Name: ships ship_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2609,7 +2607,7 @@ ALTER TABLE ONLY public.ships
 
 
 --
--- TOC entry 3301 (class 2606 OID 52692)
+-- TOC entry 3614 (class 2606 OID 16879)
 -- Name: ship_tasks ship_tasks_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2618,7 +2616,7 @@ ALTER TABLE ONLY public.ship_tasks
 
 
 --
--- TOC entry 3285 (class 2606 OID 40685)
+-- TOC entry 3604 (class 2606 OID 16881)
 -- Name: shipyard_types shipyard_types_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2627,7 +2625,7 @@ ALTER TABLE ONLY public.shipyard_types
 
 
 --
--- TOC entry 3297 (class 2606 OID 40687)
+-- TOC entry 3616 (class 2606 OID 16883)
 -- Name: survey_deposits survey_deposit_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2636,7 +2634,7 @@ ALTER TABLE ONLY public.survey_deposits
 
 
 --
--- TOC entry 3299 (class 2606 OID 40689)
+-- TOC entry 3618 (class 2606 OID 16885)
 -- Name: surveys survey_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2645,7 +2643,7 @@ ALTER TABLE ONLY public.surveys
 
 
 --
--- TOC entry 3287 (class 2606 OID 40691)
+-- TOC entry 3598 (class 2606 OID 16887)
 -- Name: systems systems_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2654,7 +2652,7 @@ ALTER TABLE ONLY public.systems
 
 
 --
--- TOC entry 3281 (class 2606 OID 40693)
+-- TOC entry 3580 (class 2606 OID 16889)
 -- Name: market_tradegood_listings tradegoods_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2663,7 +2661,7 @@ ALTER TABLE ONLY public.market_tradegood_listings
 
 
 --
--- TOC entry 3261 (class 2606 OID 40695)
+-- TOC entry 3566 (class 2606 OID 16891)
 -- Name: transactions transaction_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2672,7 +2670,7 @@ ALTER TABLE ONLY public.transactions
 
 
 --
--- TOC entry 3273 (class 2606 OID 40697)
+-- TOC entry 3588 (class 2606 OID 16893)
 -- Name: waypoint_charts waypoint_charts_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2681,7 +2679,7 @@ ALTER TABLE ONLY public.waypoint_charts
 
 
 --
--- TOC entry 3277 (class 2606 OID 40699)
+-- TOC entry 3582 (class 2606 OID 16895)
 -- Name: waypoints waypoint_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2690,7 +2688,7 @@ ALTER TABLE ONLY public.waypoints
 
 
 --
--- TOC entry 3275 (class 2606 OID 40701)
+-- TOC entry 3590 (class 2606 OID 16897)
 -- Name: waypoint_traits waypoint_traits_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
@@ -2699,53 +2697,7 @@ ALTER TABLE ONLY public.waypoint_traits
 
 
 --
--- TOC entry 3482 (class 2618 OID 79854)
--- Name: survey_average_values _RETURN; Type: RULE; Schema: public; Owner: spacetraders
---
-
-CREATE OR REPLACE VIEW public.survey_average_values AS
- SELECT s.signature,
-    s.waypoint_symbol,
-    s.expiration,
-    s.size,
-    round((sum((mp.import_price * (sd.count)::numeric)) / (sum(sd.count))::numeric), 2) AS survey_value
-   FROM ((public.surveys s
-     JOIN public.survey_deposits sd ON ((s.signature = sd.signature)))
-     JOIN public.market_prices mp ON ((mp.trade_symbol = sd.trade_symbol)))
-  WHERE (s.expiration >= timezone('utc'::text, now()))
-  GROUP BY s.signature, s.waypoint_symbol, s.expiration
-  ORDER BY (sum((mp.import_price * (sd.count)::numeric)) / (sum(sd.count))::numeric) DESC, s.expiration;
-
-
---
--- TOC entry 3486 (class 2618 OID 101212)
--- Name: import_overview _RETURN; Type: RULE; Schema: public; Owner: spacetraders
---
-
-CREATE OR REPLACE VIEW public.import_overview AS
- SELECT w.system_symbol,
-    mtl.market_symbol,
-    mtl.trade_symbol,
-    mtl.supply,
-    mtl.activity,
-    mtl.purchase_price,
-    mtl.sell_price,
-    mtl.market_depth,
-    sum(
-        CASE
-            WHEN ((t."timestamp" > (now() - '01:00:00'::interval)) AND (t.type = 'SELL'::text)) THEN t.units
-            ELSE NULL::integer
-        END) AS units_sold_recently
-   FROM ((public.market_tradegood_listings mtl
-     JOIN public.waypoints w ON ((w.waypoint_symbol = mtl.market_symbol)))
-     LEFT JOIN public.transactions t ON (((t.waypoint_symbol = w.waypoint_symbol) AND (t.trade_symbol = mtl.trade_symbol))))
-  WHERE (mtl.type = 'IMPORT'::text)
-  GROUP BY w.system_symbol, mtl.market_symbol, mtl.trade_symbol
-  ORDER BY w.system_symbol, (mtl.activity <> 'STRONG'::text), (mtl.activity <> 'GROWING'::text), (mtl.activity <> 'WEAK'::text), mtl.trade_symbol;
-
-
---
--- TOC entry 3487 (class 2618 OID 101217)
+-- TOC entry 3766 (class 2618 OID 16450)
 -- Name: export_overview _RETURN; Type: RULE; Schema: public; Owner: spacetraders
 --
 
@@ -2774,8 +2726,54 @@ CREATE OR REPLACE VIEW public.export_overview AS
 
 
 --
--- TOC entry 3513 (class 0 OID 0)
--- Dependencies: 6
+-- TOC entry 3768 (class 2618 OID 16476)
+-- Name: import_overview _RETURN; Type: RULE; Schema: public; Owner: spacetraders
+--
+
+CREATE OR REPLACE VIEW public.import_overview AS
+ SELECT w.system_symbol,
+    mtl.market_symbol,
+    mtl.trade_symbol,
+    mtl.supply,
+    mtl.activity,
+    mtl.purchase_price,
+    mtl.sell_price,
+    mtl.market_depth,
+    sum(
+        CASE
+            WHEN ((t."timestamp" > (now() - '01:00:00'::interval)) AND (t.type = 'SELL'::text)) THEN t.units
+            ELSE NULL::integer
+        END) AS units_sold_recently
+   FROM ((public.market_tradegood_listings mtl
+     JOIN public.waypoints w ON ((w.waypoint_symbol = mtl.market_symbol)))
+     LEFT JOIN public.transactions t ON (((t.waypoint_symbol = w.waypoint_symbol) AND (t.trade_symbol = mtl.trade_symbol))))
+  WHERE (mtl.type = 'IMPORT'::text)
+  GROUP BY w.system_symbol, mtl.market_symbol, mtl.trade_symbol
+  ORDER BY w.system_symbol, (mtl.activity <> 'STRONG'::text), (mtl.activity <> 'GROWING'::text), (mtl.activity <> 'WEAK'::text), mtl.trade_symbol;
+
+
+--
+-- TOC entry 3806 (class 2618 OID 16760)
+-- Name: survey_average_values _RETURN; Type: RULE; Schema: public; Owner: spacetraders
+--
+
+CREATE OR REPLACE VIEW public.survey_average_values AS
+ SELECT s.signature,
+    s.waypoint_symbol,
+    s.expiration,
+    s.size,
+    round((sum((mp.import_price * (sd.count)::numeric)) / (sum(sd.count))::numeric), 2) AS survey_value
+   FROM ((public.surveys s
+     JOIN public.survey_deposits sd ON ((s.signature = sd.signature)))
+     JOIN public.market_prices mp ON ((mp.trade_symbol = sd.trade_symbol)))
+  WHERE (s.expiration >= timezone('utc'::text, now()))
+  GROUP BY s.signature, s.waypoint_symbol, s.expiration
+  ORDER BY (sum((mp.import_price * (sd.count)::numeric)) / (sum(sd.count))::numeric) DESC, s.expiration;
+
+
+--
+-- TOC entry 3828 (class 0 OID 0)
+-- Dependencies: 5
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: spacetraders
 --
 
@@ -2783,7 +2781,7 @@ REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2023-12-30 17:04:21
+-- Completed on 2024-01-09 15:37:43
 
 --
 -- PostgreSQL database dump complete
