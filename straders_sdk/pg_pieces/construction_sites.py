@@ -5,7 +5,7 @@ import datetime
 from ..utils import try_execute_upsert, try_execute_select
 
 
-def _upsert_construction_site(connection, construction_site: ConstructionSite):
+def _upsert_construction_site(construction_site: ConstructionSite):
     sql = """INSERT INTO public.construction_sites(
 	waypoint_symbol, is_complete)
 	VALUES (%s, %s) ON CONFLICT (waypoint_symbol) DO UPDATE SET is_complete = EXCLUDED.is_complete
@@ -18,7 +18,6 @@ def _upsert_construction_site(connection, construction_site: ConstructionSite):
     ;"""
 
     resp = try_execute_upsert(
-        connection,
         sql,
         (construction_site.waypoint_symbol, construction_site.is_complete),
     )
@@ -26,7 +25,6 @@ def _upsert_construction_site(connection, construction_site: ConstructionSite):
         return resp
     for material in construction_site.materials:
         resp = try_execute_upsert(
-            connection,
             material_sql,
             (
                 construction_site.waypoint_symbol,
@@ -44,17 +42,17 @@ def _upsert_construction_site(connection, construction_site: ConstructionSite):
 
 
 def select_construction_site_one(
-    connection, waypoint_symbol: str
+    waypoint_symbol: str,
 ) -> ConstructionSite or "SpaceTradersResponse":
     sql = """select waypoint_symbol, is_complete from construction_sites where waypoint_symbol = %s"""
 
     material_sql = """select  trade_symbol, required, fulfilled from construction_site_materials where waypoint_symbol = %s"""
 
-    resp = try_execute_select(connection, sql, (waypoint_symbol,))
+    resp = try_execute_select(sql, (waypoint_symbol,))
     if not resp:
         return resp
     construction_site = ConstructionSite(resp[0][0], [], resp[0][1])
-    resp = try_execute_select(connection, material_sql, (waypoint_symbol,))
+    resp = try_execute_select(material_sql, (waypoint_symbol,))
     if not resp:
         return resp
     for material in resp:

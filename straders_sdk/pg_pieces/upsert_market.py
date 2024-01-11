@@ -6,17 +6,15 @@ from ..utils import waypoint_slicer
 from ..utils import try_execute_select, try_execute_upsert
 from ..local_response import LocalSpaceTradersRespose
 
-# from psycopg2 import connection
 
-
-def _upsert_market(connection, market: Market):
+def _upsert_market(market: Market):
     system_symbol = waypoint_slicer(market.symbol)
     sql = """INSERT INTO public.market(
 symbol, system_symbol)
 VALUES (%s, %s) 
 ON CONFLICT (symbol) DO NOTHING;"""
 
-    resp = try_execute_upsert(connection, sql, (market.symbol, system_symbol))
+    resp = try_execute_upsert(sql, (market.symbol, system_symbol))
     if not resp:
         return resp
     sql = """INSERT INTO public.market_tradegood(
@@ -27,7 +25,6 @@ ON CONFLICT (symbol) DO NOTHING;"""
         return resp
     for trade_good in market.exports:
         resp = try_execute_upsert(
-            connection,
             sql,
             (
                 market.symbol,
@@ -41,7 +38,6 @@ ON CONFLICT (symbol) DO NOTHING;"""
             return resp
     for trade_good in market.imports:
         resp = try_execute_upsert(
-            connection,
             sql,
             (
                 market.symbol,
@@ -55,7 +51,6 @@ ON CONFLICT (symbol) DO NOTHING;"""
             return resp
     for trade_good in market.exchange:
         resp = try_execute_upsert(
-            connection,
             sql,
             (
                 market.symbol,
@@ -88,7 +83,6 @@ ON CONFLICT (symbol) DO NOTHING;"""
         for listing in market.listings:
             listing: MarketTradeGoodListing
             resp = try_execute_upsert(
-                connection,
                 sql,
                 (
                     market.symbol,

@@ -1,3 +1,4 @@
+from .pg_connection_pool import PGConnectionPool
 from typing import Protocol
 from .models import (
     Waypoint,
@@ -52,36 +53,17 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         db_pass,
         current_agent_symbol,
         db_port=None,
-        connection=None,
     ) -> None:
         if not db_host or not db_name or not db_user or not db_pass:
             raise ValueError("Missing database connection information")
-        if connection:
-            self._connection = connection
-        self._db_host = db_host
-        self._db_name = db_name
-        self._db_user = db_user
-        self._db_pass = db_pass
-        self._db_port = db_port
-        self._connection = connection
+        self._connection = None
+        self.connection_pool = PGConnectionPool(
+            db_user, db_pass, db_host, db_name, db_port
+        )
         self.current_agent_symbol = current_agent_symbol
         self.logger = logging.getLogger(__name__)
         self._ship_mounts = {}
         self._ship_modules = {}
-
-    @property
-    def connection(self):
-        if not self._connection or self._connection.closed > 0:
-            self._connection = psycopg2.connect(
-                host=self._db_host,
-                port=self._db_port,
-                database=self._db_name,
-                user=self._db_user,
-                password=self._db_pass,
-            )
-            self._connection.autocommit = True
-            # self.logger.warning("lost connection to DB, restoring")
-        return self._connection
 
     def _headers(self) -> dict:
         return {}
@@ -89,40 +71,38 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
     def update(self, update_obj) -> SpaceTradersResponse:
         "Accepts objects and stores them in the DB"
         if isinstance(update_obj, JumpGate):
-            return _upsert_jump_gate(self.connection, update_obj)
+            return _upsert_jump_gate(update_obj)
         if isinstance(update_obj, Survey):
-            return _upsert_survey(self.connection, update_obj)
+            return _upsert_survey(update_obj)
         if isinstance(update_obj, Waypoint):
-            return _upsert_waypoint(self.connection, update_obj)
+            return _upsert_waypoint(update_obj)
         if isinstance(update_obj, Shipyard):
-            return _upsert_shipyard(self.connection, update_obj)
+            return _upsert_shipyard(update_obj)
         if isinstance(update_obj, Market):
-            return _upsert_market(self.connection, update_obj)
+            return _upsert_market(update_obj)
         if isinstance(update_obj, Ship):
-            return _upsert_ship(self.connection, update_obj)
+            return _upsert_ship(update_obj)
         if isinstance(update_obj, System):
-            return _upsert_system(self.connection, update_obj)
+            return _upsert_system(update_obj)
         if isinstance(update_obj, Agent):
-            return _upsert_agent(self.connection, update_obj)
+            return _upsert_agent(update_obj)
         if isinstance(update_obj, Contract):
-            return _upsert_contract(
-                self.connection, self.current_agent_symbol, update_obj
-            )
+            return _upsert_contract(self.current_agent_symbol, update_obj)
         if isinstance(update_obj, ConstructionSite):
-            return _upsert_construction_site(self.connection, update_obj)
+            return _upsert_construction_site(update_obj)
 
     def register(self, callsign, faction="COSMIC", email=None) -> SpaceTradersResponse:
         return dummy_response(__class__.__name__, "register")
 
     def agents_view_one(self, agent_symbol: str) -> Agent or SpaceTradersResponse:
-        return select_agent_one(self.connection, agent_symbol)
+        return select_agent_one(agent_symbol)
 
     def set_current_agent(self, agent_symbol: str, token: str = None):
         self.current_agent_name = agent_symbol
         self.token = token
 
     def view_my_self(self) -> Agent or SpaceTradersResponse:
-        return select_agent_one(self.connection, self.current_agent_symbol)
+        return select_agent_one(self.current_agent_symbol)
 
     def view_my_contracts(self) -> list["Contract"] or SpaceTradersResponse:
         sql = """select id --0
@@ -142,7 +122,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         where co.agent_symbol = %s
         """
 
-        rows = try_execute_select(self.connection, sql, (self.current_agent_symbol,))
+        rows = try_execute_select(sql, (self.current_agent_symbol,))
         if not rows:
             return rows
         contracts = []
@@ -187,15 +167,13 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         left join waypoint_charts wc on w.waypoint_symbol = wc.waypoint_symbol 
          
            WHERE system_symbol = %s"""
-        rows = try_execute_select(self.connection, sql, (system_symbol,))
+        rows = try_execute_select(sql, (system_symbol,))
         waypoints = {}
 
         for row in rows:
             waypoint_symbol = row[0]
             new_sql = """SELECT * FROM waypoint_traits WHERE waypoint_symbol = %s"""
-            trait_rows = try_execute_select(
-                self.connection, new_sql, (waypoint_symbol,)
-            )
+            trait_rows = try_execute_select(new_sql, (waypoint_symbol,))
             traits = []
             for trait_row in trait_rows:
                 traits.append(WaypointTrait(trait_row[1], trait_row[2], trait_row[3]))
@@ -233,17 +211,14 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         Returns:
             Either a Waypoint object or a SpaceTradersResponse object on failure."""
         sql = """SELECT * FROM waypoints WHERE waypoint_symbol = %s LIMIT 1;"""
-        cur = self.connection.cursor()
-        rows = try_execute_select(self.connection, sql, (waypoint_symbol,))
+        rows = try_execute_select(sql, (waypoint_symbol,))
         waypoints = []
 
         for row in rows:
             waypoint_symbol = row[0]
             new_sql = """SELECT * FROM waypoint_traits WHERE waypoint_symbol = %s"""
 
-            trait_rows = try_execute_select(
-                self.connection, new_sql, (waypoint_symbol,)
-            )
+            trait_rows = try_execute_select(new_sql, (waypoint_symbol,))
             traits = []
             for trait_row in trait_rows:
                 traits.append(WaypointTrait(trait_row[1], trait_row[2], trait_row[3]))
@@ -277,7 +252,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         from waypoints w join waypoint_traits wt 
         on w.waypoint_symbol = wt.waypoint_symbol
         where system_symbol = %s and x = %s and y = %s"""
-        rows = try_execute_select(self.connection, sql, (system_symbol, x, y))
+        rows = try_execute_select(sql, (system_symbol, x, y))
         waypoints = {}
         waypoints: dict[str:Waypoint]
         for row in rows:
@@ -360,9 +335,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         deposits_sql = (
             """select trade_symbol, count from survey_deposits where signature = %s """
         )
-        resp = try_execute_select(
-            self.connection, sql, (deposit_symbol, (waypoint_symbol))
-        )
+        resp = try_execute_select(sql, (deposit_symbol, (waypoint_symbol)))
         if not resp:
             if isinstance(resp, list):
                 return LocalSpaceTradersRespose(
@@ -371,9 +344,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             return resp
         surveys = []
         for survey_row in resp:
-            deposits_resp = try_execute_select(
-                self.connection, deposits_sql, (survey_row[0],)
-            )
+            deposits_resp = try_execute_select(deposits_sql, (survey_row[0],))
             if not deposits_resp:
                 return deposits_resp
             deposits = []
@@ -413,7 +384,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         deposits_sql = (
             """select trade_symbol, count from survey_deposits where signature = %s """
         )
-        resp = try_execute_select(self.connection, sql, (waypoint_symbol,))
+        resp = try_execute_select(sql, (waypoint_symbol,))
         if not resp:
             if isinstance(resp, list):
                 return LocalSpaceTradersRespose(
@@ -422,9 +393,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             return resp
         surveys = []
         for survey_row in resp:
-            deposits_resp = try_execute_select(
-                self.connection, deposits_sql, (survey_row[0],)
-            )
+            deposits_resp = try_execute_select(deposits_sql, (survey_row[0],))
             if not deposits_resp:
                 return deposits_resp
             deposits = []
@@ -459,7 +428,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         set exhausted = True
         where signature = %s
         """
-        resp = try_execute_upsert(self.connection, sql, (survey_signature,))
+        resp = try_execute_upsert(sql, (survey_signature,))
         return resp
 
     def ship_orbit(self, ship: "Ship") -> SpaceTradersResponse:
@@ -580,7 +549,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
 
     def system_construction(self, wp: Waypoint) -> SpaceTradersResponse:
         """/game/systems/{symbol}/construction"""
-        return select_construction_site_one(self.connection, wp.symbol)
+        return select_construction_site_one(wp.symbol)
         pass
 
     def construction_supply(self, wp, ship, trade_symbol, quantity):
@@ -590,7 +559,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         """/game/systems/{symbol}/marketplace"""
         try:
             sql = """SELECT mt.symbol, mt.name, mt.description FROM market_tradegood mt where mt.market_waypoint =  %s"""
-            rows = try_execute_select(self.connection, sql, (wp.symbol,))
+            rows = try_execute_select(sql, (wp.symbol,))
             if not rows:
                 return LocalSpaceTradersRespose(
                     f"Could not find market data for that waypoint", 0, 0, sql
@@ -602,7 +571,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             listings_sql = """select trade_symbol, market_depth , type,  supply, purchase_price, sell_price, last_updated, activity
                             from market_tradegood_listings mtl
                             where market_symbol = %s"""
-            rows = try_execute_select(self.connection, listings_sql, (wp.symbol,))
+            rows = try_execute_select(listings_sql, (wp.symbol,))
             listings = [MarketTradeGoodListing(*row) for row in rows]
             return Market(wp.symbol, imports, exports, exchanges, listings)
         except Exception as err:
@@ -611,7 +580,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             )
 
     def system_jumpgate(self, wp: Waypoint) -> JumpGate or SpaceTradersResponse:
-        return select_jump_gate_one(self.connection, wp)
+        return select_jump_gate_one(wp)
 
     def systems_view_twenty(
         self, page_number: int, force=False
@@ -621,7 +590,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
     def systems_view_all(self) -> list["Waypoint"] or SpaceTradersResponse:
         """/game/systems"""
         sql = """SELECT system_symbol, sector_symbol, type, x, y FROM systems"""
-        rows = try_execute_select(self.connection, sql, ())
+        rows = try_execute_select(sql, ())
         cysts = {}
         for row in rows:
             syst = System(row[0], row[1], row[2], row[3], row[4], [])
@@ -631,7 +600,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
     def systems_view_one(self, system_symbol: str) -> Waypoint or SpaceTradersResponse:
         sql = """SELECT system_symbol, sector_symbol, type, x, y FROM systems where system_symbol = %s limit 1"""
 
-        rows = try_execute_select(self.connection, sql, (system_symbol,))
+        rows = try_execute_select(sql, (system_symbol,))
         if not rows:
             return rows
         for row in rows:
@@ -651,7 +620,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             Either a list of ship types (symbols for purchase) or a SpaceTradersResponse object on failure.
         """
         sql = """SELECT ship_type, ship_cost  FROM shipyard_types where shipyard_symbol = %s"""
-        rows = try_execute_select(self.connection, sql, (wp.symbol,))
+        rows = try_execute_select(sql, (wp.symbol,))
         if not rows:
             return rows
         if len(rows) >= 1:
@@ -668,7 +637,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
     def ship_cooldown(self, ship: "Ship") -> SpaceTradersResponse:
         """/my/ships/{shipSymbol}/cooldown"""
         sql = """select total_seconds, expiration from ship_cooldown where ship_symbol = %s"""
-        resp = try_execute_select(self.connection, sql, (ship.name,))
+        resp = try_execute_select(sql, (ship.name,))
         if not resp:
             return resp
         expiration = resp[0][1]
@@ -700,7 +669,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         # but the DB is home to many ships. Therefore, this client needs to become aware of the agent name on init.
         # WAIT WE ALREADY DO THAT. well done past C'tri
 
-        resp = _select_ships(self.connection, self.current_agent_symbol, self)
+        resp = _select_ships(self.current_agent_symbol, self)
 
         if resp:
             return_obj = {}
@@ -732,7 +701,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         if len(self._ship_mounts) == 0:
             sql = """select mount_symbol, mount_name, mount_Desc, strength, required_crew, required_power from ship_mounts"""
 
-            rows = try_execute_select(self.connection, sql, ())
+            rows = try_execute_select(sql, ())
             for row in rows:
                 mount = ShipMount(
                     {

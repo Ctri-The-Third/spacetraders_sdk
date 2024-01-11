@@ -5,11 +5,12 @@ import logging
 import re
 import datetime
 from ..local_response import LocalSpaceTradersRespose
+from ..utils import try_execute_upsert
 
 # from psycopg2 import connection
 
 
-def _upsert_ship(connection, ship: Ship, owner: Agent = None):
+def _upsert_ship(ship: Ship, owner: Agent = None):
     try:
         match = re.findall(r"(.*)-[0-9A-F]+", ship.name)
         owner_name = match[0]
@@ -37,7 +38,6 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
         modules = [m if isinstance(m, str) else m.symbol for m in ship.modules]
         mounts = [m if isinstance(m, str) else m.symbol for m in ship.mounts]
         resp = try_execute_upsert(
-            connection,
             sql,
             (
                 ship.name,
@@ -55,29 +55,29 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
         if not resp:
             return resp
     if ship.mounts_dirty or ship.dirty:
-        resp = _upsert_ship_mounts(connection, ship)
+        resp = _upsert_ship_mounts(ship)
         if not resp:
             logging.warning("Failed to upsert ship mounts because %s", resp.error)
             return resp
 
     if ship.cargo_dirty or ship.dirty:
-        resp = _upsert_ship_cargo(connection, ship)
+        resp = _upsert_ship_cargo(ship)
         if not resp:
             logging.warning("Failed to upsert ship cargo because %s", resp.error)
             return resp
 
     if ship.nav_dirty or ship.dirty:
-        resp = _upsert_ship_nav(connection, ship)
+        resp = _upsert_ship_nav(ship)
         if not resp:
             logging.warning("Failed to upsert ship nav because %s", resp.error)
             return resp
     if ship.dirty:
-        resp = _upsert_ship_frame(connection, ship)
+        resp = _upsert_ship_frame(ship)
         if not resp:
             logging.warning("Failed to upsert ship frame because %s", resp.error)
             return resp
     if ship.cooldown_dirty:
-        resp = _upsert_ship_cooldown(connection, ship)
+        resp = _upsert_ship_cooldown(ship)
         if not resp:
             logging.warning("Failed to upsert ship cooldown because %s", resp.error)
             return resp
@@ -85,16 +85,16 @@ def _upsert_ship(connection, ship: Ship, owner: Agent = None):
     return resp
 
 
-def _upsert_ship_mounts(connection, ship: Ship):
+def _upsert_ship_mounts(ship: Ship):
     sql = """insert into ships (ship_symbol, mount_symbols)
     values (%s, %s) ON CONFLICT (ship_symbol) DO UPDATE
     SET mount_symbols = EXCLUDED.mount_symbols;"""
     values = (ship.name, [m.symbol for m in ship.mounts])
-    resp = try_execute_upsert(connection, sql, values)
+    resp = try_execute_upsert(sql, values)
     return resp
 
 
-def _upsert_ship_nav(connection, ship: Ship):
+def _upsert_ship_nav(ship: Ship):
     # we need to add offsets to the ship times to get them to UTC.
     sql = """INSERT into ship_nav
         (Ship_symbol, system_symbol, waypoint_symbol, departure_time, arrival_time, o_waypoint_symbol, d_waypoint_symbol, flight_status, flight_mode)
@@ -119,11 +119,11 @@ def _upsert_ship_nav(connection, ship: Ship):
         ship.nav.status,
         ship.nav.flight_mode,
     )
-    resp = try_execute_upsert(connection, sql, values)
+    resp = try_execute_upsert(sql, values)
     return resp
 
 
-def _upsert_ship_frame(connection, ship: Ship):
+def _upsert_ship_frame(ship: Ship):
     """
     INSERT INTO public.ship_frames(
         frame_symbol, name, description, module_slots, mount_points, fuel_capacity, required_power, required_crew, required_slots)
@@ -144,7 +144,7 @@ def _upsert_ship_frame(connection, ship: Ship):
         ship.frame.requirements.crew,
         ship.frame.requirements.module_slots,
     )
-    resp = try_execute_upsert(connection, sql, values)
+    resp = try_execute_upsert(sql, values)
     if not resp:
         return resp
 
@@ -156,19 +156,19 @@ def _upsert_ship_frame(connection, ship: Ship):
     VALUES (%s, %s, %s) 
     ON CONFLICT (ship_symbol, frame_symbol) DO UPDATE set condition = %s;"""
     values = (ship.name, ship.frame.symbol, ship.frame.condition, ship.frame.condition)
-    resp = try_execute_upsert(connection, sql, values)
+    resp = try_execute_upsert(sql, values)
     return resp
 
 
-def _upsert_ship_cooldown(connection, ship: Ship):
+def _upsert_ship_cooldown(ship: Ship):
     sql = """insert into ship_cooldowns  (ship_symbol, total_seconds, expiration)
     values (%s, %s, %s) ON CONFLICT (ship_symbol, expiration) DO NOTHING;"""
     values = (ship.name, ship._cooldown_length, ship._cooldown_expiration)
-    resp = try_execute_upsert(connection, sql, values)
+    resp = try_execute_upsert(sql, values)
     return resp
 
 
-def _upsert_ship_cargo(connection, ship: Ship):
+def _upsert_ship_cargo(ship: Ship):
     sql = """
     
     INSERT INTO SHIP_CARGO (ship_symbol, trade_symbol, quantity)
@@ -178,30 +178,17 @@ def _upsert_ship_cargo(connection, ship: Ship):
 
     values = [(ship.name, t.symbol, t.units) for t in ship.cargo_inventory]
     for value in values:
-        resp = try_execute_upsert(connection, sql, value)
+        resp = try_execute_upsert(sql, value)
         if not resp:
             return resp
     if len(values) > 0:
         sql = """ 
 delete from ship_cargo where ship_symbol = %s and trade_symbol not in %s;"""
         values = (ship.name, tuple([t.symbol for t in ship.cargo_inventory]))
-        resp = try_execute_upsert(connection, sql, values)
+        resp = try_execute_upsert(sql, values)
     else:
         sql = "delete from ship_cargo where ship_symbol = %s;"
-        resp = try_execute_upsert(connection, sql, (ship.name,))
+        resp = try_execute_upsert(sql, (ship.name,))
     return resp
     # not implemented yet
     pass
-
-
-def try_execute_upsert(connection, sql, params) -> LocalSpaceTradersRespose:
-    try:
-        cur = connection.cursor()
-        cur.execute(sql, params)
-        return LocalSpaceTradersRespose(
-            None, None, None, url=f"{__name__}.try_execute_upsert"
-        )
-    except Exception as err:
-        return LocalSpaceTradersRespose(
-            error=err, status_code=0, error_code=0, url=f"{__name__}.try_execute_upsert"
-        )

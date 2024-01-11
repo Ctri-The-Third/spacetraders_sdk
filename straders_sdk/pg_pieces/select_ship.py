@@ -6,7 +6,7 @@ from ..models import ShipRequirements
 from ..utils import try_execute_select, try_execute_upsert
 
 
-def _select_ships(connection, agent_name, db_client: SpaceTradersClient):
+def _select_ships(agent_name, db_client: SpaceTradersClient):
     sql = """select s.ship_symbol, s.agent_name, s.faction_symbol, s.ship_role, s.cargo_capacity, s.cargo_in_use
                 , n.waypoint_symbol, n.departure_time, n.arrival_time, n.o_waypoint_symbol, n.d_waypoint_symbol, n.flight_status, n.flight_mode
                 , sfl.condition --13
@@ -70,7 +70,7 @@ def _expand_ship_with_inventory(db_client: SpaceTradersClient, ship: Ship):
         where sc.ship_symbol = %s
         order by 1, 2 """
 
-    rows = try_execute_select(db_client.connection, sql, (ship.name,))
+    rows = try_execute_select(sql, (ship.name,))
     for row in rows:
         trade_symbol = row[2]
         units = row[3]
@@ -86,7 +86,7 @@ def _expand_ships_with_inventory(
         on sc.ship_symbol = s.ship_symbol
         where agent_name = %s
         order by 1, 2 """
-    rows = try_execute_select(db_client.connection, sql, (agent_name,))
+    rows = try_execute_select(sql, (agent_name,))
     for row in rows:
         trade_symbol = row[2]
         units = row[3]
@@ -98,9 +98,8 @@ def _expand_ships_with_inventory(
 
 
 def _select_some_ships(db_client: SpaceTradersClient, sql, params):
-    connection = db_client.connection
     try:
-        rows = try_execute_select(connection, sql, params)
+        rows = try_execute_select(sql, params)
         if not rows:
             return rows
         ships = {}

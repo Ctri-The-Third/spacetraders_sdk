@@ -133,3 +133,6 @@ resources/routes/*
 scripts/PRD-build_and_run_postgres_container.bat
 pg_build_bits/PostgresDBsetup.sql
 pg_build_bits/postgresql.conf
+scripts/PRD-build_and_push_and_run_postgres.bat
+scripts/PRD-build_and_run_postgres.bat
+scripts/PRD-pull_and_run_postgress.bat

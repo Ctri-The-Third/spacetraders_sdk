@@ -6,7 +6,7 @@ from straders_sdk.models import JumpGate, JumpGateConnection
 from straders_sdk.models import ConstructionSite, ConstructionSiteMaterial
 import pytest
 
-ST_HOST = os.getenv("ST_DB_HOST")
+ST_HOST = os.getenv("ST_TEST_DB_HOST", "localhost")
 ST_NAME = os.getenv("ST_DB_NAME")
 ST_PASS = os.getenv("ST_DB_PASSWORD")
 ST_USER = os.getenv("ST_DB_USER")
@@ -27,7 +27,8 @@ def test_contracts():
         ST_HOST, ST_NAME, ST_USER, ST_PASS, TEST_AGENT_NAME, db_port=ST_PORT
     )
     resp = client.view_my_contracts()
-    assert resp
+
+    assert isinstance(resp, list)
 
 
 def test_find_waypoints_by_type():
@@ -37,7 +38,7 @@ def test_find_waypoints_by_type():
 
     # get a starting system, check it for asteroid fields
     sql = "select distinct system_symbol from agents a join waypoints w on a.headquarters = w.waypoint_symbol limit 1"
-    system = try_execute_select(client.connection, sql, ())[0][0]
+    system = try_execute_select(sql)[0][0]
     resp = client.find_waypoints_by_type(system, "ASTEROID")
     assert resp
     for wayp in resp:
@@ -78,6 +79,9 @@ def test_load_market(market_response_data, waypoint_response_data):
     )
     test_waypoint = Waypoint.from_json(waypoint_response_data)
     test_market = Market.from_json(market_response_data)
+    client.update(test_waypoint)
+    client.update(test_market)
+
     actual_market = client.system_market(test_waypoint)
 
     assert actual_market.symbol == test_market.symbol
@@ -95,8 +99,7 @@ def test_waypoints_by_coordinate():
         select * from co_located_waypoint_symbols
         order by 1 desc 
         limit 1 """
-    connection = client.connection
-    results = try_execute_select(connection, targeting_query, ())
+    results = try_execute_select(targeting_query)
     if not results:
         pytest.skip("No co-located waypoints found")
     waypoints = client.find_waypoints_by_coords(

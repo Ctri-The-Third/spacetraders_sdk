@@ -6,7 +6,7 @@ from ..local_response import LocalSpaceTradersRespose
 from ..utils import try_execute_select, try_execute_upsert
 
 
-def _upsert_contract(connect, agent_symbol: str, contract: Contract):
+def _upsert_contract(agent_symbol: str, contract: Contract):
     sql = """INSERT INTO public.contracts(
             id, agent_symbol, faction_symbol, type, payment_upfront, payment_on_completion, accepted, fulfilled, expiration, deadline)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -15,7 +15,6 @@ def _upsert_contract(connect, agent_symbol: str, contract: Contract):
             fulfilled = EXCLUDED.fulfilled;"""
 
     resp = try_execute_upsert(
-        connect,
         sql,
         (
             contract.id,
@@ -44,7 +43,6 @@ def _upsert_contract(connect, agent_symbol: str, contract: Contract):
     for d in contract.deliverables:
         d: ContractDeliverGood
         resp = try_execute_upsert(
-            connect,
             tradegood_sql,
             (
                 contract.id,
