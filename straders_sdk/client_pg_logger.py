@@ -31,7 +31,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         self.token = token
         self.logger = logging.getLogger("PGLoggerClient")
         self.connection_pool = PG(db_user, db_pass, db_host, db_name, db_port)
-
+        self._connection = connection
         self.session_id = str(uuid.uuid4())
 
         self.current_agent_name = current_agent_symbol
@@ -167,8 +167,8 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
 	VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s) on conflict (event_timestamp, ship_symbol) do nothing;"""
 
         return try_execute_upsert(
-            sql=sql,
-            params=(
+            sql,
+            (
                 event_name,
                 self.current_agent_name,
                 ship_name,
@@ -180,6 +180,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 json.dumps(event_params),
                 duration_seconds,
             ),
+            self.connection,
         )
 
     def update(self, update_obj: SpaceTradersResponse):

@@ -5,13 +5,16 @@ from ..local_response import LocalSpaceTradersRespose
 from ..utils import try_execute_select, try_execute_upsert, waypoint_slicer
 
 
-def _upsert_jump_gate(jump_gate: JumpGate):
+def _upsert_jump_gate(jump_gate: JumpGate, connection):
     sql = """INSERT INTO public.jump_gates(
 	waypoint_symbol)
 	VALUES (%s) on conflict do nothing;"""
-    resp = try_execute_upsert(
-        sql,
-        (jump_gate.waypoint_symbol,),
+    resp = (
+        try_execute_upsert(
+            sql,
+            (jump_gate.waypoint_symbol,),
+        ),
+        connection,
     )
     if not resp:
         return resp
@@ -30,6 +33,7 @@ def _upsert_jump_gate(jump_gate: JumpGate):
                 dest_waypoint,
                 waypoint_slicer(dest_waypoint),
             ),
+            connection,
         )
         if not resp:
             return resp
@@ -40,11 +44,11 @@ def _upsert_jump_gate(jump_gate: JumpGate):
     return LocalSpaceTradersRespose(None, 0, 0, url=f"{__name__}._upsert_jump_gate")
 
 
-def select_jump_gate_one(waypoint: Waypoint):
+def select_jump_gate_one(waypoint: Waypoint, connection):
     sql = (
         """SELECT waypoint_symbol  FROM public.jump_gates WHERE waypoint_symbol = %s"""
     )
-    resp = try_execute_select(sql, (waypoint.symbol,))
+    resp = try_execute_select(sql, (waypoint.symbol,), connection)
     if not resp:
         return resp
 
@@ -52,7 +56,7 @@ def select_jump_gate_one(waypoint: Waypoint):
     select  jc.d_system_symbol 
     from jumpgate_connections jc
     where s_waypoint_symbol = %s"""
-    conn_resp = try_execute_select(connection_sql, (waypoint.symbol,))
+    conn_resp = try_execute_select(connection_sql, (waypoint.symbol,), connection)
     if not conn_resp:
         return conn_resp
     for one_row in resp:

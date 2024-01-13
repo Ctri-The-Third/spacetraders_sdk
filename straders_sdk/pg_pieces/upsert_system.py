@@ -6,7 +6,7 @@ from ..pg_pieces.upsert_waypoint import _upsert_waypoint
 from ..utils import try_execute_upsert
 
 
-def _upsert_system(system: System):
+def _upsert_system(system: System, connection):
     try:
         sql = """INSERT INTO systems (system_symbol, type, sector_symbol, x, y)
                 VALUES (%s, %s, %s, %s, %s)
@@ -25,10 +25,11 @@ def _upsert_system(system: System):
                 system.x,
                 system.y,
             ),
+            connection,
         )
 
     except Exception as err:
         print(err)
 
     for waypoint in system.waypoints:
-        _upsert_waypoint(waypoint)
+        _upsert_waypoint(waypoint, connection)

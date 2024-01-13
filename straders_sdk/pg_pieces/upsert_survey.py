@@ -5,12 +5,14 @@ import datetime
 from ..utils import try_execute_upsert
 
 
-def _upsert_survey(survey: Survey):
+def _upsert_survey(survey: Survey, connection):
     sql = """insert into surveys (signature, waypoint_symbol, expiration, size)
     values (%s, %s, %s, %s) on conflict (signature) do nothing"""
 
     resp = try_execute_upsert(
-        sql, (survey.signature, survey.symbol, survey.expiration, survey.size)
+        sql,
+        (survey.signature, survey.symbol, survey.expiration, survey.size),
+        connection,
     )
 
     sql = """insert into survey_deposits (signature, trade_symbol, count) values (%s, %s, %s) on conflict (signature, trade_symbol) do nothing"""
@@ -18,4 +20,6 @@ def _upsert_survey(survey: Survey):
     deposits: list
     for deposit in survey.deposits:
         count = deposits.count(deposit)
-        resp = try_execute_upsert(sql, (survey.signature, deposit.symbol, count))
+        resp = try_execute_upsert(
+            sql, (survey.signature, deposit.symbol, count), connection
+        )

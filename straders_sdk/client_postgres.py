@@ -605,9 +605,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
                 f"Could not find market data for that waypoint - {err}", 0, 0, sql
             )
 
-    def system_jumpgate(
-        self, wp: Waypoint, connection
-    ) -> JumpGate or SpaceTradersResponse:
+    def system_jumpgate(self, wp: Waypoint) -> JumpGate or SpaceTradersResponse:
         return select_jump_gate_one(wp, self.connection)
 
     def systems_view_twenty(

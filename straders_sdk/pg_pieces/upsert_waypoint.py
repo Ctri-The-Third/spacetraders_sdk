@@ -5,7 +5,7 @@ from ..models import Waypoint, WaypointTrait
 from ..utils import try_execute_upsert
 
 
-def _upsert_waypoint(waypoint: Waypoint):
+def _upsert_waypoint(waypoint: Waypoint, connection):
     checked = (
         len(waypoint.traits) > 0 or waypoint.is_charted
     )  # a system waypoint will not return any traits. Even if it's uncharted, we've checked it.
@@ -29,6 +29,7 @@ def _upsert_waypoint(waypoint: Waypoint):
             waypoint.under_construction,
             checked,
         ),
+        connection,
     )
 
     for trait in waypoint.traits:
@@ -43,6 +44,7 @@ def _upsert_waypoint(waypoint: Waypoint):
                 trait.name,
                 trait.description,
             ),
+            connection,
         )
     if waypoint.is_charted and len(waypoint.chart) > 0:
         sql = """INSERT into waypoint_charts 
@@ -56,4 +58,5 @@ def _upsert_waypoint(waypoint: Waypoint):
                 waypoint.chart["submittedBy"],
                 waypoint.chart["submittedOn"],
             ),
+            connection,
         )

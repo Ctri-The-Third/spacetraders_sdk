@@ -7,14 +7,14 @@ from ..utils import try_execute_select, try_execute_upsert
 from ..local_response import LocalSpaceTradersRespose
 
 
-def _upsert_market(market: Market):
+def _upsert_market(market: Market, connection):
     system_symbol = waypoint_slicer(market.symbol)
     sql = """INSERT INTO public.market(
 symbol, system_symbol)
 VALUES (%s, %s) 
 ON CONFLICT (symbol) DO NOTHING;"""
 
-    resp = try_execute_upsert(sql, (market.symbol, system_symbol))
+    resp = try_execute_upsert(sql, (market.symbol, system_symbol), connection)
     if not resp:
         return resp
     sql = """INSERT INTO public.market_tradegood(
@@ -33,6 +33,7 @@ ON CONFLICT (symbol) DO NOTHING;"""
                 trade_good.name,
                 trade_good.description,
             ),
+            connection,
         )
         if not resp:
             return resp
@@ -46,6 +47,7 @@ ON CONFLICT (symbol) DO NOTHING;"""
                 trade_good.name,
                 trade_good.description,
             ),
+            connection,
         )
         if not resp:
             return resp
@@ -59,6 +61,7 @@ ON CONFLICT (symbol) DO NOTHING;"""
                 trade_good.name,
                 trade_good.description,
             ),
+            connection,
         )
         if not resp:
             return resp
@@ -95,6 +98,7 @@ ON CONFLICT (symbol) DO NOTHING;"""
                     listing.type,
                     listing.activity,
                 ),
+                connection,
             )
             if not resp:
                 return resp
