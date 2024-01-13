@@ -6,7 +6,7 @@ from ..utils import try_execute_upsert
 
 
 def _upsert_extraction(
-    extraction: dict, session_id: str, waypoint_symbol, survey_signature
+    extraction: dict, session_id: str, waypoint_symbol, survey_signature, connection
 ):
     sql = """INSERT INTO public.extractions(
 	ship_symbol, session_id, event_timestamp, waypoint_symbol, survey_signature, trade_symbol, quantity)
@@ -21,4 +21,5 @@ def _upsert_extraction(
             extraction["yield"]["symbol"],
             extraction["yield"]["units"],
         ),
+        connection,
     )

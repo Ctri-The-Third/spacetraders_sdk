@@ -239,30 +239,13 @@ def waypoint_suffix(anything: str) -> str:
     return pieces[-1]
 
 
-def try_execute_upsert(connection=None, sql="", params=()) -> LocalSpaceTradersRespose:
-    skip_return = False
+def try_execute_upsert(sql="", params=(), connection=None) -> LocalSpaceTradersRespose:
+    skip_return = connection is not None
 
-    if isinstance(connection, str) and isinstance(sql, tuple):
-        params = sql
-        sql = connection
-        connection = None
-        # this is good, this is how we want the method to be used.
+    if not connection:
+        logging.warning("try_execute_upsert is falling back to the connection pool.")
+        connection = PGConnectionPool().get_connection()
 
-    if connection:
-        logging.warning(
-            "try_execute_upsert now uses the built in connection pool - make sure to initialize it instead."
-        )
-
-    else:
-        try:
-            connection = PGConnectionPool().get_connection()
-        except Exception as err:
-            return LocalSpaceTradersRespose(
-                error=err,
-                status_code=0,
-                error_code=0,
-                url=f"{__name__}.try_execute_upsert",
-            )
     if connection.closed > 1:
         logging.error("Connection is closed")
         return LocalSpaceTradersRespose(
@@ -286,20 +269,12 @@ def try_execute_upsert(connection=None, sql="", params=()) -> LocalSpaceTradersR
             PGConnectionPool().return_connection(connection)
 
 
-def try_execute_select(connection=None, sql="", params=()) -> list:
+def try_execute_select(sql="", params=(), connection=None) -> list:
     "Takes a connection from the connection pool, executes the select, and returns a list of rows - or a response object on failure"
-    skip_return = False
-    if isinstance(connection, str) and isinstance(sql, tuple):
-        params = sql
-        sql = connection
-        connection = None
-        # this is good, this is how we want the method to be used.
-    if connection:
-        logging.warning(
-            "try_execute_upsert now uses the built in connection pool - make sure to initialize it instead."
-        )
+    skip_return = connection is not None
 
-    else:
+    if not connection:
+        logging.warning("try_execute_upsert is falling back to the connection pool.")
         connection = PGConnectionPool().get_connection()
 
     if connection.closed > 1:
@@ -324,5 +299,5 @@ def try_execute_select(connection=None, sql="", params=()) -> list:
             PGConnectionPool().return_connection(connection)
 
 
-def try_execute_no_results(connection, sql, params) -> LocalSpaceTradersRespose:
-    return try_execute_upsert(connection, sql, params)
+def try_execute_no_results(sql, params, connection) -> LocalSpaceTradersRespose:
+    return try_execute_upsert(sql, params, connection)

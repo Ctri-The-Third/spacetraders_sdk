@@ -1,7 +1,7 @@
 from .utils import get_and_validate, get_and_validate_paginated, post_and_validate, _url
 from .utils import ApiConfig, _log_response, waypoint_slicer
 from .client_interface import SpaceTradersInteractive, SpaceTradersClient
-
+import time
 from .responses import SpaceTradersResponse
 from .local_response import LocalSpaceTradersRespose
 from .contracts import Contract
@@ -61,21 +61,6 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         self.token = token
         self.current_agent = current_agent_symbol
         if db_host and db_name and db_user and db_pass:
-            if not connection:
-                connection = psycopg2.connect(
-                    host=db_host,
-                    port=db_port,
-                    database=db_name,
-                    user=db_user,
-                    password=db_pass,
-                    application_name="unspecified ST client",
-                    keepalives=1,
-                    keepalives_idle=30,
-                    keepalives_interval=10,
-                    keepalives_count=3,  # connection terminates after 30 seconds of silence
-                )
-                connection.autocommit = True
-
             self.db_client = SpaceTradersPostgresClient(
                 db_host=db_host,
                 db_name=db_name,
@@ -83,7 +68,6 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 db_pass=db_pass,
                 db_port=db_port,
                 current_agent_symbol=current_agent_symbol,
-                connection=connection,
             )
             self.logging_client = SpaceTradersPostgresLoggerClient(
                 db_host=db_host,
@@ -93,9 +77,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 db_pass=db_pass,
                 current_agent_symbol=current_agent_symbol,
                 token=token,
-                connection=connection,
             )
-            self._connection = self.db_client.connection
         else:
             self.db_client = SpaceTradersStubClient()
             self.logging_client = SpaceTradersStubClient()
@@ -130,11 +112,13 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         self.surveys: dict[str:Survey] = {}
         self._lock = Lock()
 
+    def release_connection(self):
+        self.db_client.release_connection()
+        self.logging_client.release_connection()
+
     @property
     def connection(self):
-        if self._connection.closed > 0:
-            self._connection = self.db_client.connection
-        return self._connection
+        return self.db_client.connection
 
     def game_status(self) -> GameStatus:
         """Get the status of the SpaceTraders game server.
@@ -1264,6 +1248,11 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             contract.fulfilled = True
             self.db_client.update(contract)
         return resp
+
+    def sleep(self, seconds):
+        if seconds > 0:
+            self.release_connection()
+        time.sleep(seconds)
 
     def _headers(self) -> dict:
         return {"Authorization": f"Bearer {self.token}"}

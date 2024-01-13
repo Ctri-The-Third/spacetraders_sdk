@@ -49,6 +49,13 @@ class SpaceTradersClient(Protocol):
     def view_my_contracts(self) -> list["Contract"] or SpaceTradersResponse:
         pass
 
+    def release_connection(self):
+        """A method that instructs the SDK to release any applicable DB connections back to a connction pool in multi-threaded applications.
+        does nothing if the client does not have database connectivity, or if the client does not support connection pooling.
+
+        Useful if you've just enabled a long cooldown and have instructed the thread to sleep.
+        """
+
     @abstractmethod
     def waypoints_view(
         self, system_symbol: str

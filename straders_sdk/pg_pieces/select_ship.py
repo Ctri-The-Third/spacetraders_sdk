@@ -13,8 +13,8 @@ def _select_ships(agent_name, db_client: SpaceTradersClient):
                 , sf.frame_symbol, sf.name, sf.description, sf.module_slots, sf.mount_points, sf.fuel_capacity, sf.required_power, sf.required_crew, sf.required_slots
                 , s.fuel_capacity, s.fuel_current --24  
                 , sc.expiration, sc.total_seconds --26
-                , o.waypoint_symbol, o.type, o.system_symbol, o.x, o.y --31
-				, d.waypoint_symbol, d.type, d.system_symbol, d.x, d.y --37
+                , n.o_waypoint_symbol, o.type, o.system_symbol, o.x, o.y --31
+				, n.d_waypoint_symbol, d.type, n.system_symbol, d.x, d.y --37
                 , s.mount_symbols, s.module_symbols --39
 
                 from ships s join ship_nav n on s.ship_symbol = n.ship_symbol
@@ -41,8 +41,8 @@ def _select_ship_one(ship_symbol: str, db_client: SpaceTradersClient):
                 , sf.frame_symbol, sf.name, sf.description, sf.module_slots, sf.mount_points, sf.fuel_capacity, sf.required_power, sf.required_crew, sf.required_slots
                 , s.fuel_capacity, s.fuel_current --24  
                 , sc.expiration, sc.total_seconds --26
-                , o.waypoint_symbol, o.type, o.system_symbol, o.x, o.y --31
-				, d.waypoint_symbol, d.type, d.system_symbol, d.x, d.y --37
+                , n.o_waypoint_symbol, o.type, o.system_symbol, o.x, o.y --31
+				, n.d_waypoint_symbol, d.type, n.system_symbol, d.x, d.y --37
                 , s.mount_symbols, s.module_symbols --38
 
 
@@ -70,7 +70,7 @@ def _expand_ship_with_inventory(db_client: SpaceTradersClient, ship: Ship):
         where sc.ship_symbol = %s
         order by 1, 2 """
 
-    rows = try_execute_select(sql, (ship.name,))
+    rows = try_execute_select(sql, (ship.name,), db_client.connection)
     for row in rows:
         trade_symbol = row[2]
         units = row[3]
@@ -86,7 +86,7 @@ def _expand_ships_with_inventory(
         on sc.ship_symbol = s.ship_symbol
         where agent_name = %s
         order by 1, 2 """
-    rows = try_execute_select(sql, (agent_name,))
+    rows = try_execute_select(sql, (agent_name,), db_client.connection)
     for row in rows:
         trade_symbol = row[2]
         units = row[3]
@@ -99,7 +99,7 @@ def _expand_ships_with_inventory(
 
 def _select_some_ships(db_client: SpaceTradersClient, sql, params):
     try:
-        rows = try_execute_select(sql, params)
+        rows = try_execute_select(sql, params, db_client.connection)
         if not rows:
             return rows
         ships = {}

@@ -1,5 +1,6 @@
 import psycopg2.pool as pg_pool
 import time
+import logging
 
 
 class PGConnectionPool:
@@ -26,6 +27,7 @@ class PGConnectionPool:
             self.db_port = db_port
             self._connections = None
             self._instance = None
+            self.logger = logging.getLogger("PGConnectionPool")
             pass
 
     @property
@@ -35,7 +37,7 @@ class PGConnectionPool:
         else:
             self._connections = pg_pool.ThreadedConnectionPool(
                 1,
-                20,
+                100,
                 user=self.db_user,
                 password=self.db_pass,
                 host=self.db_host,
@@ -49,11 +51,20 @@ class PGConnectionPool:
         attempts = 0
         while connection == None and attempts < 20:
             try:
+                # self.logger.debug("Attempting to get a connection from the pool")
                 connection = self.connection_pool.getconn()
+                self.logger.debug(
+                    f"Got a connection from the pool after {attempts} attempts - {len(self.connection_pool._used)} / {self.connection_pool.maxconn}used"
+                )
             except:
                 attempts += 1
                 time.sleep(0.25)
         return connection
 
     def return_connection(self, conn):
-        self.connection_pool.putconn(conn)
+        closed = conn.closed > 0
+        # self.logger.debug("about to rturn a connection to the pool")
+        self.connection_pool.putconn(conn, close=closed)
+        # self.logger.debug(
+        #    f"Returned a connection to the pool - {len(self.connection_pool._used)} / {self.connection_pool.maxconn} used"
+        # )
