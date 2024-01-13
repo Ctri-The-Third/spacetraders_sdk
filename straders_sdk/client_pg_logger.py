@@ -24,18 +24,32 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         db_port,
         db_name,
         db_user,
-        db_,
+        db_pass,
         current_agent_symbol="",
         connection=None,
     ) -> None:
         self.token = token
         self.logger = logging.getLogger("PGLoggerClient")
-        self.connection_pool = PG(db_user, db_, db_host, db_name, db_port)
+        self.connection_pool = PG(db_user, db_pass, db_host, db_name, db_port)
 
         self.session_id = str(uuid.uuid4())
 
         self.current_agent_name = current_agent_symbol
         utils.st_log_client = self
+
+    @property
+    def connection(self):
+        if not self._connection:
+            self._connection = self.connection_pool.get_connection()
+        if self._connection.closed:
+            self.connection_pool.return_connection(self._connection)
+            self._connection = self.connection_pool.get_connection()
+        return self._connection
+
+    def release_connection(self):
+        if self._connection:
+            self.connection_pool.return_connection(self._connection)
+            self._connection = None
 
     def log_beginning(
         self,
@@ -173,7 +187,9 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             update_obj = update_obj.data
         if isinstance(update_obj, dict):
             if "transaction" in update_obj:
-                _upsert_transaction(update_obj["transaction"], self.session_id)
+                _upsert_transaction(
+                    update_obj["transaction"], self.session_id, self.connection
+                )
 
         return
 
@@ -418,7 +434,9 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 "trade_symbol": siphon_yield.get("symbol"),
                 "units": siphon_yield["units"],
             }
-            _upsert_extraction(siphon, self.session_id, ship.nav.waypoint_symbol, None)
+            _upsert_extraction(
+                siphon, self.session_id, ship.nav.waypoint_symbol, None, self.connection
+            )
         self.log_event(
             "ship_siphon",
             ship.name,
@@ -444,6 +462,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 self.session_id,
                 ship.nav.waypoint_symbol,
                 survey.signature if survey is not None else None,
+                self.connection,
             )
         response: SpaceTradersResponse
 
