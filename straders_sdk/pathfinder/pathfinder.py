@@ -165,7 +165,7 @@ select distinct * from sources
         # for row in rows:
         #    syst = System(row[0], row[1], row[2], row[3], row[4], [])
 
-        results = try_execute_select(self.connection, sql, ())
+        results = try_execute_select(sql, (), self.connection)
 
         if results:
             for result in results:
@@ -183,7 +183,7 @@ select distinct * from sources
             return graph
         sql = """select s_system_symbol, d_system_symbol from jumpgate_connections 
                 """
-        results = try_execute_select(self.connection, sql, ())
+        results = try_execute_select(sql, (), self.connection)
         connections = []
         if not results:
             return graph
@@ -207,7 +207,7 @@ select distinct * from sources
         sql = """SELECT system_symbol, sector_symbol, type, x, y,  waypoint_symbol
 	FROM public.mat_intergalactic_nodes;;"""
         wayps = {}
-        results = try_execute_select(self.connection, sql, ())
+        results = try_execute_select(sql, (), self.connection)
         if not results:
             return None
         for r in results:
@@ -225,7 +225,7 @@ select distinct * from sources
         edge_sql = """SELECT origin_system, distance, target_waypoint, target_system
 	FROM public.mat_intergalactic_edges;"""
 
-        results = try_execute_select(self.connection, edge_sql, ())
+        results = try_execute_select(edge_sql, (), self.connection)
         if not results:
             return None
 
@@ -255,7 +255,7 @@ select distinct * from sources
 left join waypoint_Traits wt on wt.waypoint_symbol = w.waypoint_symbol and wt.trait_symbol = 'MARKETPLACE'
                 where system_symbol = %s
 """
-        results = try_execute_select(self.connection, sql, (system_s,))
+        results = try_execute_select(sql, (system_s,), self.connection)
         t = [WaypointTrait("MARKETPLACE", "Marketplace", "")]
         if not results:
             return None
@@ -296,7 +296,7 @@ and w2.system_symbol = %s
 and (mt.symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
 
 """
-        results = try_execute_select(self.connection, edge_sql, (system_s, system_s))
+        results = try_execute_select(edge_sql, (system_s, system_s), self.connection)
         if not results:
             return None
 
