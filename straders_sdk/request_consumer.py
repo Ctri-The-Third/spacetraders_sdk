@@ -62,7 +62,7 @@ class RequestConsumer:
                 package: PackageedRequest
                 try:
                     # print("Doing the thing")
-                    package.response = self._session.send(package.request)
+                    package.response = self._session.send(package.request, timeout=5)
 
                 except Exception as e:
                     package.priority = 0

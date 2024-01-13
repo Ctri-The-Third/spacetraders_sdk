@@ -17,11 +17,11 @@ def _upsert_shipyard(shipyard: Shipyard, connection):
             ship_details = shipyard.ships.get(ship_type, None)
             if ship_details:
                 ship_cost = ship_details.purchase_price
-        resp = try_execute_upsert(
-            sql, (shipyard.waypoint, ship_type, ship_cost), connection
-        )
-        if not resp:
-            return resp
+            resp = try_execute_upsert(
+                sql, (shipyard.waypoint, ship_type, ship_cost), connection
+            )
+            if not resp:
+                return resp
 
     else:
         try:
