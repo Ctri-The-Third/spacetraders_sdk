@@ -248,9 +248,9 @@ def try_execute_upsert(sql="", params=(), connection=None) -> LocalSpaceTradersR
 
     if connection.closed > 1:
         logging.error("Connection is closed")
-        return LocalSpaceTradersRespose(
-            "Connection is closed", 0, 0, url=f"{__name__}.try_execute_upsert"
-        )
+        connection = PGConnectionPool().get_connection()
+        skip_return = False
+
     try:
         with connection.cursor() as cur:
             cur.execute(sql, params)
@@ -278,25 +278,32 @@ def try_execute_select(sql="", params=(), connection=None) -> list:
         connection = PGConnectionPool().get_connection()
 
     if connection.closed > 1:
-        logging.error("Connection is closed")
+        logging.error("Connection is closed - using temp")
+        connection = PGConnectionPool().get_connection()
+        skip_return = False
 
-        return LocalSpaceTradersRespose(
-            "Connection is closed", 0, 0, url=f"{__name__}.try_execute_upsert"
-        )
-    try:
-        with connection.cursor() as cur:
-            cur.execute(sql, params)
-            rows = cur.fetchall()
-            return rows
-    except Exception as err:
-        logging.error("Couldn't execute select: %s", err)
-        logging.debug("SQL: %s", sql)
-        return LocalSpaceTradersRespose(
-            error=err, status_code=0, error_code=0, url=f"{__name__}.try_execute_select"
-        )
-    finally:
-        if not skip_return:
-            PGConnectionPool().return_connection(connection)
+    for i in range(0, 3):
+        try:
+            with connection.cursor() as cur:
+                cur.execute(sql, params)
+                rows = cur.fetchall()
+                resp = rows
+                break
+        except Exception as err:
+            logging.error("Couldn't execute select - attempting again: %s", err)
+
+            logging.debug("SQL: %s", sql)
+            resp = LocalSpaceTradersRespose(
+                error=err,
+                status_code=0,
+                error_code=0,
+                url=f"{__name__}.try_execute_upsert",
+            )
+            time.sleep(i**1.5)
+        finally:
+            if not skip_return:
+                PGConnectionPool().return_connection(connection)
+    return resp
 
 
 def try_execute_no_results(sql, params, connection) -> LocalSpaceTradersRespose:

@@ -58,7 +58,7 @@ class PGConnectionPool:
                 )
             except:
                 attempts += 1
-                time.sleep(0.25)
+                time.sleep(0.25**attempts)
         return connection
 
     def return_connection(self, conn):

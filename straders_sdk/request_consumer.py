@@ -45,11 +45,12 @@ class RequestConsumer:
 
     def _consume_until_stopped(self):
         """this method should be tied to the _consumer_thread"""
-        interval = timedelta(milliseconds=60000 / 120)
-
+        base_mod = 120
+        interval = timedelta(milliseconds=60000 / base_mod)
+        delay_mod = 0
         while not self.stop_flag:
             if not self.queue.empty():
-                next_request = datetime.now() + interval
+                next_request = datetime.now() + interval + timedelta(seconds=delay_mod)
                 tupe = self.queue.get()
                 if isinstance(tupe, tuple):
                     package = tupe[1]
@@ -63,6 +64,7 @@ class RequestConsumer:
                 try:
                     # print("Doing the thing")
                     package.response = self._session.send(package.request, timeout=5)
+                    delay_mod = max(0, delay_mod - 0.1)
 
                 except Exception as e:
                     package.priority = 0
@@ -79,10 +81,14 @@ class RequestConsumer:
                         f"* Completed priority {package.priority} request {package.request.url} after {datetime.now() - package.time_added}"
                     )
                 else:
+                    delay_mod += 0.2 + int(
+                        package.response.headers.get("retry-after", 0)
+                    )
                     package.priority = 0
                     self.queue.put((0, package))
                 sleep(max(0, (next_request - datetime.now()).total_seconds()))
             else:
+                delay_mod = max(0, delay_mod - 0.1)
                 sleep(interval.total_seconds())
 
     def validate(self, response: requests.Response):

@@ -85,8 +85,8 @@ class SpaceTradersApiClient(SpaceTradersClient):
 
     def view_my_contracts(self) -> list["Contract"] or SpaceTradersResponse:
         url = _url("my/contracts")
-        resp = get_and_validate(
-            url, headers=self._headers(), session=self.session, priority=self.priority
+        resp = get_and_validate_paginated(
+            url, 20, 50, headers=self._headers(), session=self.session, priority=self.priority
         )
         if resp:
             return [Contract.from_json(d) for d in resp.data]
