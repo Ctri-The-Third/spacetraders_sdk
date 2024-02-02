@@ -53,7 +53,7 @@ def select_jump_gate_one(waypoint: Waypoint, connection):
         return resp
 
     connection_sql = """
-    select  jc.d_system_symbol 
+    select  jc.d_waypoint_symbol
     from jumpgate_connections jc
     where s_waypoint_symbol = %s"""
     conn_resp = try_execute_select(connection_sql, (waypoint.symbol,), connection)

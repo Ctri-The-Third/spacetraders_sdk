@@ -358,6 +358,16 @@ and (mt.symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
 
         # delete graph file
 
+    def validate_and_refresh_jump_graph(self, origin_system, destination_system):
+        "check if the supplied nodes are in the graph, and if not, refresh the graph."
+
+        if origin_system not in self.graph.nodes:
+            self._jump_graph = self.load_jump_graph_from_db()
+            self.save_graph()
+        if destination_system not in self.graph.nodes:
+            self._jump_graph = self.load_jump_graph_from_db()
+            self.save_graph()
+
     def astar(
         self,
         start: System,
@@ -374,15 +384,17 @@ and (mt.symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
                     < datetime.now() + self.expiration_window
                 ):
                     return route
-        graph = self.graph
 
         # check if there's a graph yet. There won't be if this is very early in the restart.
         if start == goal:
             return compile_route(start, goal, [goal.symbol])
-        if not graph:
+        if not self.graph:
             return None
 
         "`bypass_check` is for when we're looking for the nearest nodes to the given locations, when either the source or destination are not on the jump network."
+        self.validate_and_refresh_jump_graph(start.symbol, goal.symbol)
+        graph = self.graph
+
         if not bypass_check:
             if start.symbol not in graph.nodes:
                 return None
