@@ -373,6 +373,19 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             duration_seconds=duration,
         )
 
+    def ship_create_chart(self, ship: "Ship", response=None, duration: float = None):
+        """my/ships/:shipSymbol/chart"""
+        url = _url("my/ships/:ship_name/chart")
+        event_parms = {"charted_waypoint_symbol": ship.nav.waypoint_symbol}
+        self.log_event(
+            "ship_create_chart",
+            ship.name,
+            url,
+            response,
+            event_parms,
+            duration_seconds=duration,
+        )
+
     def ship_warp(
         self,
         ship: "Ship",

@@ -96,6 +96,11 @@ class SpaceTradersStubClient:
 
         pass
 
+    def ship_create_chart(self, ship: "Ship"):
+        """my/ships/:shipSymbol/chart"""
+
+        pass
+
     def ship_scan_ships(self, ship: "Ship") -> list["Ship"] or SpaceTradersResponse:
         """my/ships/:shipSymbol/scan"""
 

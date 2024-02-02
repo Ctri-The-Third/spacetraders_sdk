@@ -86,7 +86,12 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def view_my_contracts(self) -> list["Contract"] or SpaceTradersResponse:
         url = _url("my/contracts")
         resp = get_and_validate_paginated(
-            url, 20, 50, headers=self._headers(), session=self.session, priority=self.priority
+            url,
+            20,
+            50,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
         )
         if resp:
             return [Contract.from_json(d) for d in resp.data]
@@ -204,6 +209,16 @@ class SpaceTradersApiClient(SpaceTradersClient):
             headers=self._headers(),
             session=self.session,
             priority=self.priority + MOVEMENT_OFFSET,
+        )
+        if resp:
+            self.update(resp.data)
+        return resp
+
+    def ship_create_chart(self, ship: "Ship"):
+        """my/ships/:shipSymbol/chart"""
+        url = _url(f"my/ships/{ship.name}/chart")
+        resp = post_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
         )
         if resp:
             self.update(resp.data)

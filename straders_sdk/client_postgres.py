@@ -475,6 +475,11 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         return dummy_response(__class__.__name__, "ship_move")
         pass
 
+    def ship_create_chart(self, ship: "Ship"):
+        """my/ships/:shipSymbol/chart"""
+        return dummy_response(__class__.__name__, "ship_create_chart")
+        pass
+
     def ship_scan_ships(self, ship: "Ship") -> list["Ship"] or SpaceTradersResponse:
         """my/ships/:shipSymbol/scan"""
 

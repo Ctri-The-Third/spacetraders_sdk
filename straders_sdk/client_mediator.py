@@ -908,6 +908,17 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.ships[ship.name] = ship
         return resp
 
+    def ship_create_chart(self, ship: "Ship"):
+        """my/ships/:shipSymbol/chart"""
+        start = datetime.now()
+        resp = self.api_client.ship_create_chart(ship)
+        self.logging_client.ship_create_chart(
+            ship, resp, (datetime.now() - start).total_seconds()
+        )
+        if resp:
+            self.db_client.update(ship)
+        return resp
+
     def ship_warp(self, ship: "Ship", dest_waypoint_symbol: str):
         """my/ships/:shipSymbol/warp"""
 

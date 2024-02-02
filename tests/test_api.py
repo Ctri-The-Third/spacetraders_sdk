@@ -115,3 +115,13 @@ def test_warp():
     resp = client.ship_warp(ship, wp)
 
     assert resp
+
+
+def test_chart():
+    client = SpaceTradersApiClient("token", BASE_URL, VERSION)
+    ship = Ship()
+    ship.name = "test"
+
+    resp = client.ship_create_chart(ship)
+
+    assert resp

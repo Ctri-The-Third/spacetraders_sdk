@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 import requests
 
-from .utils import DATE_FORMAT
+from .utils import DATE_FORMAT, waypoint_slicer
 
 
 class SymbolClass:
@@ -500,6 +500,7 @@ class JumpGate:
     ) -> None:
         self.waypoint_symbol = waypoint_symbol
         self.connected_waypoints = connected_waypoints
+        self.connected_systems = [waypoint_slicer(c) for c in self.connected_waypoints]
 
     @classmethod
     def from_json(cls, waypoint_symbol, json_data: dict):
