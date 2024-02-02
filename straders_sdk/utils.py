@@ -107,7 +107,9 @@ def request_and_validate(
     if not consumer._consumer_thread.is_alive():
         consumer.start()
     packaged_request.event.wait()
-    return RemoteSpaceTradersRespose(packaged_request.response)
+    return RemoteSpaceTradersRespose(
+        packaged_request.response, packaged_request.priority
+    )
 
 
 def get_name_from_token(token: str) -> str:

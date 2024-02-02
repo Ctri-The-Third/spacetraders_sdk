@@ -145,10 +145,12 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         error_code = 0
         status_code = 0
         new_credits = None
+        priority = None
         if response_obj is not None:
             if isinstance(response_obj, SpaceTradersResponse):
                 status_code = response_obj.status_code
                 error_code = response_obj.error_code
+                priority = response_obj.request_proirity
                 credits = (
                     response_obj.response_json.get("data", {})
                     .get("agent", {})
@@ -163,10 +165,10 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         if isinstance(ship_name, Ship):
             ship_name = ship_name.name
         sql = """INSERT INTO public.logging(
-	event_name, event_timestamp, agent_name, ship_symbol, session_id, endpoint_name, new_credits, status_code, error_code, event_params, duration_seconds)
-	VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s) on conflict (event_timestamp, ship_symbol) do nothing;"""
+	event_name, event_timestamp, agent_name, ship_symbol, session_id, endpoint_name, new_credits, status_code, error_code, event_params, duration_seconds, event_priority)
+	VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) on conflict (event_timestamp, ship_symbol) do nothing;"""
 
-        return try_execute_upsert(
+        resp = try_execute_upsert(
             sql,
             (
                 event_name,
@@ -179,9 +181,15 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
                 error_code,
                 json.dumps(event_params),
                 duration_seconds,
+                priority,
             ),
             self.connection,
         )
+        if not resp:
+            logging.error("Couldn't log event %s because %s", event_name, resp.error)
+        else:
+            logging.debug("Logged event %s - %s", event_name, status_code)
+        return resp
 
     def update(self, update_obj: SpaceTradersResponse):
         if isinstance(update_obj, SpaceTradersResponse):
@@ -231,7 +239,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         )
 
     def systems_view_twenty(
-        self, page_number, force=False, response=None, duration: float = None
+        self, page_number, response=None, duration: float = None
     ) -> dict[str:"System"] or SpaceTradersResponse:
         url = _url("systems")
         self.log_event(
@@ -257,7 +265,6 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
     def waypoints_view_one(
         self,
         waypoint_symbol,
-        force=False,
         response=None,
         duration: float = None,
     ) -> Waypoint or SpaceTradersResponse:
@@ -266,7 +273,6 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         Args:
             `system_symbol` (str): The symbol of the system to search for the waypoint in.
             `waypoint_symbol` (str): The symbol of the waypoint to search for.
-            `force` (bool): Optional - Force a refresh of the waypoint. Defaults to False.
 
         Returns:
             Either a Waypoint object or a SpaceTradersResponse object on failure."""
@@ -680,7 +686,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         )
 
     def system_jumpgate(
-        self, wp: Waypoint, force_update=False, response=None, duration: float = None
+        self, wp: Waypoint, response=None, duration: float = None
     ) -> "JumpGate" or SpaceTradersResponse:
         """/game/systems/{symbol}/jumpgate"""
         url = _url("game/systems/:waypoint_symbol/jumpgate")

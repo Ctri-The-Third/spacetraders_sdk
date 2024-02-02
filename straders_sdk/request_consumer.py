@@ -81,9 +81,11 @@ class RequestConsumer:
                         f"* Completed priority {package.priority} request {package.request.url} after {datetime.now() - package.time_added}"
                     )
                 else:
-                    delay_mod += 0.2 + int(
-                        package.response.headers.get("retry-after", 0)
+                    delay_mod += (
+                        float(package.response.headers.get("retry-after", 0)) + 0.1
                     )
+                    self.logger.debug("Delayed a request because of rate_limiting")
+
                     package.priority = 0
                     self.queue.put((0, package))
                 sleep(max(0, (next_request - datetime.now()).total_seconds()))
