@@ -86,7 +86,12 @@ class SpaceTradersApiClient(SpaceTradersClient):
     def view_my_contracts(self) -> list["Contract"] or SpaceTradersResponse:
         url = _url("my/contracts")
         resp = get_and_validate_paginated(
-            url, 20, 50, headers=self._headers(), session=self.session, priority=self.priority
+            url,
+            20,
+            50,
+            headers=self._headers(),
+            session=self.session,
+            priority=self.priority,
         )
         if resp:
             return [Contract.from_json(d) for d in resp.data]
@@ -209,6 +214,16 @@ class SpaceTradersApiClient(SpaceTradersClient):
             self.update(resp.data)
         return resp
 
+    def ship_create_chart(self, ship: "Ship"):
+        """my/ships/:shipSymbol/chart"""
+        url = _url(f"my/ships/{ship.name}/chart")
+        resp = post_and_validate(
+            url, headers=self._headers(), session=self.session, priority=self.priority
+        )
+        if resp:
+            self.update(resp.data)
+        return resp
+
     def ship_scan_waypoints(self, ship: Ship) -> SpaceTradersResponse:
         """returns a list of waypoints that are in range. Triggers a cooldown.
         /my/ships/{shipSymbol}/scan/waypoints"""
@@ -217,7 +232,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
             url,
             headers=self._headers(),
             session=self.session,
-            priority=self.priority - COOLDOWN_OFFSET,
+            priority=self.priority + COOLDOWN_OFFSET,
         )
         if resp:
             self.update(resp.data)
@@ -237,7 +252,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
             url,
             headers=self._headers(),
             session=self.session,
-            priority=self.priority - COOLDOWN_OFFSET,
+            priority=self.priority + COOLDOWN_OFFSET,
         )
         if resp:
             self.update(resp.data)
@@ -257,7 +272,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
             data,
             headers=self._headers(),
             session=self.session,
-            priority=self.priority - COOLDOWN_OFFSET,
+            priority=self.priority + MOVEMENT_OFFSET,
         )
         if resp:
             self.update(resp.data)
@@ -272,7 +287,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
             data,
             headers=self._headers(),
             session=self.session,
-            priority=self.priority - COOLDOWN_OFFSET,
+            priority=self.priority + COOLDOWN_OFFSET,
         )
         if resp:
             self.update(resp.data)
