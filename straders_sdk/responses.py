@@ -21,6 +21,7 @@ class SpaceTradersResponse(Protocol):
     error: str
     status_code: int
     error_code: int
+    request_proirity: int
 
     def __bool__(self):
         pass
@@ -29,12 +30,21 @@ class SpaceTradersResponse(Protocol):
 class RemoteSpaceTradersRespose:
     "base class for all responses"
 
-    def __init__(self, response: requests.Response):
+    def __init__(self, response: requests.Response, priority: int = None):
         self.data = {}
 
         self.error = None
-        self.status_code = response.status_code
+
         self.error_code = None
+        self.request_priority = None
+
+        if not response:
+            self.status_code = 0
+            self.error_code = 0
+            self.error = "Timed out waiting for request to be sent."
+            return
+
+        self.status_code = response.status_code
         if response.status_code == 204 or response.content == b"":
             self.response_json = {}
         else:
