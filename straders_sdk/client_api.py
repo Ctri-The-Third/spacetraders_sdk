@@ -232,7 +232,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
             url,
             headers=self._headers(),
             session=self.session,
-            priority=self.priority - COOLDOWN_OFFSET,
+            priority=self.priority + COOLDOWN_OFFSET,
         )
         if resp:
             self.update(resp.data)
@@ -252,7 +252,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
             url,
             headers=self._headers(),
             session=self.session,
-            priority=self.priority - COOLDOWN_OFFSET,
+            priority=self.priority + COOLDOWN_OFFSET,
         )
         if resp:
             self.update(resp.data)
@@ -272,7 +272,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
             data,
             headers=self._headers(),
             session=self.session,
-            priority=self.priority - COOLDOWN_OFFSET,
+            priority=self.priority + MOVEMENT_OFFSET,
         )
         if resp:
             self.update(resp.data)
@@ -287,7 +287,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
             data,
             headers=self._headers(),
             session=self.session,
-            priority=self.priority - COOLDOWN_OFFSET,
+            priority=self.priority + COOLDOWN_OFFSET,
         )
         if resp:
             self.update(resp.data)

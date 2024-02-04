@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from dateutil import parser
 from threading import Event, Thread
 from requests import PreparedRequest
 from time import sleep
@@ -63,8 +64,8 @@ class RequestConsumer:
                 package: PackageedRequest
                 try:
                     # print("Doing the thing")
-                    package.response = self._session.send(package.request, timeout=5)
-                    delay_mod = max(0, delay_mod - 0.1)
+                    package.response = self._session.send(package.request)
+                    delay_mod = max(0, delay_mod - 0.5)
 
                 except Exception as e:
                     package.priority = 0
@@ -78,19 +79,32 @@ class RequestConsumer:
                 if package.response.status_code != 429:
                     package.event.set()
                     self.logger.debug(
-                        f"* Completed priority {package.priority} request {package.request.url} after {datetime.now() - package.time_added}"
+                        f"* Completed priority {package.priority} request {package.request.url} after {datetime.now() - package.time_added} - Q[{self.queue.qsize()}]"
                     )
                 else:
-                    delay_mod += (
-                        float(package.response.headers.get("retry-after", 0)) + 0.1
+                    try:
+                        delay_mod = (
+                            parser.parse(
+                                package.response.headers.get("x-ratelimit-reset")[:-1]
+                            )
+                            - datetime.utcnow()
+                        ).total_seconds() + 0.1
+                    except Exception as err:
+                        delay_mod = 1.1
+
+                    # delay_mod = (
+                    #    float(package.response.headers.get("retry-after", 0)) + 0.1
+                    # )
+                    self.logger.debug(
+                        "* Delaying a request for %s because of rate_limiting",
+                        delay_mod,
                     )
-                    self.logger.debug("Delayed a request because of rate_limiting")
 
                     package.priority = 0
                     self.queue.put((0, package))
                 sleep(max(0, (next_request - datetime.now()).total_seconds()))
             else:
-                delay_mod = max(0, delay_mod - 0.1)
+                # delay_mod = max(0, delay_mod - 0.1)
                 sleep(interval.total_seconds())
 
     def validate(self, response: requests.Response):

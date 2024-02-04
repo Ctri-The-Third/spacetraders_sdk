@@ -34,9 +34,17 @@ class RemoteSpaceTradersRespose:
         self.data = {}
 
         self.error = None
-        self.status_code = response.status_code
+
         self.error_code = None
         self.request_priority = None
+
+        if not response:
+            self.status_code = 0
+            self.error_code = 0
+            self.error = "Timed out waiting for request to be sent."
+            return
+
+        self.status_code = response.status_code
         if response.status_code == 204 or response.content == b"":
             self.response_json = {}
         else:

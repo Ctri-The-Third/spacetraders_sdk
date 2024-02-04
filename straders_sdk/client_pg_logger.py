@@ -41,6 +41,8 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
     def connection(self):
         if not self._connection:
             self._connection = self.connection_pool.get_connection()
+        if not self._connection:
+            return None
         if self._connection.closed:
             self.connection_pool.return_connection(self._connection)
             self._connection = self.connection_pool.get_connection()
@@ -185,10 +187,10 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             ),
             self.connection,
         )
-        if not resp:
-            logging.error("Couldn't log event %s because %s", event_name, resp.error)
-        else:
-            logging.debug("Logged event %s - %s", event_name, status_code)
+        # if not resp:
+        #    logging.error("Couldn't log event %s because %s", event_name, resp.error)
+        # else:
+        #    logging.debug("Logged event %s - %s", event_name, status_code)
         return resp
 
     def update(self, update_obj: SpaceTradersResponse):
