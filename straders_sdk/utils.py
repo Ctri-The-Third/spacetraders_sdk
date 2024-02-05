@@ -106,7 +106,10 @@ def request_and_validate(
     consumer.queue.put((packaged_request.priority, packaged_request))
     if not consumer._consumer_thread.is_alive():
         consumer.start()
-    packaged_request.event.wait()
+    # if a request gets stuck, the thread will never end and the ship can't be reprioritised.
+    # e.g. if a ship submits a priority 6 request, it's probs never getting serviced.
+    # this will def crash the thread - but it will free up the ship for any new behaviour
+    packaged_request.event.wait(timeout=3600)
     return RemoteSpaceTradersRespose(
         packaged_request.response, packaged_request.priority
     )
