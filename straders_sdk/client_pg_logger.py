@@ -53,6 +53,12 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             self.connection_pool.return_connection(self._connection)
             self._connection = None
 
+    def assign_connection(self, connection):
+        if isinstance(connection, psycopg2.extensions.connection):
+            self._connection = connection
+        else:
+            raise ValueError("Connection must be a psycopg2 connection object")
+
     def log_beginning(
         self,
         behaviour_name: str,

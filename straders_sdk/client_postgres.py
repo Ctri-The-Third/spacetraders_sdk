@@ -79,6 +79,12 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             self.connection_pool.return_connection(self._connection)
             self._connection = None
 
+    def assign_connection(self, connection):
+        if isinstance(connection, psycopg2.extensions.connection):
+            self._connection = connection
+        else:
+            raise ValueError("Connection must be a psycopg2 connection object")
+
     def _headers(self) -> dict:
         return {}
 
