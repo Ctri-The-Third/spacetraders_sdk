@@ -150,7 +150,7 @@ def post_and_validate(
     url, data=None, json=None, headers=None, priority=5, session: Session = None
 ) -> SpaceTradersResponse:
     "wraps the requests.post function to make it easier to use"
-
+    headers["Content-Type"] = "application/json"
     return request_and_validate(
         "POST", url, data=data, json=json, headers=headers, priority=priority
     )

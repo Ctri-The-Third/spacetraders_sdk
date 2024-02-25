@@ -1,8 +1,8 @@
 from ..local_response import LocalSpaceTradersRespose
-from ..ship import Ship, ShipFrame, ShipNav, ShipInventory
-from ..models import RouteNode
+from ..models_ship import Ship, ShipFrame, ShipNav, ShipInventory
+from ..models_misc import RouteNode
 from ..client_interface import SpaceTradersClient
-from ..models import ShipRequirements
+from ..models_misc import ShipRequirements
 from ..utils import try_execute_select, try_execute_upsert
 
 

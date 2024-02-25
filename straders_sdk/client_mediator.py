@@ -4,8 +4,8 @@ from .client_interface import SpaceTradersInteractive, SpaceTradersClient
 import time
 from .responses import SpaceTradersResponse
 from .local_response import LocalSpaceTradersRespose
-from .contracts import Contract
-from .models import (
+from .models_contracts import Contract
+from .models_misc import (
     Waypoint,
     ShipyardShip,
     GameStatus,
@@ -16,13 +16,13 @@ from .models import (
     JumpGate,
 )
 import psycopg2
-from .models import Shipyard, System
-from .ship import Ship
+from .models_misc import Shipyard, System
+from .models_ship import Ship
 from .client_api import SpaceTradersApiClient
 from .client_stub import SpaceTradersStubClient
 from .client_postgres import SpaceTradersPostgresClient
 from .client_pg_logger import SpaceTradersPostgresLoggerClient
-from .client_json_cache import SpaceTradersCacheClient
+from .client_json_cache import SpaceTradersJSONClient
 from straders_sdk.pg_connection_pool import PGConnectionPool
 from threading import Lock
 import logging
@@ -93,7 +93,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
                 db_pass,
             )
             self._connection = None
-        self.json_cache_client = SpaceTradersCacheClient()
+        self.json_cache_client = SpaceTradersJSONClient()
         self.api_client = SpaceTradersApiClient(
             token=token,
             base_url=base_url,

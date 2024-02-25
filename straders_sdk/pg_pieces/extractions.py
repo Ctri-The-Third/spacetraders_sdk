@@ -1,4 +1,4 @@
-from ..models import Agent
+from ..models_misc import Agent
 from ..local_response import LocalSpaceTradersRespose
 import logging
 import datetime

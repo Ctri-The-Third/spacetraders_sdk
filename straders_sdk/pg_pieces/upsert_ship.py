@@ -1,5 +1,5 @@
-from ..ship import Ship
-from ..models import Agent
+from ..models_ship import Ship
+from ..models_misc import Agent
 import psycopg2
 import logging
 import re

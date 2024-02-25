@@ -1,5 +1,5 @@
-from straders_sdk.client_json_cache import SpaceTradersCacheClient
-from straders_sdk.models import Waypoint, System
+from straders_sdk.client_json_cache import SpaceTradersJSONClient
+from straders_sdk.models_misc import Waypoint, System
 import os
 import pytest
 
@@ -7,7 +7,7 @@ FOLDER = "resources"
 
 
 def test_init():
-    client = SpaceTradersCacheClient(FOLDER)
+    client = SpaceTradersJSONClient(FOLDER)
     assert client
 
     # check the resources folder exists
@@ -17,13 +17,13 @@ def test_init():
 
 
 def test_save_waypoint(waypoint_response_data):
-    client = SpaceTradersCacheClient(FOLDER)
+    client = SpaceTradersJSONClient(FOLDER)
     wp = Waypoint.from_json(waypoint_response_data)
     client.update(wp)
 
 
 def test_waypoints_view_one(waypoint_response_data):
-    client = SpaceTradersCacheClient(FOLDER)
+    client = SpaceTradersJSONClient(FOLDER)
     check_wp = Waypoint.from_json(waypoint_response_data)
     wp = client.waypoints_view_one("DOESNOTEXIST")
     assert not wp
@@ -33,13 +33,13 @@ def test_waypoints_view_one(waypoint_response_data):
 
 
 def test_save_system(system_response_data):
-    client = SpaceTradersCacheClient(FOLDER)
+    client = SpaceTradersJSONClient(FOLDER)
     sys = System.from_json(system_response_data)
     client.update(sys)
 
 
 def test_systems_view_one(system_response_data):
-    client = SpaceTradersCacheClient(FOLDER)
+    client = SpaceTradersJSONClient(FOLDER)
     check_sys = System.from_json(system_response_data)
     sys = client.systems_view_one(check_sys.symbol)
     assert sys.symbol == check_sys.symbol
@@ -49,7 +49,7 @@ def test_systems_view_one(system_response_data):
 
 
 def test_waypoints_view(system_response_data):
-    client = SpaceTradersCacheClient(FOLDER)
+    client = SpaceTradersJSONClient(FOLDER)
     check_sys = System.from_json(system_response_data)
     wps = client.waypoints_view(check_sys.symbol)
     assert wps
@@ -57,7 +57,7 @@ def test_waypoints_view(system_response_data):
 
 
 def test_find_waypoints_by_coords(waypoint_response_data):
-    client = SpaceTradersCacheClient(FOLDER)
+    client = SpaceTradersJSONClient(FOLDER)
     check_wp = Waypoint.from_json(waypoint_response_data)
     wps = client.find_waypoints_by_coords(
         check_wp.system_symbol, check_wp.x, check_wp.y

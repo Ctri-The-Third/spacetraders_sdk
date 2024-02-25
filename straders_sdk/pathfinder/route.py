@@ -1,4 +1,4 @@
-from straders_sdk.models import System, Waypoint
+from straders_sdk.models_misc import System, Waypoint
 import json
 import logging
 from datetime import datetime

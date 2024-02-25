@@ -1,10 +1,11 @@
 import os
 from straders_sdk.client_postgres import SpaceTradersPostgresClient
 from straders_sdk.utils import try_execute_select
-from straders_sdk.models import Waypoint, Market, System
-from straders_sdk.models import JumpGate, JumpGateConnection
-from straders_sdk.models import ConstructionSite, ConstructionSiteMaterial
+from straders_sdk.models_misc import Waypoint, Market, System
+from straders_sdk.models_misc import JumpGate, JumpGateConnection
+from straders_sdk.models_misc import ConstructionSite, ConstructionSiteMaterial
 import pytest
+import psycopg2
 
 ST_HOST = os.getenv("ST_TEST_DB_HOST", "localhost")
 ST_NAME = os.getenv("ST_DB_NAME")
@@ -22,10 +23,19 @@ def test_environment_variables():
     assert ST_PORT
 
 
+def test_connection():
+    conn = psycopg2.connect(
+        dbname=ST_NAME, user=ST_USER, password=ST_PASS, host=ST_HOST, port=ST_PORT
+    )
+    assert conn
+    conn.close()
+
+
 def test_contracts():
     client = SpaceTradersPostgresClient(
         ST_HOST, ST_NAME, ST_USER, ST_PASS, TEST_AGENT_NAME, db_port=ST_PORT
     )
+
     resp = client.view_my_contracts()
 
     assert isinstance(resp, list)
@@ -38,8 +48,13 @@ def test_find_waypoints_by_type():
 
     # get a starting system, check it for asteroid fields
     sql = "select distinct system_symbol from agents a join waypoints w on a.headquarters = w.waypoint_symbol limit 1"
-    system = try_execute_select(sql)[0][0]
+    results = try_execute_select(sql)
+    if len(results) == 0:
+        pytest.skip("No ASTEROID waypoints found in system")
+    system = results[0][0]
     resp = client.find_waypoints_by_type(system, "ASTEROID")
+    assert isinstance(resp, list)
+
     assert resp
     for wayp in resp:
         assert wayp.type == "ASTEROID"

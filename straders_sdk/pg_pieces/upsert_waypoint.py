@@ -1,7 +1,7 @@
 import psycopg2
 
 
-from ..models import Waypoint, WaypointTrait
+from ..models_misc import Waypoint, WaypointTrait
 from ..utils import try_execute_upsert
 
 

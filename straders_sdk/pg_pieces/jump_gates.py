@@ -1,4 +1,4 @@
-from ..models import Waypoint, JumpGate, JumpGateConnection
+from ..models_misc import Waypoint, JumpGate, JumpGateConnection
 import logging
 from datetime import datetime
 from ..local_response import LocalSpaceTradersRespose

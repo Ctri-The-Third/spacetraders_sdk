@@ -1,4 +1,4 @@
-from .models import Waypoint
+from .models_misc import Waypoint
 from .responses import SpaceTradersResponse
 from .client_interface import SpaceTradersClient
 from .responses import SpaceTradersResponse
@@ -13,7 +13,7 @@ from .utils import (
     waypoint_slicer,
 )
 from .local_response import LocalSpaceTradersRespose  #
-from .models import (
+from .models_misc import (
     Waypoint,
     Survey,
     Market,
@@ -26,8 +26,8 @@ from .models import (
     Agent,
     Faction,
 )
-from .contracts import Contract
-from .ship import Ship
+from .models_contracts import Contract
+from .models_ship import Ship
 import logging
 from requests_ratelimiter import LimiterSession
 from datetime import datetime
@@ -492,7 +492,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
         data = {"symbol": mount_symbol}
         resp = post_and_validate(
             url,
-            data,
+            json=data,
             headers=self._headers(),
             session=self.session,
             priority=self.priority,

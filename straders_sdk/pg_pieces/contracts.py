@@ -1,5 +1,5 @@
-from ..models import Waypoint
-from ..contracts import Contract, ContractDeliverGood
+from ..models_misc import Waypoint
+from ..models_contracts import Contract, ContractDeliverGood
 import logging
 from datetime import datetime
 from ..local_response import LocalSpaceTradersRespose

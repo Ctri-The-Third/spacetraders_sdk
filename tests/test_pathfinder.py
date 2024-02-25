@@ -1,6 +1,6 @@
 from straders_sdk.pathfinder import PathFinder
-from straders_sdk.models import System, Waypoint, WaypointTrait
-from straders_sdk.ship import Ship
+from straders_sdk.models_misc import System, Waypoint, WaypointTrait
+from straders_sdk.models_ship import Ship
 import os
 import psycopg2
 

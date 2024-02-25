@@ -1,4 +1,4 @@
-from ..models import Market, MarketTradeGoodListing, Waypoint
+from ..models_misc import Market, MarketTradeGoodListing, Waypoint
 import psycopg2
 import logging
 from datetime import datetime

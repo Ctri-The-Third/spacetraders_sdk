@@ -1,6 +1,6 @@
 from typing import Protocol, runtime_checkable
-from .models import Waypoint, Survey, Market, Shipyard, Agent, ConstructionSite
-from .ship import Ship
+from .models_misc import Waypoint, Survey, Market, Shipyard, Agent, ConstructionSite
+from .models_ship import Ship
 from .client_interface import SpaceTradersClient
 import straders_sdk.utils as utils
 from .responses import SpaceTradersResponse

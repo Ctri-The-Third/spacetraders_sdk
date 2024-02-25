@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from dataclasses import dataclass
-from .models import ShipFrame, ShipModule, ShipMount
-from .models import ShipReactor, ShipEngine
-from .models import ShipRequirements, ShipNav
+from .models_misc import ShipFrame, ShipModule, ShipMount
+from .models_misc import ShipReactor, ShipEngine
+from .models_misc import ShipRequirements, ShipNav
 from .client_interface import SpaceTradersInteractive
 import logging
 from .utils import parse_timestamp

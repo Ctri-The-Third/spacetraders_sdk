@@ -2,7 +2,7 @@ from datetime import datetime
 
 from .client_interface import SpaceTradersClient
 from .utils import DATE_FORMAT, _url, post_and_validate
-from .models import SymbolClass
+from .models_misc import SymbolClass
 from dataclasses import dataclass
 import logging
 

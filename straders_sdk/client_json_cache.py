@@ -1,5 +1,5 @@
 from typing import Protocol
-from .models import Waypoint, Survey, Market, System
+from .models_misc import Waypoint, Survey, Market, System
 from .responses import SpaceTradersResponse
 from .local_response import LocalSpaceTradersRespose
 from .client_interface import SpaceTradersClient
@@ -8,7 +8,7 @@ import os
 import logging
 
 
-class SpaceTradersCacheClient(SpaceTradersClient):
+class SpaceTradersJSONClient(SpaceTradersClient):
     def __init__(
         self,
         resources_folder_path="resources",

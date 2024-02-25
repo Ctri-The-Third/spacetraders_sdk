@@ -1,4 +1,4 @@
-from ..models import ConstructionSite, ConstructionSiteMaterial
+from ..models_misc import ConstructionSite, ConstructionSiteMaterial
 from ..local_response import LocalSpaceTradersRespose
 import logging
 import datetime

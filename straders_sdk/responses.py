@@ -38,7 +38,7 @@ class RemoteSpaceTradersRespose:
         self.error_code = None
         self.request_priority = None
 
-        if not response:
+        if response is None:
             self.status_code = 0
             self.error_code = 0
             self.error = "Timed out waiting for request to be sent."

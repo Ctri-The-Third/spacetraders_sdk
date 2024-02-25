@@ -1,5 +1,5 @@
 from typing import Protocol, runtime_checkable
-from .models import Waypoint, Survey, Market, Shipyard, JumpGate, ConstructionSite
+from .models_misc import Waypoint, Survey, Market, Shipyard, JumpGate, ConstructionSite
 from .responses import SpaceTradersResponse
 from abc import abstractmethod
 

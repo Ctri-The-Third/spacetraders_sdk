@@ -1,4 +1,4 @@
-from ..models import Survey
+from ..models_misc import Survey
 
 import logging
 import datetime

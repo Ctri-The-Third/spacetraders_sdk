@@ -5,7 +5,7 @@ import json
 import os
 from datetime import timedelta, datetime
 from networkx import Graph
-from straders_sdk.models import System, Waypoint, WaypointTrait
+from straders_sdk.models_misc import System, Waypoint, WaypointTrait
 from networkx import Graph
 from straders_sdk.utils import try_execute_select
 from straders_sdk.pathfinder.route import JumpGateRoute, JumpGateSystem

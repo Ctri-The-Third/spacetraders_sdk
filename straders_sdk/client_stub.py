@@ -1,5 +1,5 @@
 from typing import Protocol
-from .models import Waypoint, Survey, Market
+from .models_misc import Waypoint, Survey, Market
 from .responses import SpaceTradersResponse
 
 

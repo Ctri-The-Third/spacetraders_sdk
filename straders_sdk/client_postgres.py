@@ -1,6 +1,6 @@
 from .pg_connection_pool import PGConnectionPool
 from typing import Protocol
-from .models import (
+from .models_misc import (
     Waypoint,
     WaypointTrait,
     Market,
@@ -15,7 +15,7 @@ from .models import (
     JumpGate,
 )
 import logging
-from .contracts import Contract, ContractDeliverGood
+from .models_contracts import Contract, ContractDeliverGood
 from datetime import datetime
 from .responses import SpaceTradersResponse
 from .client_interface import SpaceTradersClient
@@ -34,8 +34,8 @@ from .pg_pieces.construction_sites import (
     select_construction_site_one,
 )
 from .local_response import LocalSpaceTradersRespose
-from .models import RouteNode, ConstructionSite
-from .ship import Ship, ShipInventory, ShipNav, ShipModule, ShipMount
+from .models_misc import RouteNode, ConstructionSite
+from .models_ship import Ship, ShipInventory, ShipNav, ShipModule, ShipMount
 from .utils import try_execute_select, try_execute_upsert
 import psycopg2
 from .constants import ORBITAL_TYPES, PARENT_TYPES

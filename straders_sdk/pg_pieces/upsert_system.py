@@ -1,7 +1,7 @@
 import psycopg2
 
 
-from ..models import System
+from ..models_misc import System
 from ..pg_pieces.upsert_waypoint import _upsert_waypoint
 from ..utils import try_execute_upsert
 

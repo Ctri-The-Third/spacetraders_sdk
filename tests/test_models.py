@@ -5,7 +5,7 @@ sys.path.append(".")
 import pytest
 from datetime import datetime, timedelta
 from straders_sdk.utils import DATE_FORMAT
-from straders_sdk.models import (
+from straders_sdk.models_misc import (
     Announement,
     CrewInfo,
     FuelInfo,
@@ -21,7 +21,7 @@ from straders_sdk.models import (
     Waypoint,
 )
 
-from straders_sdk.ship import Ship
+from straders_sdk.models_ship import Ship
 
 
 # Test cases for Announement class
@@ -253,9 +253,9 @@ def market_response_data():
 
 
 def test_market(market_response_data):
-    import straders_sdk.models as models
+    import straders_sdk.models_misc as models_misc
 
-    market = models.Market.from_json(market_response_data)
+    market = models_misc.Market.from_json(market_response_data)
     assert market is not None
 
 

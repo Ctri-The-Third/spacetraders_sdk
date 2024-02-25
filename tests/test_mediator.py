@@ -1,9 +1,9 @@
 import os
 from straders_sdk import SpaceTraders
 from straders_sdk.utils import try_execute_select
-from straders_sdk.models import Waypoint, Market
-from straders_sdk.models import JumpGate, JumpGateConnection
-from straders_sdk.models import ConstructionSite, ConstructionSiteMaterial
+from straders_sdk.models_misc import Waypoint, Market
+from straders_sdk.models_misc import JumpGate, JumpGateConnection
+from straders_sdk.models_misc import ConstructionSite, ConstructionSiteMaterial
 import pytest
 
 ST_HOST = os.getenv("ST_DB_HOST")

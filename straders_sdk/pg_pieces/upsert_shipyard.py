@@ -1,4 +1,4 @@
-from ..models import Shipyard, ShipyardShip
+from ..models_misc import Shipyard, ShipyardShip
 import psycopg2
 import logging
 from ..utils import try_execute_upsert
