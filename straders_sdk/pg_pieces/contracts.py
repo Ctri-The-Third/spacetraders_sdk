@@ -2,7 +2,7 @@ from ..models_misc import Waypoint
 from ..models_contracts import Contract, ContractDeliverGood
 import logging
 from datetime import datetime
-from ..local_response import LocalSpaceTradersRespose
+from ..resp_local_resp import LocalSpaceTradersRespose
 from ..utils import try_execute_select, try_execute_upsert
 
 

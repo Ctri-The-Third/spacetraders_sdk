@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import random
 import json, base64
 import time
-from .local_response import LocalSpaceTradersRespose
+from .resp_local_resp import LocalSpaceTradersRespose
 import threading
 import copy
 from requests import Session
@@ -93,6 +93,9 @@ def rate_limit_check(response: requests.Response):
 def request_and_validate(
     method, url, data=None, json=None, headers=None, params=None, priority=6
 ):
+    if isinstance(data, dict):
+        json = data
+        data = None
     if priority == 6:
         logging.warning("Priority not set in url %s", url)
     request = requests.Request(
@@ -130,6 +133,17 @@ def get_name_from_token(token: str) -> str:
     return identifier
 
 
+def get_date_from_token(token: str) -> str:
+
+    header_b64, payload_b64, signature = token.split(".")
+
+    payload = json.loads(base64.urlsafe_b64decode(payload_b64 + "=="))
+
+    reset_date = payload.get("reset_date", None)
+
+    return reset_date
+
+
 def get_and_validate(
     url,
     params=None,
@@ -150,6 +164,7 @@ def post_and_validate(
     url, data=None, json=None, headers=None, priority=5, session: Session = None
 ) -> SpaceTradersResponse:
     "wraps the requests.post function to make it easier to use"
+    headers = headers or {}
     headers["Content-Type"] = "application/json"
     return request_and_validate(
         "POST", url, data=data, json=json, headers=headers, priority=priority
@@ -226,7 +241,7 @@ def sleep_until_ready(ship: "Ship"):
     sleep(max(ship.seconds_until_cooldown, ship.nav.travel_time_remaining))
 
 
-def waypoint_slicer(waypoint_symbol: str) -> str:
+def waypoint_to_system(waypoint_symbol: str) -> str:
     "returns the system symbol from a waypoint symbol"
     if "-" not in waypoint_symbol:
         return waypoint_symbol

@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from .models_misc import ShipFrame, ShipModule, ShipMount
 from .models_misc import ShipReactor, ShipEngine
 from .models_misc import ShipRequirements, ShipNav
-from .client_interface import SpaceTradersInteractive
 import logging
 from .utils import parse_timestamp
 from .constants import SURVEYOR_SYMBOLS, MINING_SYMBOLS, SIPHON_SYMBOLS
@@ -49,14 +48,14 @@ class ShipInventory:
         return cls(*json_data.values())
 
 
-class Ship(SpaceTradersInteractive):
+class Ship:
     name: str
     role: str
     faction: str
-    nav: ShipNav
-    frame: ShipFrame
-    reactor: ShipReactor
-    engine: ShipEngine
+    nav: "ShipNav"
+    frame: "ShipFrame"
+    reactor: "ShipReactor"
+    engine: "ShipEngine"
     crew_capacity: int
     crew_current: int
     crew_required: int
@@ -65,7 +64,7 @@ class Ship(SpaceTradersInteractive):
     crew_wages: int
     cargo_capacity: int
     cargo_units_used: int
-    cargo_inventory: list[ShipInventory]
+    cargo_inventory: list["ShipInventory"]
     # ---- FUEL INFO ----
 
     fuel_capacity: int
@@ -78,8 +77,8 @@ class Ship(SpaceTradersInteractive):
     # ----  REACTOR INFO ----
 
     # todo: modules and mounts
-    modules: list[ShipModule]
-    mounts: list[ShipMount]
+    modules: list["ShipModule"]
+    mounts: list["ShipMount"]
 
     def __init__(self) -> None:
         pass

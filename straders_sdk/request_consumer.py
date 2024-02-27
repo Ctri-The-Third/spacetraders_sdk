@@ -32,6 +32,7 @@ class RequestConsumer:
             target=self._consume_until_stopped, daemon=auto_start
         )
         self._session = requests.Session()
+        self.handlers = {}
         if auto_start:
             self.start()
         pass
@@ -43,6 +44,11 @@ class RequestConsumer:
         self.stop_flag = False
         if not self._consumer_thread.is_alive():
             self._consumer_thread.start()
+
+    def register_handler(self, handler, identifier):
+        if not callable(handler):
+            raise ValueError("Handler must be callable")
+        self.handlers[identifier] = handler
 
     def _consume_until_stopped(self):
         """this method should be tied to the _consumer_thread"""
@@ -65,6 +71,8 @@ class RequestConsumer:
                 try:
                     # print("Doing the thing")
                     package.response = self._session.send(package.request)
+                    for identifier, handler in self.handlers.items():
+                        handler(package.response)
                     delay_mod = max(0, delay_mod - 0.5)
 
                 except Exception as e:

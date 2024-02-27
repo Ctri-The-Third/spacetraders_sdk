@@ -17,6 +17,7 @@ import logging
 @runtime_checkable
 class SpaceTradersResponse(Protocol):
     data: dict
+    url: str
     response_json: dict
     error: str
     status_code: int
@@ -32,7 +33,7 @@ class RemoteSpaceTradersRespose:
 
     def __init__(self, response: requests.Response, priority: int = None):
         self.data = {}
-
+        self.url = response.url
         self.error = None
 
         self.error_code = None

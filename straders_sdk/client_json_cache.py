@@ -1,7 +1,7 @@
 from typing import Protocol
 from .models_misc import Waypoint, Survey, Market, System
 from .responses import SpaceTradersResponse
-from .local_response import LocalSpaceTradersRespose
+from .resp_local_resp import LocalSpaceTradersRespose
 from .client_interface import SpaceTradersClient
 import json
 import os

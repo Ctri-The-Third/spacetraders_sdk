@@ -1,4 +1,4 @@
-from ..local_response import LocalSpaceTradersRespose
+from ..resp_local_resp import LocalSpaceTradersRespose
 from ..models_ship import Ship, ShipFrame, ShipNav, ShipInventory
 from ..models_misc import RouteNode
 from ..client_interface import SpaceTradersClient

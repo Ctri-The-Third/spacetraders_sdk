@@ -4,7 +4,7 @@ import psycopg2
 import logging
 import re
 import datetime
-from ..local_response import LocalSpaceTradersRespose
+from ..resp_local_resp import LocalSpaceTradersRespose
 from ..utils import try_execute_upsert
 
 # from psycopg2 import connection

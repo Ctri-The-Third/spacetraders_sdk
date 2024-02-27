@@ -1,9 +1,9 @@
 from .utils import get_and_validate, get_and_validate_paginated, post_and_validate, _url
-from .utils import ApiConfig, _log_response, waypoint_slicer
+from .utils import ApiConfig, _log_response, waypoint_to_system
 from .client_interface import SpaceTradersInteractive, SpaceTradersClient
 import time
 from .responses import SpaceTradersResponse
-from .local_response import LocalSpaceTradersRespose
+from .resp_local_resp import LocalSpaceTradersRespose
 from .models_contracts import Contract
 from .models_misc import (
     Waypoint,
@@ -390,7 +390,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
     ) -> Waypoint or SpaceTradersResponse:
         # check self
         self.set_connections()
-        system_symbol = waypoint_slicer(waypoint_symbol)
+        system_symbol = waypoint_to_system(waypoint_symbol)
         if waypoint_symbol in self.waypoints and not force:
             return self.waypoints[waypoint_symbol]
         if not force:

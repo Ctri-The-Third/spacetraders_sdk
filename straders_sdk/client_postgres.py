@@ -33,7 +33,7 @@ from .pg_pieces.construction_sites import (
     _upsert_construction_site,
     select_construction_site_one,
 )
-from .local_response import LocalSpaceTradersRespose
+from .resp_local_resp import LocalSpaceTradersRespose
 from .models_misc import RouteNode, ConstructionSite
 from .models_ship import Ship, ShipInventory, ShipNav, ShipModule, ShipMount
 from .utils import try_execute_select, try_execute_upsert

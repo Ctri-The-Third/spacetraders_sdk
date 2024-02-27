@@ -2,13 +2,13 @@ from ..models_misc import Market, MarketTradeGoodListing, Waypoint
 import psycopg2
 import logging
 from datetime import datetime
-from ..utils import waypoint_slicer
+from ..utils import waypoint_to_system
 from ..utils import try_execute_select, try_execute_upsert
-from ..local_response import LocalSpaceTradersRespose
+from ..resp_local_resp import LocalSpaceTradersRespose
 
 
 def _upsert_market(market: Market, connection):
-    system_symbol = waypoint_slicer(market.symbol)
+    system_symbol = waypoint_to_system(market.symbol)
     sql = """INSERT INTO public.market(
 symbol, system_symbol)
 VALUES (%s, %s) 

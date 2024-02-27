@@ -1,8 +1,8 @@
 from ..models_misc import Waypoint, JumpGate, JumpGateConnection
 import logging
 from datetime import datetime
-from ..local_response import LocalSpaceTradersRespose
-from ..utils import try_execute_select, try_execute_upsert, waypoint_slicer
+from ..resp_local_resp import LocalSpaceTradersRespose
+from ..utils import try_execute_select, try_execute_upsert, waypoint_to_system
 
 
 def _upsert_jump_gate(jump_gate: JumpGate, connection):
@@ -29,9 +29,9 @@ def _upsert_jump_gate(jump_gate: JumpGate, connection):
             connection_sql,
             (
                 jump_gate.waypoint_symbol,
-                waypoint_slicer(jump_gate.waypoint_symbol),
+                waypoint_to_system(jump_gate.waypoint_symbol),
                 dest_waypoint,
-                waypoint_slicer(dest_waypoint),
+                waypoint_to_system(dest_waypoint),
             ),
             connection,
         )

@@ -1,5 +1,5 @@
 from ..models_misc import Agent
-from ..local_response import LocalSpaceTradersRespose
+from ..resp_local_resp import LocalSpaceTradersRespose
 import logging
 import datetime
 
