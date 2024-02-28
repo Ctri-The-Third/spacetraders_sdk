@@ -911,10 +911,10 @@ ALTER VIEW public.market_supply_changes_and_market_movements OWNER TO spacetrade
 -- Name: market_tradegood; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
-CREATE TABLE public.market_tradegood (
-    market_waypoint text NOT NULL,
-    symbol text NOT NULL,
-    buy_or_sell text,
+CREATE TABLE public.market_tradegoods (
+    market_symbol text NOT NULL,
+    trade_symbol text NOT NULL,
+    type text,
     name text,
     description text,
     market_symbol text,

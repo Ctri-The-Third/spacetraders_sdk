@@ -29,7 +29,7 @@ ON CONFLICT (symbol) DO NOTHING;"""
             (
                 market.symbol,
                 trade_good.symbol,
-                "sell",
+                "EXPORT",
                 trade_good.name,
                 trade_good.description,
             ),
@@ -43,7 +43,7 @@ ON CONFLICT (symbol) DO NOTHING;"""
             (
                 market.symbol,
                 trade_good.symbol,
-                "buy",
+                "IMPORT",
                 trade_good.name,
                 trade_good.description,
             ),
@@ -57,7 +57,7 @@ ON CONFLICT (symbol) DO NOTHING;"""
             (
                 market.symbol,
                 trade_good.symbol,
-                "exchange",
+                "EXCHANGE",
                 trade_good.name,
                 trade_good.description,
             ),

@@ -879,7 +879,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         if resp:
             ship.update(resp.data)
             self.db_client.update(ship)
-        return
+        return resp
 
     def ship_patch_nav(self, ship: "Ship", flight_mode: str):
         """my/ships/:shipSymbol/course"""
