@@ -64,8 +64,9 @@ CREATE TABLE public.logging (
     new_credits integer,
     status_code integer,
     error_code integer,
-    event_params jsonb,
-    duration_seconds numeric
+    duration_seconds numeric,
+    event_priority numeric,
+    event_params jsonb
 );
 
 
