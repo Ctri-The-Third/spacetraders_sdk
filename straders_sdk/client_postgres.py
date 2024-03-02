@@ -596,7 +596,6 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
         """/game/systems/{symbol}/marketplace"""
         try:
             sql = """SELECT mt.trade_symbol, mt.name, mt.description, mt.type FROM market_tradegoods mt where mt.market_symbol =  %s"""
-
             rows = try_execute_select(sql, (wp.symbol,), self.connection)
             if not rows:
                 return LocalSpaceTradersRespose(
@@ -613,7 +612,7 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
                             where market_symbol = %s"""
             rows = try_execute_select(listings_sql, (wp.symbol,), self.connection)
             listings = [MarketTradeGoodListing(*row) for row in rows]
-            return Market(wp.symbol, imports, exports, exchanges, listings)
+            return Market(wp.symbol, exports, imports, exchanges, listings)
         except Exception as err:
             return LocalSpaceTradersRespose(
                 f"Could not find market data for that waypoint - {err}", 0, 0, sql

@@ -916,41 +916,17 @@ CREATE TABLE public.market_tradegoods (
     trade_symbol text NOT NULL,
     type text,
     name text,
-    description text,
-    market_symbol text,
-    trade_symbol text,
-    "type " text
+    description text
 );
 
 
-ALTER TABLE public.market_tradegood OWNER TO spacetraders;
+ALTER TABLE public.market_tradegoods OWNER TO spacetraders;
 
 --
 -- TOC entry 244 (class 1259 OID 16531)
 -- Name: market_tradegoods; Type: VIEW; Schema: public; Owner: spacetraders
 --
 
-CREATE VIEW public.market_tradegoods AS
- WITH buy_or_sell_vs(buy_or_sell, type) AS (
-         VALUES ('sell'::text,'EXPORT'::text), ('buy'::text,'IMPORT'::text), ('exchange'::text,'EXCHANGE'::text)
-        ), market_tradegoods AS (
-         SELECT mt.market_waypoint AS market_symbol,
-            COALESCE(mt.trade_symbol, mt.symbol) AS trade_symbol,
-            COALESCE(bs.type, bs.type) AS type,
-            mt.name,
-            mt.description
-           FROM (public.market_tradegood mt
-             JOIN buy_or_sell_vs bs ON ((mt.buy_or_sell = bs.buy_or_sell)))
-        )
- SELECT market_symbol,
-    trade_symbol,
-    type,
-    name,
-    description
-   FROM market_tradegoods;
-
-
-ALTER VIEW public.market_tradegoods OWNER TO spacetraders;
 
 --
 -- TOC entry 245 (class 1259 OID 16536)
@@ -1658,10 +1634,10 @@ CREATE VIEW public.mkt_shpyrds_systems_to_visit_first AS
          SELECT DISTINCT w.system_symbol,
             mtl.last_updated,
             (mtl.last_updated IS NOT NULL) AS visited
-           FROM ((public.market_tradegood mt
-             LEFT JOIN public.market_tradegood_listings mtl ON (((mt.market_waypoint = mtl.market_symbol) AND (mt.symbol = mtl.trade_symbol))))
-             JOIN public.waypoints w ON ((mt.market_waypoint = w.waypoint_symbol)))
-          WHERE (((mt.symbol = ANY (ARRAY['IRON'::text, 'IRON_ORE'::text, 'COPPER'::text, 'COPPER_ORE'::text, 'ALUMINUM'::text, 'ALUMINUM_ORE'::text, 'SILVER'::text, 'SILVER_ORE'::text, 'GOLD'::text, 'GOLD_ORE'::text, 'PLATINUM'::text, 'PLATINUM_ORE'::text, 'URANITE'::text, 'URANITE_ORE'::text, 'MERITIUM'::text, 'MERITIUM_ORE'::text])) AND (mtl.last_updated IS NULL)) OR (mtl.last_updated <= (timezone('utc'::text, now()) - '1 day'::interval)))
+           FROM ((public.market_tradegoods mt
+             LEFT JOIN public.market_tradegood_listings mtl ON (((mt.market_symbol = mtl.market_symbol) AND (mt.trade_symbol = mtl.trade_symbol))))
+             JOIN public.waypoints w ON ((mt.market_symbol = w.waypoint_symbol)))
+          WHERE (((mt.trade_symbol = ANY (ARRAY['IRON'::text, 'IRON_ORE'::text, 'COPPER'::text, 'COPPER_ORE'::text, 'ALUMINUM'::text, 'ALUMINUM_ORE'::text, 'SILVER'::text, 'SILVER_ORE'::text, 'GOLD'::text, 'GOLD_ORE'::text, 'PLATINUM'::text, 'PLATINUM_ORE'::text, 'URANITE'::text, 'URANITE_ORE'::text, 'MERITIUM'::text, 'MERITIUM_ORE'::text])) AND (mtl.last_updated IS NULL)) OR (mtl.last_updated <= (timezone('utc'::text, now()) - '1 day'::interval)))
           ORDER BY (mtl.last_updated IS NOT NULL), mtl.last_updated
         )
  SELECT us.system_symbol
@@ -1718,7 +1694,7 @@ CREATE VIEW public.mkt_shpyrds_waypoints_scanned AS
              JOIN public.waypoints w2 ON (((w1.system_symbol = w2.system_symbol) AND (w1.waypoint_symbol <> w2.waypoint_symbol))))
              JOIN public.jump_gates jg ON ((jg.waypoint_symbol = w2.waypoint_symbol)))
              LEFT JOIN public.shipyard_types st ON ((st.shipyard_symbol = w1.waypoint_symbol)))
-             LEFT JOIN public.market_tradegood mt ON ((mt.market_waypoint = w1.waypoint_symbol)))
+             LEFT JOIN public.market_tradegoods mt ON ((mt.market_symbol = w1.waypoint_symbol)))
           WHERE (wt.trait_symbol = ANY (ARRAY['MARKETPLACE'::text, 'SHIPYARD'::text]))
           GROUP BY wt.waypoint_symbol, wt.trait_symbol
         )
@@ -2796,8 +2772,8 @@ ALTER TABLE ONLY public.market
 -- Name: market_tradegood market_tradegood_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
-ALTER TABLE ONLY public.market_tradegood
-    ADD CONSTRAINT market_tradegood_pkey PRIMARY KEY (market_waypoint, symbol);
+ALTER TABLE ONLY public.market_tradegoods
+    ADD CONSTRAINT market_tradegood_pkey PRIMARY KEY (market_symbol, trade_symbol);
 
 
 --
@@ -3043,4 +3019,5 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 --
 -- PostgreSQL database dump complete
 --
+
 

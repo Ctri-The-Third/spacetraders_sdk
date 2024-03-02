@@ -17,10 +17,10 @@ ON CONFLICT (symbol) DO NOTHING;"""
     resp = try_execute_upsert(sql, (market.symbol, system_symbol), connection)
     if not resp:
         return resp
-    sql = """INSERT INTO public.market_tradegood(
-        market_waypoint, symbol, buy_or_sell, name, description)
+    sql = """INSERT INTO public.market_tradegoods(
+        market_symbol, trade_symbol, type, name, description)
             VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT (market_waypoint, symbol) DO NOTHING"""
+            ON CONFLICT (market_symbol, trade_symbol) DO NOTHING"""
     if not resp:
         return resp
     for trade_good in market.exports:

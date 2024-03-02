@@ -1152,6 +1152,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         if resp:
             self.update(resp.data)
             ship.update(resp.data)
+            self.update(ship)
         return resp
 
     def ship_survey(self, ship: "Ship") -> list[Survey] or SpaceTradersResponse:
