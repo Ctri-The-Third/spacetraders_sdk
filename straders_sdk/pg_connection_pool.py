@@ -47,6 +47,7 @@ class PGConnectionPool:
             return self._connections
 
     def get_connection(self):
+        self.logger.debug("Attempting to get a connection from the pool")
         connection = None
         attempts = 0
         while connection == None and attempts < 20:
@@ -56,7 +57,8 @@ class PGConnectionPool:
                 self.logger.debug(
                     f"Got a connection from the pool after {attempts} attempts - {len(self.connection_pool._used)} / {self.connection_pool.maxconn}used"
                 )
-            except:
+            except Exception as err:
+                self.logger.error(f"Error getting a connection from the pool: {err}")
                 attempts += 1
                 time.sleep(1.02**attempts)
         return connection

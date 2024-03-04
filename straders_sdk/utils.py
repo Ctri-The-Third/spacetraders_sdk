@@ -281,6 +281,7 @@ def try_execute_upsert(sql="", params=(), connection=None) -> LocalSpaceTradersR
     except Exception as err:
         logging.error("Couldn't execute upsert: %s", err)
         logging.debug("SQL: %s", sql)
+        connection.rollback()
         return LocalSpaceTradersRespose(
             error=err, status_code=0, error_code=0, url=f"{__name__}.try_execute_upsert"
         )
@@ -313,6 +314,7 @@ def try_execute_select(sql="", params=(), connection=None) -> list:
             logging.error("Couldn't execute select - attempting again: %s", err)
 
             logging.debug("SQL: %s", sql)
+            connection.rollback()
             resp = LocalSpaceTradersRespose(
                 error=err,
                 status_code=0,
