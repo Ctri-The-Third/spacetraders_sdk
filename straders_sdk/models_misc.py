@@ -776,17 +776,20 @@ class Market:
                 return True
         return False
 
-    def get_tradegood(self, symbol) -> MarketTradeGoodListing:
+    def get_tradegood(self, symbol) -> MarketTradeGood:
+        for export in self.exports:
+            if export.symbol == symbol:
+                return export
+        for import_ in self.imports:
+            if import_.symbol == symbol:
+                return import_
+        for exchange in self.exchange:
+            if exchange.symbol == symbol:
+                return exchange
+        return None
+
+    def get_tradegood_listing(self, symbol) -> MarketTradeGoodListing:
         for listing in self.listings:
-            if listing.symbol == symbol:
-                return listing
-        for listing in self.exports:
-            if listing.symbol == symbol:
-                return listing
-        for listing in self.imports:
-            if listing.symbol == symbol:
-                return listing
-        for listing in self.exchange:
             if listing.symbol == symbol:
                 return listing
 
