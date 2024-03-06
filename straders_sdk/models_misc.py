@@ -350,7 +350,7 @@ class Waypoint:
     type: str
     x: int
     y: int
-    oribtals: list
+    orbitals: list
     traits: list[WaypointTrait]
     chart: dict
     faction: dict
@@ -364,6 +364,7 @@ class Waypoint:
         type,
         x,
         y,
+        orbits=None,
         orbitals=None,
         traits=None,
         chart=None,
@@ -376,12 +377,17 @@ class Waypoint:
         self.type = type
         self.x = x
         self.y = y
-        self.oribtals = orbitals or []
+        self.orbits = orbits or ""
+        self.orbitals = orbitals or []
         self.traits = traits or []
         self.chart = chart or {}
         self.faction = faction or {}
         self.modifiers = modifiers or []
         self.under_construction = under_construction or False
+
+    @property
+    def orbital_symbols(self):
+        return [o["symbol"] for o in self.orbitals]
 
     @classmethod
     def from_json(cls, json_data: dict):
@@ -403,6 +409,7 @@ class Waypoint:
             json_data["type"],
             json_data["x"],
             json_data["y"],
+            json_data.get("orbits", ""),
             json_data["orbitals"],
             json_data["traits"],
             json_data["chart"],
@@ -424,14 +431,11 @@ class Waypoint:
             "type": self.type,
             "x": self.x,
             "y": self.y,
-            "orbitals": [],
+            "orbitals": [{"symbol": o["symbol"]} for o in self.orbitals],
             "traits": [t.to_json() for t in self.traits],
             "chart": {},
             "faction": {},
         }
-
-    def __dict__(self):
-        return self.to_json()
 
     def __repr__(self) -> str:
         return f"Waypoint({self.symbol}, X={self.x}, Y={self.y})"

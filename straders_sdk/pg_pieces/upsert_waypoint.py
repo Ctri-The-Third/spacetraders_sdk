@@ -11,13 +11,13 @@ def _upsert_waypoint(waypoint: Waypoint, connection):
     )  # a system waypoint will not return any traits. Even if it's uncharted, we've checked it.
     # a waypoint with exactly zero traits that has been checked is a jump gate, and will have a chart
     # if it'snot been charted, then it's UNCHARTED and the first condition gets it.
-    sql = """INSERT INTO waypoints (waypoint_symbol, type, system_symbol, x, y, modifiers, under_construction, checked)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    sql = """INSERT INTO waypoints (waypoint_symbol, type, system_symbol, x, y, parent_symbol, orbital_symbols, modifiers, under_construction, checked)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (waypoint_symbol) DO UPDATE
                     SET checked = EXCLUDED.checked
                 , modifiers = EXCLUDED.modifiers
                 , under_construction = EXCLUDED.under_construction"""
-    try_execute_upsert(
+    resp = try_execute_upsert(
         sql,
         (
             waypoint.symbol,
@@ -25,6 +25,8 @@ def _upsert_waypoint(waypoint: Waypoint, connection):
             waypoint.system_symbol,
             waypoint.x,
             waypoint.y,
+            waypoint.orbits,
+            [w["symbol"] for w in waypoint.orbitals],
             waypoint.modifiers,
             waypoint.under_construction,
             checked,

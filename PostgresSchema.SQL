@@ -438,6 +438,8 @@ CREATE TABLE public.waypoints (
     system_symbol text NOT NULL,
     x smallint NOT NULL,
     y smallint NOT NULL,
+    parent_symbol text COLLATE pg_catalog."default",
+    orbital_symbols text[] COLLATE pg_catalog."default",
     checked boolean DEFAULT false NOT NULL,
     modifiers text[],
     under_construction boolean DEFAULT false NOT NULL

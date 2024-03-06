@@ -154,6 +154,8 @@ def test_waypoint(waypoint_response_data):
     assert wp
     assert "STRIPPED" in wp.modifiers
     assert wp.under_construction
+    for orbital in wp.orbitals:
+        assert orbital["symbol"] in wp.orbital_symbols
 
 
 def test_waypoints(waypoint_response_data):

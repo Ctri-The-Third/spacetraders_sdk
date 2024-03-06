@@ -25,11 +25,14 @@ def test_save_waypoint(waypoint_response_data):
 def test_waypoints_view_one(waypoint_response_data):
     client = SpaceTradersJSONClient(FOLDER)
     check_wp = Waypoint.from_json(waypoint_response_data)
+    client.update(check_wp)
     wp = client.waypoints_view_one("DOESNOTEXIST")
     assert not wp
 
     wp = client.waypoints_view_one(check_wp.symbol)
+
     assert wp.symbol == check_wp.symbol
+    assert len(wp.orbital_symbols) > 0
 
 
 def test_save_system(system_response_data):

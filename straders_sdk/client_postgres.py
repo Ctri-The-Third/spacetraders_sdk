@@ -234,7 +234,9 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
 
         Returns:
             Either a Waypoint object or a SpaceTradersResponse object on failure."""
-        sql = """SELECT * FROM waypoints WHERE waypoint_symbol = %s LIMIT 1;"""
+        sql = """SELECT waypoint_symbol, type, system_symbol, x, y --0-4
+         , checked, modifiers, under_construction, parent_symbol, orbital_symbols --5-9
+FROM waypoints WHERE waypoint_symbol = %s LIMIT 1;"""
         rows = try_execute_select(sql, (waypoint_symbol,), self.connection)
         waypoints = []
 
@@ -246,6 +248,13 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
                 new_sql, (waypoint_symbol,), self.connection
             )
             traits = []
+            chart_sql = """select waypoint_symbol, submitted_by, submitted_on from waypoint_charts
+where waypoint_symbol = %s"""
+            chart_rows = try_execute_select(
+                chart_sql, (waypoint_symbol,), self.connection
+            )
+            orbitals = [{"symbol": o} for o in row[9]]
+            chart = {"submittedBy": chart_rows[0][1], "submittedOn": chart_rows[0][2]}
             for trait_row in trait_rows:
                 traits.append(WaypointTrait(trait_row[1], trait_row[2], trait_row[3]))
             waypoint = Waypoint(
@@ -254,10 +263,11 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
                 row[1],
                 row[3],
                 row[4],
-                [],
+                row[8],
+                orbitals,
                 traits,
-                {},
-                {},
+                chart,
+                None,
                 row[6],
                 row[7],
             )

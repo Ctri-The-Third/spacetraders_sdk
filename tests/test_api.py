@@ -75,6 +75,7 @@ def test_waypoint():
     wp = client.waypoints_view_one(
         "OE-PM",
     )
+    assert len(wp.orbital_symbols) > 0
 
     assert wp
 
