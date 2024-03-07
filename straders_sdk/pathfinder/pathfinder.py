@@ -288,12 +288,12 @@ left join waypoint_Traits wt on wt.waypoint_symbol = w.waypoint_symbol and wt.tr
  from waypoints w1 
  join waypoints w2 on w1.waypoint_symbol != w2.waypoint_symbol 
  and w1.system_symbol = w2.system_Symbol 
- left join market_tradegood mt on mt.market_waypoint = w2.waypoint_symbol
+ left join market_tradegoods mt on mt.market_symbol = w2.waypoint_symbol
  left join waypoint_traits wt on wt.waypoint_Symbol = w2.waypoint_symbol
 where  
 w1.system_symbol = %s 
 and w2.system_symbol = %s
-and (mt.symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
+and (mt.trade_symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
 
 """
         results = try_execute_select(edge_sql, (system_s, system_s), self.connection)
