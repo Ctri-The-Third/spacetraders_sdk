@@ -268,11 +268,8 @@ left join waypoint_Traits wt on wt.waypoint_symbol = w.waypoint_symbol and wt.tr
                 result[1],
                 result[2],
                 result[4],
-                t if result[3] else [],
-                {},
-                {},
-                [],
-                result[5],
+                traits=t if result[3] else [],
+                under_construction=result[5],
             )
             wayps[result[0]] = wayp
 
@@ -517,11 +514,16 @@ and (mt.trade_symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
             cached_route = self.load_system_nav(start, goal, fuel_capacity)
             if cached_route:
                 return cached_route
-        if not graph:
+        if not graph and not force_recalc:
             graph = self.load_graph_from_file(
                 f"resources/systemgraph-{system}({fuel_capacity}).json"
             )
-        if not graph or force_recalc == True:
+        if (
+            not graph
+            or force_recalc == True
+            or start.symbol not in graph.nodes
+            or goal.symbol not in graph.nodes
+        ):
             graph = self.load_system_graph_from_db(system, fuel_capacity)
 
             self.save_graph(
@@ -532,6 +534,11 @@ and (mt.trade_symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
         if start == goal:
             return compile_route(start, goal, [goal])
         if not graph:
+            return None
+
+        if start.symbol not in graph.nodes:
+            return None
+        if goal.symbol not in graph.nodes:
             return None
 
         # f"{destination_folder}{self.start_waypoint.symbol}-{self.end_waypoint.symbol}[{self.max_fuel}].json",
@@ -612,6 +619,9 @@ and (mt.trade_symbol = 'FUEL' or wt.trait_symbol = 'MARKETPLACE')
 
                     came_from[neighbour.symbol] = current.symbol
                     g_score[neighbour.symbol] = tentative_global_score
+
+                    # g_score is the travel time to the location so far
+                    # f_score is the remaining direct-travel time from the current location to the destination - so lowest f_score should represent the nearest
                     f_score = tentative_global_score + self.h(
                         neighbour, goal, fuel_capacity
                     )  # total weight + weight

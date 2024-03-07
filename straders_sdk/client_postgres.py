@@ -185,7 +185,9 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
             Either a dict of Waypoint objects or a SpaceTradersResponse object on failure.
         """
 
-        sql = """SELECT * FROM waypoints w 
+        sql = """SELECT w.waypoint_symbol, type, system_symbol, x, y --0-4
+         , checked, modifiers, under_construction, parent_symbol, orbital_symbols --5-9 
+        FROM waypoints w 
         left join waypoint_charts wc on w.waypoint_symbol = wc.waypoint_symbol 
          
            WHERE system_symbol = %s"""
@@ -206,18 +208,21 @@ class SpaceTradersPostgresClient(SpaceTradersClient):
                 "submittedBy": row[7],
                 "submittedOn": row[8],
             }
+            #            orbitals = [{"symbol": o} for o in row[9] or []]
+
+            orbitals = [{"symbol": o} for o in row[9] or []]
+
             waypoint = Waypoint(
                 row[2],
                 row[0],
                 row[1],
                 row[3],
                 row[4],
-                [],
-                traits,
-                {},
-                {},
-                row[6],
-                row[7],
+                orbitals=orbitals,
+                traits=traits,
+                chart=chart,
+                modifiers=row[6],
+                under_construction=row[7],
             )
             waypoints[waypoint.symbol] = waypoint
         return waypoints
@@ -253,8 +258,15 @@ where waypoint_symbol = %s"""
             chart_rows = try_execute_select(
                 chart_sql, (waypoint_symbol,), self.connection
             )
-            orbitals = [{"symbol": o} for o in row[9]]
-            chart = {"submittedBy": chart_rows[0][1], "submittedOn": chart_rows[0][2]}
+            if chart_rows:
+                chart = {
+                    "submittedBy": chart_rows[0][1],
+                    "submittedOn": chart_rows[0][2],
+                }
+            else:
+                chart = {}
+            orbitals = [{"symbol": o} for o in row[9] or []]
+
             for trait_row in trait_rows:
                 traits.append(WaypointTrait(trait_row[1], trait_row[2], trait_row[3]))
             waypoint = Waypoint(
@@ -263,13 +275,11 @@ where waypoint_symbol = %s"""
                 row[1],
                 row[3],
                 row[4],
-                row[8],
-                orbitals,
-                traits,
-                chart,
-                None,
-                row[6],
-                row[7],
+                orbitals=orbitals,
+                traits=traits,
+                chart=chart,
+                modifiers=row[6],
+                under_construction=row[7],
             )
             waypoints.append(waypoint)
 
