@@ -7,10 +7,12 @@ from ..utils import try_execute_upsert
 def _upsert_shipyard(shipyard: Shipyard, connection):
     if len(shipyard.ships) > 0:
         sql = """INSERT INTO public.shipyard_types(
-        shipyard_symbol, ship_type, ship_cost, last_updated)
-        VALUES (%s, %s, %s, now() at time zone 'utc')
+        shipyard_symbol, ship_type, ship_cost, supply, activity, last_updated)
+        VALUES (%s, %s, %s, %s, %s, now() at time zone 'utc')
         ON CONFLICT (shipyard_symbol, ship_type) DO UPDATE
         SET ship_cost = EXCLUDED.ship_cost,
+        supply = EXCLUDED.supply,
+        activity = EXCLUDED.activity,
         last_updated = now() at time zone 'utc';"""
         for ship_type in shipyard.ship_types:
             ship_cost = None
@@ -18,7 +20,15 @@ def _upsert_shipyard(shipyard: Shipyard, connection):
             if ship_details:
                 ship_cost = ship_details.purchase_price
             resp = try_execute_upsert(
-                sql, (shipyard.waypoint, ship_type, ship_cost), connection
+                sql,
+                (
+                    shipyard.waypoint,
+                    ship_type,
+                    ship_cost,
+                    ship_details.supply,
+                    ship_details.activity,
+                ),
+                connection,
             )
             if not resp:
                 return resp

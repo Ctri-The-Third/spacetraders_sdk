@@ -1,6 +1,7 @@
 from straders_sdk.client_api import SpaceTradersApiClient
 from straders_sdk.models import Ship
 from straders_sdk.models_misc import ShipMount
+import straders_sdk.models as st_models
 from straders_sdk.utils import ApiConfig
 
 BASE_URL = "https://stoplight.io"
@@ -105,7 +106,7 @@ def test_move():
     ship = Ship()
     ship.name = "test"
     wp = client.waypoints_view_one("OE-PM")
-    resp = client.ship_move(ship, wp)
+    resp = client.ship_move(ship, wp.symbol)
 
     assert resp
 
@@ -115,7 +116,7 @@ def test_warp():
     ship = Ship()
     ship.name = "test"
     wp = client.waypoints_view_one("OE-PM")
-    resp = client.ship_warp(ship, wp)
+    resp = client.ship_warp(ship, wp.symbol)
 
     assert resp
 
@@ -128,3 +129,22 @@ def test_chart():
     resp = client.ship_create_chart(ship)
 
     assert resp
+
+
+def test_shipyard():
+    client = SpaceTradersApiClient("token", BASE_URL, VERSION)
+    ship = Ship()
+    ship.name = "test"
+    wayp = client.waypoints_view_one("OE-PM")
+    resp = client.system_shipyard(wayp)
+
+    assert resp
+    assert isinstance(resp, st_models.Shipyard)
+    assert len(resp.ships) > 0
+    assert isinstance(resp.ships["SHIP_PROBE"], st_models.ShipyardShip)
+
+    probe = resp.ships["SHIP_PROBE"]
+    probe_json = probe.to_json()
+    assert "activity" in probe_json
+    assert probe_json["activity"] is not None
+    assert probe_json

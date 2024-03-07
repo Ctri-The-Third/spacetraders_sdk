@@ -1569,6 +1569,8 @@ CREATE TABLE public.shipyard_types (
     shipyard_symbol text NOT NULL,
     ship_type text NOT NULL,
     ship_cost integer,
+    supply text,
+    activity text,
     last_updated timestamp without time zone
 );
 

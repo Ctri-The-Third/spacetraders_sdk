@@ -3,6 +3,7 @@ from straders_sdk.client_postgres import SpaceTradersPostgresClient
 from straders_sdk.utils import try_execute_select
 from straders_sdk.models_misc import Waypoint, Market, System
 from straders_sdk.models_misc import JumpGate, JumpGateConnection
+import straders_sdk.models as st_models
 from straders_sdk.models_misc import ConstructionSite, ConstructionSiteMaterial
 import pytest
 import psycopg2
@@ -193,6 +194,19 @@ def test_constructionn_site(construction_response_data, waypoint_response_data):
 
     loaded_construction_site = client.system_construction(test_waypoint)
     assert test_construction_site
+
+
+def test_shipyard(waypoint_response_data, shipyard_response_data):
+    client = SpaceTradersPostgresClient(
+        ST_HOST, ST_NAME, ST_USER, ST_PASS, TEST_AGENT_NAME, db_port=ST_PORT
+    )
+    test_waypoint = st_models.Waypoint.from_json(waypoint_response_data)
+    test_shipyard = st_models.Shipyard.from_json(shipyard_response_data)
+    client.update(test_shipyard)
+    loaded_shipyard = client.system_shipyard(test_waypoint)
+    for ship_type, ship in loaded_shipyard.ships.items():
+        assert ship.supply
+    assert loaded_shipyard
 
 
 @pytest.fixture
@@ -1096,4 +1110,49 @@ def system_response_data():
             },
         ],
         "factions": [],
+    }
+
+
+@pytest.fixture
+def shipyard_response_data():
+    return {
+        "symbol": "X1-TEST-A1",
+        "shipTypes": [{"type": "SHIP_PROBE"}],
+        "transactions": [],
+        "ships": [
+            {
+                "type": "SHIP_PROBE",
+                "name": "Probe Satellite",
+                "description": "A small, unmanned spacecraft that can be launched into orbit to gather data and perform basic tasks.",
+                "supply": "HIGH",
+                "purchasePrice": 20848,
+                "frame": {
+                    "symbol": "FRAME_PROBE",
+                    "name": "Probe",
+                    "description": "A small, unmanned spacecraft used for exploration, reconnaissance, and scientific research.",
+                    "moduleSlots": 0,
+                    "mountingPoints": 0,
+                    "fuelCapacity": 0,
+                    "requirements": {"power": 1, "crew": 0},
+                },
+                "reactor": {
+                    "symbol": "REACTOR_SOLAR_I",
+                    "name": "Solar Reactor I",
+                    "description": "A basic solar power reactor, used to generate electricity from solar energy.",
+                    "powerOutput": 3,
+                    "requirements": {"crew": 0},
+                },
+                "engine": {
+                    "symbol": "ENGINE_IMPULSE_DRIVE_I",
+                    "name": "Impulse Drive I",
+                    "description": "A basic low-energy propulsion system that generates thrust for interplanetary travel.",
+                    "speed": 3,
+                    "requirements": {"power": 1, "crew": 0},
+                },
+                "modules": [],
+                "mounts": [],
+                "crew": {"required": 0, "capacity": 0},
+            }
+        ],
+        "modificationsFee": 100,
     }

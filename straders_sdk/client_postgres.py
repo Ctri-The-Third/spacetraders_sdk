@@ -668,7 +668,7 @@ where waypoint_symbol = %s"""
         Returns:
             Either a list of ship types (symbols for purchase) or a SpaceTradersResponse object on failure.
         """
-        sql = """SELECT ship_type, ship_cost  FROM shipyard_types where shipyard_symbol = %s"""
+        sql = """SELECT ship_type, ship_cost, supply, activity FROM shipyard_types where shipyard_symbol = %s"""
         rows = try_execute_select(sql, (wp.symbol,), self.connection)
         if not rows:
             return rows
@@ -676,7 +676,17 @@ where waypoint_symbol = %s"""
             types = [row[0] for row in rows]
             ships = {
                 row[0]: ShipyardShip(
-                    None, None, None, row[0], None, row[0], row[1], [], []
+                    None,
+                    None,
+                    None,
+                    row[0],
+                    None,
+                    row[0],
+                    row[1],
+                    [],
+                    [],
+                    row[2],
+                    row[3],
                 )
                 for row in rows
             }

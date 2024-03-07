@@ -64,6 +64,13 @@ class ShipRequirements:
     def from_json(cls, json_data: dict):
         return cls(*json_data.values())
 
+    def to_json(self) -> dict:
+        return {
+            "crew": self.crew,
+            "slots": self.module_slots,
+            "power": self.power,
+        }
+
 
 @dataclass
 class ShipFrame(SymbolClass):
@@ -90,6 +97,18 @@ class ShipFrame(SymbolClass):
             ShipRequirements.from_json(json_data.get("requirements", {})),
         )
 
+    def to_json(self) -> dict:
+        return {
+            "symbol": self.symbol,
+            "name": self.name,
+            "description": self.description,
+            "moduleSlots": self.module_slots,
+            "mountingPoints": self.mounting_points,
+            "fuelCapacity": self.fuel_capacity,
+            "condition": self.condition,
+            "requirements": self.requirements.to_json(),
+        }
+
 
 class ShipModule:
     symbol: str
@@ -113,6 +132,16 @@ class ShipModule:
     def from_json(cls, json_data: dict):
         return cls(json_data)
 
+    def to_json(self) -> dict:
+        return {
+            "symbol": self.symbol,
+            "capacity": self.capacity,
+            "range": self.range,
+            "name": self.name,
+            "description": self.description,
+            "requirements": self.requirements.to_json(),
+        }
+
 
 @dataclass
 class Deposit:
@@ -125,7 +154,7 @@ class ShipMount:
     description: str
     strength: int
     deposits: list[Deposit]
-    requirements: dict
+    requirements: ShipRequirements
 
     def __init__(self, json_data: dict) -> None:
         self.symbol = json_data["symbol"]
@@ -142,6 +171,16 @@ class ShipMount:
     @classmethod
     def from_json(cls, json_data: dict):
         return cls(json_data)
+
+    def to_json(self) -> dict:
+        return {
+            "symbol": self.symbol,
+            "name": self.name,
+            "description": self.description,
+            "strength": self.strength,
+            "deposits": [d.symbol for d in self.deposits],
+            "requirements": self.requirements.to_json(),
+        }
 
 
 @dataclass
@@ -165,6 +204,16 @@ class ShipReactor(SymbolClass):
             ShipRequirements.from_json(json_data.get("requirements", {})),
         )
 
+    def to_json(self):
+        return {
+            "symbol": self.symbol,
+            "name": self.name,
+            "description": self.description,
+            "condition": self.condition,
+            "powerOutput": self.power_output,
+            "requirements": self.requirements.to_json(),
+        }
+
 
 @dataclass
 class ShipEngine(SymbolClass):
@@ -185,6 +234,16 @@ class ShipEngine(SymbolClass):
             json_data.get("speed", ""),
             ShipRequirements.from_json(json_data.get("requirements", {})),
         )
+
+    def to_json(self):
+        return {
+            "symbol": self.symbol,
+            "name": self.name,
+            "description": self.description,
+            "condition": self.condition,
+            "speed": self.speed,
+            "requirements": self.requirements.to_json(),
+        }
 
 
 ## this should/could be a waypoint.
@@ -626,6 +685,8 @@ class ShipyardShip:
         purchase_price,
         modules,
         mounts,
+        supply: str,
+        activity: str,
     ):
         self.frame = frame
         self.reactor = reactor
@@ -634,8 +695,11 @@ class ShipyardShip:
         self.description = description
         self.ship_type = ship_type
         self.purchase_price = purchase_price
+
         self.modules = modules
         self.mounts = mounts
+        self.supply = supply
+        self.activity = activity
 
     @classmethod
     def from_json(cls, json_data: dict):
@@ -659,7 +723,24 @@ class ShipyardShip:
             purchase_price,
             modules,
             mounts,
+            json_data["supply"],
+            json_data.get("activity", None),
         )
+
+    def to_json(self) -> dict:
+        return {
+            "frame": self.frame.to_json(),
+            "reactor": self.reactor.to_json(),
+            "engine": self.engine.to_json(),
+            "name": self.name,
+            "description": self.description,
+            "type": self.ship_type,
+            "supply": self.supply,
+            "activity": self.activity,
+            "purchasePrice": self.purchase_price,
+            "modules": [m.to_json() for m in self.modules],
+            "mounts": [m.to_json() for m in self.mounts],
+        }
 
 
 @dataclass
@@ -677,6 +758,13 @@ class Shipyard:
         }
 
         return cls(json_data["symbol"], types, ships)
+
+    def to_json(self) -> dict:
+        return {
+            "symbol": self.waypoint,
+            "shipTypes": self.ship_types,
+            "ships": {k: v.to_json() for k, v in self.ships.items()},
+        }
 
 
 class RateLimitDetails:
