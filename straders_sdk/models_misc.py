@@ -642,9 +642,6 @@ class System(SymbolClass):
             return self.symbol != o.symbol
         return False
 
-    def __dict__(self) -> dict:
-        return self.to_json()
-
     def __repr__(self) -> str:
         return f"System({self.symbol}, X={self.x}, Y={self.y})"
 
@@ -728,16 +725,20 @@ class ShipyardShip:
         )
 
     def to_json(self) -> dict:
+
+        frame = self.frame.to_json() if self.frame else {}
+        reactor = self.reactor.to_json() if self.reactor else {}
+        engine = self.engine.to_json() if self.engine else {}
         return {
-            "frame": self.frame.to_json(),
-            "reactor": self.reactor.to_json(),
-            "engine": self.engine.to_json(),
+            "frame": frame,
+            "reactor": reactor,
+            "engine": engine,
             "name": self.name,
             "description": self.description,
             "type": self.ship_type,
             "supply": self.supply,
             "activity": self.activity,
-            "purchasePrice": self.purchase_price,
+            "purchasePrice": self.purchase_price or "Unknown",
             "modules": [m.to_json() for m in self.modules],
             "mounts": [m.to_json() for m in self.mounts],
         }
