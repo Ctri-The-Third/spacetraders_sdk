@@ -193,3 +193,24 @@ delete from ship_cargo where ship_symbol = %s and trade_symbol not in %s;"""
     return resp
     # not implemented yet
     pass
+
+
+# (transaction: dict, session_id: str, connection):
+def _upsert_damage_event(transaction: dict, ship_symbol: str, connection):
+    # INSERT INTO public.ship_damage_events(
+    # event_timestamp, ship_symbol, event_symbol, affected_component, name, description)
+    # VALUES (?, ?, ?, ?, ?, ?);
+    sql = """INSERT INTO ship_damage_events
+    (event_timestamp, ship_symbol, event_symbol, affected_component, name, description)
+    VALUES (%s, %s, %s, %s, %s, %s)
+    ON CONFLICT (event_symbol) do nothing;"""
+    values = (
+        datetime.datetime.now(),
+        ship_symbol,
+        transaction["symbol"],
+        transaction["component"],
+        transaction["name"],
+        transaction["description"],
+    )
+    resp = try_execute_upsert(sql, values, connection)
+    return resp

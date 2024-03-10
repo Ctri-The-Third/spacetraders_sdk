@@ -6,6 +6,7 @@ import straders_sdk.utils as utils
 from .responses import SpaceTradersResponse
 from .pg_pieces.transactions import _upsert_transaction
 from .pg_pieces.extractions import _upsert_extraction
+from .pg_pieces.upsert_ship import _upsert_damage_event
 from straders_sdk.utils import (
     try_execute_select,
     try_execute_upsert,
@@ -390,6 +391,8 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             event_params,
             duration_seconds=duration,
         )
+        if response and "event" in response.data:
+            _upsert_damage_event(response.data["event"], ship.name, self.connection)
 
     def ship_create_chart(self, ship: "Ship", response=None, duration: float = None):
         """my/ships/:shipSymbol/chart"""

@@ -80,7 +80,8 @@ class ShipFrame(SymbolClass):
     module_slots: int
     mounting_points: int
     fuel_capacity: int
-    condition: int
+    condition: float
+    integrity: float
     requirements: ShipRequirements
     pass
 
@@ -93,7 +94,8 @@ class ShipFrame(SymbolClass):
             json_data.get("moduleSlots", ""),
             json_data.get("mountingPoints", ""),
             json_data.get("fuelCapacity", ""),
-            json_data.get("condition", 0),
+            json_data.get("condition", 1),
+            json_data.get("integrity", 1),
             ShipRequirements.from_json(json_data.get("requirements", {})),
         )
 
@@ -106,6 +108,7 @@ class ShipFrame(SymbolClass):
             "mountingPoints": self.mounting_points,
             "fuelCapacity": self.fuel_capacity,
             "condition": self.condition,
+            "integrity": self.integrity,
             "requirements": self.requirements.to_json(),
         }
 
@@ -905,4 +908,21 @@ class Faction:
             json_data["description"],
             json_data["headquarters"],
             json_data["isRecruiting"],
+        )
+
+
+@dataclass
+class ConditionEvent:
+    symbol: str
+    component: str
+    name: str
+    description: str
+
+    @classmethod
+    def from_json(cls, json_data: dict):
+        return cls(
+            json_data["symbol"],
+            json_data["component"],
+            json_data["name"],
+            json_data["description"],
         )

@@ -1866,7 +1866,9 @@ ALTER VIEW public.ship_cooldown OWNER TO spacetraders;
 CREATE TABLE public.ship_frame_links (
     ship_symbol text NOT NULL,
     frame_symbol text NOT NULL,
-    condition integer
+    condition numeric,
+    integrity numeric 
+
 );
 
 
