@@ -94,7 +94,7 @@ class Ship:
         self.role: str = ""
         self.faction: str = ""
         self.nav = ShipNav("", "", "", None, None, None, "", "")
-        self.frame = ShipFrame("", "", "", 0, 0, 0, 0, ShipRequirements(0, 0, 0))
+        self.frame = ShipFrame("", "", "", 0, 0, 0, 0, 0, ShipRequirements(0, 0, 0))
         self.reactor = ShipReactor("", "", "", 0, 0, ShipRequirements(0, 0, 0))
         self.engine = ShipEngine("", "", "", 0, 0, ShipRequirements(0, 0, 0))
         self.crew_capacity: int = 0

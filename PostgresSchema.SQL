@@ -1863,16 +1863,22 @@ ALTER VIEW public.ship_cooldown OWNER TO spacetraders;
 -- Name: ship_frame_links; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
-CREATE TABLE public.ship_frame_links (
-    ship_symbol text NOT NULL,
-    frame_symbol text NOT NULL,
+-- Table: public.ship_frame_links
+
+-- DROP TABLE IF EXISTS public.ship_frame_links;
+
+CREATE TABLE IF NOT EXISTS public.ship_frame_links
+(
+    ship_symbol text COLLATE pg_catalog."default" NOT NULL,
+    frame_symbol text COLLATE pg_catalog."default" NOT NULL,
     condition numeric,
-    integrity numeric 
+    integrity numeric,
+    CONSTRAINT ship_frame_links_pkey PRIMARY KEY (ship_symbol, frame_symbol)
+)
 
-);
 
-
-ALTER TABLE public.ship_frame_links OWNER TO spacetraders;
+ALTER TABLE IF EXISTS public.ship_frame_links
+    OWNER to spacetraders;
 
 --
 -- TOC entry 277 (class 1259 OID 16714)

@@ -109,6 +109,8 @@ def test_move():
     resp = client.ship_move(ship, wp.symbol)
 
     assert resp
+    events = resp.data["events"]
+    assert events
 
 
 def test_warp():

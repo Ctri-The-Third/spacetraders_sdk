@@ -150,13 +150,13 @@ def _upsert_ship_frame(ship: Ship, connection):
         return resp
 
     """INSERT INTO public.ship_frame_links(
-	ship_symbol, frame_symbol, condition)
+	ship_symbol, frame_symbol, condition, integrity)
 	VALUES (?, ?, ?);"""
     sql = """INSERT INTO ship_frame_links 
-    (ship_symbol, frame_symbol, condition)
-    VALUES (%s, %s, %s) 
-    ON CONFLICT (ship_symbol, frame_symbol) DO UPDATE set condition = %s;"""
-    values = (ship.name, ship.frame.symbol, ship.frame.condition, ship.frame.condition)
+    (ship_symbol, frame_symbol, condition, integrity)
+    VALUES (%s, %s, %s, %s) 
+    ON CONFLICT (ship_symbol, frame_symbol) DO UPDATE set condition = EXCLUDED.condition, integrity = EXCLUDED.integrity;"""
+    values = (ship.name, ship.frame.symbol, ship.frame.condition, ship.frame.integrity)
     resp = try_execute_upsert(sql, values, connection)
     return resp
 
