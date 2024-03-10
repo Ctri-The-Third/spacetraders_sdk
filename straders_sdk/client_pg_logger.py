@@ -39,7 +39,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         self._connection = connection
         self.session_id = str(uuid.uuid4())
 
-        self.current_agent_name = current_agent_symbol
+        self.current_agent_symbol = current_agent_symbol
         utils.st_log_client = self
 
     @property
@@ -80,7 +80,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
         )
 
     def set_current_agent(self, agent_symbol: str, token: str = None):
-        self.current_agent_name = agent_symbol
+        self.current_agent_symbol = agent_symbol
         self.token = token
 
     def log_ending(
@@ -115,7 +115,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             sql=sql,
             params=(
                 event_name,
-                self.current_agent_name,
+                self.current_agent_symbol,
                 ship_name,
                 self.session_id,
                 None,
@@ -135,7 +135,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             sql=sql,
             params=(
                 event_name,
-                self.current_agent_name,
+                self.current_agent_symbol,
                 ship_name,
                 self.session_id,
                 None,
@@ -185,7 +185,7 @@ class SpaceTradersPostgresLoggerClient(SpaceTradersClient):
             sql,
             (
                 event_name,
-                self.current_agent_name,
+                self.current_agent_symbol,
                 ship_name,
                 self.session_id,
                 endpoint_name,
