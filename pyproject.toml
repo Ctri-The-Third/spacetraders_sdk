@@ -1,6 +1,6 @@
 [project]
 name = "straders"
-version = "2.1.5" 
+version = "2.2.0" 
 authors = [
 {name="C'tri", email ="pythonpackages@ctri.co.uk"},
 ]

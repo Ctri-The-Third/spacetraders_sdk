@@ -200,8 +200,8 @@ def _frame_from_row(row) -> ShipFrame:
         row[18],
         row[19],
         row[20],
-        row[13],
-        row[14],
+        float(row[13]),
+        float(row[14]),
         reqiurements,
     )
 

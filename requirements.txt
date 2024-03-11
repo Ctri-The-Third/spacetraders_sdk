@@ -1,6 +1,5 @@
 pytest
 requests
-requests-ratelimiter
 networkx
 psycopg2-binary
 setuptools
