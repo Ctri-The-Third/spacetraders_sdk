@@ -12,7 +12,6 @@ from .resp_local_resp import LocalSpaceTradersRespose
 import threading
 import copy
 from requests import Session
-from requests_ratelimiter import LimiterSession
 import straders_sdk.request_consumer as rc
 from .pg_connection_pool import PGConnectionPool
 

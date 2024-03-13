@@ -29,7 +29,6 @@ from .models_misc import (
 from .models_contracts import Contract
 from .models_ship import Ship
 import logging
-from requests_ratelimiter import LimiterSession
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -45,7 +44,7 @@ class SpaceTradersApiClient(SpaceTradersClient):
         token=None,
         base_url=None,
         version=None,
-        session: LimiterSession = None,
+        session=None,
         connection=None,
         priority=5,
     ) -> None:
