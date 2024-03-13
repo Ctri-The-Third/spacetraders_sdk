@@ -281,7 +281,8 @@ def try_execute_upsert(sql="", params=(), connection=None) -> LocalSpaceTradersR
     except Exception as err:
         logging.error("Couldn't execute upsert: %s", err)
         logging.debug("SQL: %s", sql)
-        connection.rollback()
+        if not connection.closed > 0:
+            connection.rollback()
         return LocalSpaceTradersRespose(
             error=err, status_code=0, error_code=0, url=f"{__name__}.try_execute_upsert"
         )

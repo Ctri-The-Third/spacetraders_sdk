@@ -72,10 +72,15 @@ def _upsert_ship(ship: Ship, connection, owner: Agent = None):
         if not resp:
             logging.warning("Failed to upsert ship nav because %s", resp.error)
             return resp
-    if ship.dirty:
+    if ship.dirty or ship.frame_dirty:
         resp = _upsert_ship_frame(ship, connection)
         if not resp:
             logging.warning("Failed to upsert ship frame because %s", resp.error)
+            return resp
+    if ship.engine_dirty or ship.dirty:
+        resp = _upsert_ship_engine(ship, connection)
+        if not resp:
+            logging.warning("Failed to upsert ship engine because %s", resp.error)
             return resp
     if ship.cooldown_dirty:
         resp = _upsert_ship_cooldown(ship, connection)
@@ -157,6 +162,38 @@ def _upsert_ship_frame(ship: Ship, connection):
     VALUES (%s, %s, %s, %s) 
     ON CONFLICT (ship_symbol, frame_symbol) DO UPDATE set condition = EXCLUDED.condition, integrity = EXCLUDED.integrity;"""
     values = (ship.name, ship.frame.symbol, ship.frame.condition, ship.frame.integrity)
+    resp = try_execute_upsert(sql, values, connection)
+    return resp
+
+
+def _upsert_ship_engine(ship: Ship, connection):
+
+    sql = """
+    INSERT INTO ship_engines (engine_symbol, name, description, speed, required_power, required_crew, required_slots)
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    ON CONFLICT (engine_symbol) DO NOTHING;
+    """
+    values = (
+        ship.engine.symbol,
+        ship.engine.name,
+        ship.engine.description,
+        ship.engine.speed,
+        ship.engine.requirements.power,
+        ship.engine.requirements.crew,
+        ship.engine.requirements.module_slots,
+    )
+    resp = try_execute_upsert(sql, values, connection)
+
+    sql = """INSERT INTO ship_engine_links (ship_symbol, engine_symbol, condition, integrity)
+    VALUES (%s, %s, %s, %s)
+    ON CONFLICT (ship_symbol) DO UPDATE
+    SET condition = EXCLUDED.condition, integrity = EXCLUDED.integrity;"""
+    values = (
+        ship.name,
+        ship.engine.symbol,
+        ship.engine.condition,
+        ship.engine.integrity,
+    )
     resp = try_execute_upsert(sql, values, connection)
     return resp
 

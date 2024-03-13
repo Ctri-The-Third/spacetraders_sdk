@@ -223,7 +223,8 @@ class ShipEngine(SymbolClass):
     symbol: str
     name: str
     description: str
-    condition: int
+    condition: float
+    integrity: float
     speed: int
     requirements: ShipRequirements
 
@@ -234,6 +235,7 @@ class ShipEngine(SymbolClass):
             json_data.get("name", ""),
             json_data.get("description", ""),
             json_data.get("condition", 0),
+            json_data.get("integrity", 0),
             json_data.get("speed", ""),
             ShipRequirements.from_json(json_data.get("requirements", {})),
         )

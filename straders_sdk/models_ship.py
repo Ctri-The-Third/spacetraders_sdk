@@ -87,6 +87,8 @@ class Ship:
         self.nav_dirty = False
         self.fuel_dirty = False
         self.mounts_dirty = False
+        self.frame_dirty = False
+        self.engine_dirty = False
         self.cooldown_dirty = False
         self.logger = logging.getLogger("ship-logger")
 
@@ -96,7 +98,7 @@ class Ship:
         self.nav = ShipNav("", "", "", None, None, None, "", "")
         self.frame = ShipFrame("", "", "", 0, 0, 0, 0, 0, ShipRequirements(0, 0, 0))
         self.reactor = ShipReactor("", "", "", 0, 0, ShipRequirements(0, 0, 0))
-        self.engine = ShipEngine("", "", "", 0, 0, ShipRequirements(0, 0, 0))
+        self.engine = ShipEngine("", "", "", 0, 0, 0, ShipRequirements(0, 0, 0))
         self.crew_capacity: int = 0
         self.crew_current: int = 0
         self.crew_required: int = 0
@@ -266,6 +268,8 @@ class Ship:
         self.fuel_dirty = False
         self.mounts_dirty = False
         self.cooldown_dirty = False
+        self.engine_dirty = False
+        self.frame_dirty = False
 
     def receive_cargo(self, trade_symbol, units):
         for inventory_item in self.cargo_inventory:
@@ -318,6 +322,12 @@ class Ship:
                 self.mounts: list[ShipMount] = [
                     ShipMount(d) for d in json_data["mounts"]
                 ]
+            if "engine" in json_data:
+                self.engine_dirty = True
+                self.engine = ShipEngine.from_json(json_data["engine"])
+            if "frame" in json_data:
+                self.frame_dirty = True
+                self.frame = ShipFrame.from_json(json_data["frame"])
         # pass the updated ship to the client to be logged appropriately
 
     @property

@@ -53,6 +53,9 @@ def _upsert_waypoint(waypoint: Waypoint, connection):
             ( waypoint_symbol, submitted_by, submitted_on)
             VALUES (%s, %s, %s)
             ON CONFLICT do nothing"""
+        submitted_on = waypoint.chart["submittedOn"]
+        if not submitted_on:
+            submitted_on = None
         try_execute_upsert(
             sql,
             (

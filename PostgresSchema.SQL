@@ -1876,6 +1876,8 @@ CREATE TABLE IF NOT EXISTS public.ship_frame_links
     CONSTRAINT ship_frame_links_pkey PRIMARY KEY (ship_symbol, frame_symbol)
 )
 
+TABLESPACE pg_default;;
+
 
 ALTER TABLE IF EXISTS public.ship_frame_links
     OWNER to spacetraders;
@@ -2811,10 +2813,6 @@ ALTER TABLE ONLY public.ship_cooldowns
 -- Name: ship_frame_links ship_frame_links_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
 --
 
-ALTER TABLE ONLY public.ship_frame_links
-    ADD CONSTRAINT ship_frame_links_pkey PRIMARY KEY (ship_symbol, frame_symbol);
-
-
 --
 -- TOC entry 3632 (class 2606 OID 16878)
 -- Name: ship_frames ship_frames_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
@@ -3016,7 +3014,43 @@ CREATE OR REPLACE VIEW public.survey_average_values AS
   ORDER BY (sum((mp.import_price * (sd.count)::numeric)) / (sum(sd.count))::numeric) DESC, s.expiration;
 
 
---
+
+CREATE TABLE IF NOT EXISTS public.ship_engine_links
+(
+    ship_symbol text COLLATE pg_catalog."default" NOT NULL,
+    engine_symbol text COLLATE pg_catalog."default",
+    condition numeric,
+    integrity numeric,
+    CONSTRAINT ship_symbol_links_pkey PRIMARY KEY (ship_symbol)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.ship_engine_links
+    OWNER to spacetraders;--
+
+
+-- Table: public.ship_engines
+
+-- DROP TABLE IF EXISTS public.ship_engines;
+
+CREATE TABLE IF NOT EXISTS public.ship_engines
+(
+    engine_symbol text COLLATE pg_catalog."default" NOT NULL,
+    name text COLLATE pg_catalog."default",
+    description text COLLATE pg_catalog."default",
+    speed integer,
+    required_power integer,
+    required_crew integer,
+    required_slots integer,
+    CONSTRAINT ship_engines_pkey PRIMARY KEY (engine_symbol)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.ship_engines
+    OWNER to spacetraders;
+
 -- TOC entry 3854 (class 0 OID 0)
 -- Dependencies: 5
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: spacetraders
@@ -3033,3 +3067,23 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 --
 
 
+-- Table: public.ship_damage_events
+
+-- DROP TABLE IF EXISTS public.ship_damage_events;
+-- Table: public.ship_damage_events
+
+CREATE TABLE IF NOT EXISTS public.ship_damage_events
+(
+    event_timestamp timestamp without time zone NOT NULL,
+    ship_symbol text COLLATE pg_catalog."default" NOT NULL,
+	event_symbol text COLLATE pg_catalog."default" NOT NULL,
+	component text COLLATE pg_catalog."default" NOT NULL,
+    name text COLLATE pg_catalog."default",
+    description text COLLATE pg_catalog."default",
+    CONSTRAINT ship_damage_events_pkey PRIMARY KEY (event_timestamp, ship_symbol)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.ship_damage_events
+    OWNER to spacetraders;

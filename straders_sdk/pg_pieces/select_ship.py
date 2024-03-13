@@ -1,5 +1,5 @@
 from ..resp_local_resp import LocalSpaceTradersRespose
-from ..models_ship import Ship, ShipFrame, ShipNav, ShipInventory
+from ..models_ship import Ship, ShipFrame, ShipNav, ShipInventory, ShipEngine
 from ..models_misc import RouteNode
 from ..client_interface import SpaceTradersClient
 from ..models_misc import ShipRequirements
@@ -16,15 +16,20 @@ def _select_ships(agent_name, db_client: SpaceTradersClient):
                 , n.o_waypoint_symbol, o.type, o.system_symbol, o.x, o.y --32
 				, n.d_waypoint_symbol, d.type, n.system_symbol, d.x, d.y --38
                 , s.mount_symbols, s.module_symbols --40                
-
+                , sel.engine_symbol, sel.condition, sel.integrity --43
+				, se.name, se.description, se.speed  --46
+				, se.required_power, se.required_crew, se.required_slots --49
                 
 
                 from ships s join ship_nav n on s.ship_symbol = n.ship_symbol
                 left join ship_frame_links sfl on s.ship_symbol = sfl.ship_symbol
                 left join ship_frames sf on sf.frame_symbol = sfl.frame_symbol
+                left join ship_engine_links sel on s.ship_symbol = sel.ship_symbol
+                left join ship_engines se on sel.engine_symbol = se.engine_symbol
                 left join ship_cooldown sc on s.ship_symbol = sc.ship_symbol
                 left join waypoints o on n.o_waypoint_symbol = o.waypoint_symbol
 				left join waypoints d on n.d_waypoint_symbol = d.waypoint_symbol
+
 
                 where s.agent_name = %s
                 order by s.ship_symbol
@@ -45,14 +50,21 @@ def _select_ship_one(ship_symbol: str, db_client: SpaceTradersClient):
                 , sc.expiration, sc.total_seconds --27
                 , n.o_waypoint_symbol, o.type, o.system_symbol, o.x, o.y --32
 				, n.d_waypoint_symbol, d.type, n.system_symbol, d.x, d.y --38
-                , s.mount_symbols, s.module_symbols --40
+                , s.mount_symbols, s.module_symbols --40                
+                , sel.engine_symbol, sel.condition, sel.integrity --43
+				, se.name, se.description, se.speed  --46
+				, se.required_power, se.required_crew, se.required_slots --49
+                
 
                 from ships s join ship_nav n on s.ship_symbol = n.ship_symbol
                 left join ship_frame_links sfl on s.ship_symbol = sfl.ship_symbol
                 left join ship_frames sf on sf.frame_symbol = sfl.frame_symbol
+                left join ship_engine_links sel on s.ship_symbol = sel.ship_symbol
+                left join ship_engines se on sel.engine_symbol = se.engine_symbol
                 left join ship_cooldown sc on s.ship_symbol = sc.ship_symbol
                 left join waypoints o on n.o_waypoint_symbol = o.waypoint_symbol
 				left join waypoints d on n.d_waypoint_symbol = d.waypoint_symbol
+
 
                 where s.ship_symbol = %s
                 """
@@ -113,7 +125,7 @@ def _select_some_ships(db_client: SpaceTradersClient, sql, params):
             ship.cargo_units_used = row[5]
             ship.cargo_inventory = []
             # , 6: n.waypoint_symbol, n.departure_time, n.arrival_time, n.origin_waypoint, n.destination_waypoint, n.flight_status, n.flight_mode
-
+            ship.engine = _engine_from_row(row)
             ship.nav = _nav_from_row(row)
             ship.frame = _frame_from_row(row)
             ship.fuel_capacity = row[24]
@@ -133,6 +145,34 @@ def _select_some_ships(db_client: SpaceTradersClient, sql, params):
             error_code=0,
             url=f"select_ship._select_ship",
         )
+
+
+def _engine_from_row(row) -> ShipEngine:
+    """expected:
+    s.ship_symbol, s.agent_name, s.faction_symbol, s.ship_role, s.cargo_capacity, s.cargo_in_use
+                   , n.waypoint_symbol, n.departure_time, n.arrival_time, n.o_waypoint_symbol, n.d_waypoint_symbol, n.flight_status, n.flight_mode
+                   , sfl.condition, sfl.integrity --13
+                   , sf.frame_symbol, sf.name, sf.description, sf.module_slots, sf.mount_points, sf.fuel_capacity, sf.required_power, sf.required_crew, sf.required_slots
+                   , s.fuel_capacity, s.fuel_current --25
+                   , sc.expiration, sc.total_seconds --27
+                   , n.o_waypoint_symbol, o.type, o.system_symbol, o.x, o.y --32
+                                   , n.d_waypoint_symbol, d.type, n.system_symbol, d.x, d.y --38
+                   , s.mount_symbols, s.module_symbols --39
+                   , sel.engine_symbol, sel.condition, sel.integrity --42
+                                   , se.name, se.description, se.speed  --45
+                                   , se.required_power, se.required_crew, se.required_slots --48
+    """
+    requirements = ShipRequirements(row[47], row[46], row[48])
+    return_obj = ShipEngine(
+        symbol=row[40],
+        name=row[43],
+        description=row[44],
+        condition=float(row[41]),
+        integrity=float(row[42]),
+        speed=row[45],
+        requirements=requirements,
+    )
+    return return_obj
 
 
 def _nav_from_row(row) -> ShipNav:

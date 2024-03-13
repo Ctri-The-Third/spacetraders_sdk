@@ -941,6 +941,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         if resp:
             ship.update(resp.data)
             self.db_client.update(ship)
+            self.db_client.update(resp.data)
             self.ships[ship.name] = ship
         return resp
 
