@@ -1565,15 +1565,27 @@ ALTER VIEW public.mkt_export_and_imports OWNER TO spacetraders;
 -- Name: shipyard_types; Type: TABLE; Schema: public; Owner: spacetraders
 --
 
-CREATE TABLE public.shipyard_types (
-    shipyard_symbol text NOT NULL,
-    ship_type text NOT NULL,
-    ship_cost integer,
-    supply text,
-    activity text,
-    last_updated timestamp without time zone
-);
+-- Table: public.shipyard_types
 
+-- DROP TABLE IF EXISTS public.shipyard_types;
+
+CREATE TABLE IF NOT EXISTS public.shipyard_types
+(
+    shipyard_symbol text COLLATE pg_catalog."default" NOT NULL,
+    ship_type text COLLATE pg_catalog."default" NOT NULL,
+    ship_name text COLLATE pg_catalog."default",
+    ship_description text COLLATE pg_catalog."default",
+    ship_cost integer,
+    supply text COLLATE pg_catalog."default",
+    activity text COLLATE pg_catalog."default",
+    last_updated timestamp without time zone,
+    CONSTRAINT shipyard_types_pkey PRIMARY KEY (shipyard_symbol, ship_type)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.shipyard_types
+    OWNER to spacetraders;
 
 ALTER TABLE public.shipyard_types OWNER TO spacetraders;
 
@@ -2857,14 +2869,6 @@ ALTER TABLE ONLY public.ships
 ALTER TABLE ONLY public.ship_tasks
     ADD CONSTRAINT ship_tasks_pkey PRIMARY KEY (task_hash);
 
-
---
--- TOC entry 3624 (class 2606 OID 16888)
--- Name: shipyard_types shipyard_types_pkey; Type: CONSTRAINT; Schema: public; Owner: spacetraders
---
-
-ALTER TABLE ONLY public.shipyard_types
-    ADD CONSTRAINT shipyard_types_pkey PRIMARY KEY (shipyard_symbol, ship_type);
 
 
 --

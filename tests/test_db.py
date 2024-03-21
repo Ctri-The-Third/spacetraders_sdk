@@ -208,6 +208,8 @@ def test_shipyard(waypoint_response_data, shipyard_response_data):
     loaded_shipyard = client.system_shipyard(test_waypoint)
     for ship_type, ship in loaded_shipyard.ships.items():
         assert ship.supply
+        assert ship.name != ship_type
+        assert ship.description
     assert loaded_shipyard
 
 

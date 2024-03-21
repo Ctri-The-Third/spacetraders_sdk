@@ -7,8 +7,8 @@ from ..utils import try_execute_upsert
 def _upsert_shipyard(shipyard: Shipyard, connection):
     if len(shipyard.ships) > 0:
         sql = """INSERT INTO public.shipyard_types(
-        shipyard_symbol, ship_type, ship_cost, supply, activity, last_updated)
-        VALUES (%s, %s, %s, %s, %s, now() at time zone 'utc')
+        shipyard_symbol, ship_type, ship_name, ship_description, ship_cost, supply, activity, last_updated)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, now() at time zone 'utc')
         ON CONFLICT (shipyard_symbol, ship_type) DO UPDATE
         SET ship_cost = EXCLUDED.ship_cost,
         supply = EXCLUDED.supply,
@@ -24,6 +24,8 @@ def _upsert_shipyard(shipyard: Shipyard, connection):
                 (
                     shipyard.waypoint,
                     ship_type,
+                    ship_details.name,
+                    ship_details.description,
                     ship_cost,
                     ship_details.supply,
                     ship_details.activity,
