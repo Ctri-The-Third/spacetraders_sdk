@@ -1,5 +1,5 @@
 from .utils import get_and_validate, get_and_validate_paginated, post_and_validate, _url
-from .utils import ApiConfig, _log_response, waypoint_to_system
+from .utils import ApiConfig, _log_response, waypoint_to_system, get_name_from_token
 from .client_interface import SpaceTradersInteractive, SpaceTradersClient
 import time
 from .responses import SpaceTradersResponse
@@ -16,8 +16,8 @@ from .models_misc import (
     JumpGate,
 )
 import psycopg2
-from .models_misc import Shipyard, System
-from .models_ship import Ship
+from .models_misc import Shipyard, System, SingletonMarkets
+from .models_ship import Ship, SingletonShips
 from .client_api import SpaceTradersApiClient
 from .client_stub import SpaceTradersStubClient
 from .client_postgres import SpaceTradersPostgresClient
@@ -60,7 +60,10 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         self.logger = logging.getLogger(__name__)
 
         self.token = token
-        self.current_agent = current_agent_symbol
+        if token and not current_agent_symbol:
+            self.current_agent_symbol = get_name_from_token(token)
+        else:
+            self.current_agent_symbol = current_agent_symbol
         if db_host and db_name and db_user and db_pass:
             self.db_client = SpaceTradersPostgresClient(
                 db_host=db_host,
@@ -224,15 +227,21 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             resp = self.db_client.ships_view()
             if resp:
                 self.ships = self.ships | resp
+                for ship in self.ships.values():
+                    
+                    ship = SingletonShips().add_ship(ship)
+                    
                 return resp
         start = datetime.now()
         resp = self.api_client.ships_view()
         self.logging_client.ships_view(resp, (datetime.now() - start).total_seconds())
         if resp:
+
             new_ships = resp
             self.ships = self.ships | new_ships
             for ship in self.ships.values():
                 ship: Ship
+                ship = SingletonShips().add_ship(ship)
                 ship.dirty = True  # force a refresh of the ship into the DB
                 self.db_client.update(ship)
             return new_ships
@@ -249,7 +258,9 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             resp = self.db_client.ships_view_one(symbol)
             if resp:
                 resp: Ship
-                self.ships[symbol] = resp
+                SingletonShips().add_ship(resp)
+
+
                 return resp
         start = datetime.now()
         resp = self.api_client.ships_view_one(symbol)
@@ -259,7 +270,8 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         if resp:
             resp: Ship
             resp.dirty = True
-            self.ships[symbol] = resp
+            SingletonShips().add_ship(resp)
+
             self.db_client.update(resp)
         return resp
 
@@ -277,6 +289,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         self.set_connections()
         start = datetime.now()
         resp = self.api_client.ships_purchase(ship_type, waypoint)
+        resp[0] = SingletonShips().add_ship(resp[0])
         self.logging_client.ships_purchase(
             ship_type, waypoint, resp, (datetime.now() - start).total_seconds()
         )
@@ -369,7 +382,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             self.surveys[json_data.signature] = json_data
             self.db_client.update(json_data)
         if isinstance(json_data, Ship):
-            self.ships[json_data.name] = json_data
+            json_data = SingletonShips().add_ship(json_data)
             self.db_client.update(json_data)
         if isinstance(json_data, Waypoint):
             self.waypoints[json_data.symbol] = json_data
@@ -597,6 +610,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         resp = self.api_client.system_market(wp)
         self.logging_client.system_market(wp, (datetime.now() - start).total_seconds())
         if bool(resp):
+            resp = SingletonMarkets().add_market(resp)
             self.db_client.update(resp)
             return resp
         return resp

@@ -844,6 +844,36 @@ class MarketTradeGood:
     description: str
 
 
+class SingletonMarkets:
+    "A singleton dict of markets, keyed by symbol."
+
+    def __new__(cls):
+        if not hasattr(cls, "instance"):
+            cls.instance = super(SingletonMarkets, cls).__new__(cls)
+
+        pass
+        return cls.instance
+
+    def __init__(self):
+        if not hasattr(self, "markets"):
+            self.markets = {}
+        pass
+
+    def add_market(self, market: "Market"):
+        """Add a market to the singleton dict. If the market already exists, merge the data.
+        The returned object should be the authoritative market object."""
+        if market.symbol not in self.markets:
+            self.markets[market.symbol] = market
+            return market
+        else:
+            self.markets[market.symbol].merge(market)
+            return self.markets[market.symbol]
+        pass
+
+    def get_market(self, symbol: str) -> "Market":
+        return self.markets.get(symbol, None)
+
+
 @dataclass
 class Market:
     symbol: str
@@ -863,6 +893,10 @@ class Market:
                 MarketTradeGoodListing.from_json(l) for l in json_data["tradeGoods"]
             ]
         return cls(json_data["symbol"], exports, imports, exchange, listings)
+
+    def merge(self, other_market: "Market"):
+        self.__dict__.update(other_market.__dict__)
+        return self
 
     def is_stale(self, age: int = 60):
         if not self.listings:

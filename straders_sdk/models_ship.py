@@ -48,6 +48,33 @@ class ShipInventory:
         return cls(*json_data.values())
 
 
+class SingletonShips:
+
+    def __new__(cls):
+        if not hasattr(cls, "_instance"):
+            cls._instance = super(SingletonShips, cls).__new__(cls)
+        pass
+        return cls._instance
+
+    def __init__(self) -> None:
+        if not hasattr(self, "ships"):
+            self.ships = {}
+
+    def get_ship(self, ship_name: str):
+        if ship_name in self.ships:
+            return self.ships[ship_name]
+        else:
+            return None
+
+    def add_ship(self, ship: "Ship"):
+        "use this method to guarantee the ship object you're using is the same as the one in the dictionary."
+        if ship.name not in self.ships:
+            self.ships[ship.name] = ship
+            return ship
+        else:
+            return self.ships[ship.name].merge(ship)
+
+
 class Ship:
     name: str
     role: str
@@ -284,6 +311,11 @@ class Ship:
                 units,
             )
         )
+
+    def merge(self, new_ship_data: "Ship"):
+        "Merge the data from a new ship object into this one."
+        self.__dict__.update(new_ship_data.__dict__)
+        return self
 
     def update(self, json_data: dict):
         "Update the ship with the contents of a response object"
