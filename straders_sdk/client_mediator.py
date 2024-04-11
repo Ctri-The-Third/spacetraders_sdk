@@ -228,9 +228,9 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             if resp:
                 self.ships = self.ships | resp
                 for ship in self.ships.values():
-                    
+
                     ship = SingletonShips().add_ship(ship)
-                    
+
                 return resp
         start = datetime.now()
         resp = self.api_client.ships_view()
@@ -258,8 +258,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
             resp = self.db_client.ships_view_one(symbol)
             if resp:
                 resp: Ship
-                SingletonShips().add_ship(resp)
-
+                resp = SingletonShips().add_ship(resp)
 
                 return resp
         start = datetime.now()
@@ -270,7 +269,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         if resp:
             resp: Ship
             resp.dirty = True
-            SingletonShips().add_ship(resp)
+            resp = SingletonShips().add_ship(resp)
 
             self.db_client.update(resp)
         return resp
@@ -289,7 +288,7 @@ class SpaceTradersMediatorClient(SpaceTradersClient):
         self.set_connections()
         start = datetime.now()
         resp = self.api_client.ships_purchase(ship_type, waypoint)
-        resp[0] = SingletonShips().add_ship(resp[0])
+        resp = (SingletonShips().add_ship(resp[0]), resp[1])
         self.logging_client.ships_purchase(
             ship_type, waypoint, resp, (datetime.now() - start).total_seconds()
         )
